@@ -1,4 +1,4 @@
-// BloodBridge Theme System
+// SevaSethu Theme System
 export const Colors = {
   // Primary Red Palette
   primary: '#DC2626',

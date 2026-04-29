@@ -1,5 +1,5 @@
 /**
- * BloodBridge - Blood Donation Ecosystem
+ * SevaSethu - Blood Donation Ecosystem
  * Saving Lives Faster
  *
  * @format

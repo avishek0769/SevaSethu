@@ -25,7 +25,7 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <View style={styles.logoCircle}>
               <Icon name="water" size={28} color="#DC2626" />
             </View>
-            <Text style={styles.logoText}>BloodBridge</Text>
+            <Text style={styles.logoText}>SevaSethu</Text>
           </View>
           <Text style={styles.welcomeText}>Welcome Back</Text>
           <Text style={styles.subText}>Sign in to continue saving lives</Text>

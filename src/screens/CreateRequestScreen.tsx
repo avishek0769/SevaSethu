@@ -29,7 +29,7 @@ const CreateRequestScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const safeHospital = hospital.trim() || 'Hospital Name';
     const safeAddress = address.trim() || user.city;
     const safeContact = contact.trim() || user.phone;
-    const safeNotes = notes.trim() || 'Created from BloodBridge prototype';
+    const safeNotes = notes.trim() || 'Created from SevaSethu prototype';
 
     if (type === 'urgent') {
       addUrgentRequest({

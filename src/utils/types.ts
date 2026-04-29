@@ -1,4 +1,4 @@
-// BloodBridge Type Definitions
+// SevaSethu Type Definitions
 
 export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 export type Gender = 'Male' | 'Female' | 'Other';

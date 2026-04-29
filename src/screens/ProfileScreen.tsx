@@ -25,7 +25,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       items: [
         { icon: 'robot', label: 'AI Chat Assistant', color: '#9333EA', onPress: () => navigation.navigate('Chatbot') },
         { icon: 'hospital-building', label: 'Nearby Blood Banks', color: Colors.primary, onPress: () => navigation.navigate('NearbyBloodBanks') },
-        { icon: 'information', label: 'About BloodBridge', color: Colors.textSecondary, onPress: () => navigation.navigate('Chatbot') },
+        { icon: 'information', label: 'About SevaSethu', color: Colors.textSecondary, onPress: () => navigation.navigate('Chatbot') },
         { icon: 'help-circle', label: 'Help & Support', color: Colors.info, onPress: () => navigation.navigate('Chatbot') },
       ],
     },
@@ -125,7 +125,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>
 
-      <Text style={styles.version}>BloodBridge v1.0.0</Text>
+      <Text style={styles.version}>SevaSethu v1.0.0</Text>
       <View style={{ height: 100 }} />
     </ScrollView>
   );

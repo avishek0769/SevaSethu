@@ -32,7 +32,7 @@ const SplashScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.logoCircle}>
           <Icon name="water" size={48} color="#DC2626" />
         </View>
-        <Text style={styles.appName}>BloodBridge</Text>
+        <Text style={styles.appName}>SevaSethu</Text>
         <Text style={styles.tagline}>Saving Lives Faster</Text>
       </View>
       <View style={styles.bottomRow}>
