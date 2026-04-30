@@ -16,6 +16,7 @@ import SignupScreen from '../screens/SignupScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import DonorRegistrationScreen from '../screens/DonorRegistrationScreen';
 import HomeScreen from '../screens/HomeScreen';
+import MyRequestsScreen from '../screens/MyRequestsScreen';
 import RequestsScreen from '../screens/RequestsScreen';
 import RewardsScreen from '../screens/RewardsScreen';
 import HistoryScreen from '../screens/HistoryScreen';
@@ -26,16 +27,21 @@ import DonorMatchScreen from '../screens/DonorMatchScreen';
 import DonationConfirmationScreen from '../screens/DonationConfirmationScreen';
 import ChatbotScreen from '../screens/ChatbotScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
+import RequestDetailsScreen from '../screens/RequestDetailsScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
+import MedicalInfoScreen from '../screens/MedicalInfoScreen';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
+import AboutScreen from '../screens/AboutScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const tabConfig = [
-  { name: 'Home', component: HomeScreen, icon: 'home', iconOutline: 'home-outline' },
-  { name: 'Requests', component: RequestsScreen, icon: 'water', iconOutline: 'water-outline' },
-  { name: 'Rewards', component: RewardsScreen, icon: 'trophy', iconOutline: 'trophy-outline' },
-  { name: 'History', component: HistoryScreen, icon: 'history', iconOutline: 'history' },
-  { name: 'Profile', component: ProfileScreen, icon: 'account', iconOutline: 'account-outline' },
+  { name: 'Home', label: 'Home', component: HomeScreen, icon: 'home', iconOutline: 'home-outline' },
+  { name: 'MyRequests', label: 'My Requests', component: MyRequestsScreen, icon: 'clipboard-text', iconOutline: 'clipboard-text-outline' },
+  { name: 'Requests', label: 'Requests', component: RequestsScreen, icon: 'water', iconOutline: 'water-outline' },
+  { name: 'History', label: 'History', component: HistoryScreen, icon: 'history', iconOutline: 'history' },
+  { name: 'Profile', label: 'Profile', component: ProfileScreen, icon: 'account', iconOutline: 'account-outline' },
 ];
 
 function MainTabs() {
@@ -77,6 +83,7 @@ function MainTabs() {
           name={tab.name}
           component={tab.component}
           options={{
+            tabBarLabel: tab.label,
             tabBarIcon: ({ focused, color, size }) => (
               <View style={focused ? styles.activeTab : undefined}>
                 <Icon name={focused ? tab.icon : tab.iconOutline} size={focused ? 26 : 22} color={color} />
@@ -109,14 +116,20 @@ export default function AppNavigation() {
 
         {/* Main App */}
         <Stack.Screen name="MainApp" component={MainTabs} options={{ ...TransitionPresets.FadeFromBottomAndroid }} />
+        <Stack.Screen name="Rewards" component={RewardsScreen} />
 
         {/* Additional Screens */}
         <Stack.Screen name="CreateRequest" component={CreateRequestScreen} />
+        <Stack.Screen name="RequestDetails" component={RequestDetailsScreen} />
         <Stack.Screen name="NearbyBloodBanks" component={NearbyBloodBanksScreen} />
         <Stack.Screen name="DonorMatch" component={DonorMatchScreen} />
         <Stack.Screen name="DonationConfirmation" component={DonationConfirmationScreen} />
         <Stack.Screen name="Chatbot" component={ChatbotScreen} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+        <Stack.Screen name="MedicalInfo" component={MedicalInfoScreen} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+        <Stack.Screen name="AboutSevaSethu" component={AboutScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

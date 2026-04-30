@@ -1,14 +1,33 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
+import { useApp } from '../context/AppContext';
+import { AppCard } from '../components/CommonComponents';
 
-const DonationConfirmationScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [donorName, setDonorName] = useState('');
-  const [units, setUnits] = useState('1');
-  const [source, setSource] = useState<'individual' | 'bank'>('individual');
+const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
+  const { user, urgentRequests, scheduledRequests, confirmDonation } = useApp();
   const [confirmed, setConfirmed] = useState(false);
+  const goToMyRequests = () => navigation.navigate('MainApp', { screen: 'MyRequests' });
+  const requestType: 'urgent' | 'scheduled' = route?.params?.requestType || 'urgent';
+  const requestId = route?.params?.requestId;
+  const donorId = route?.params?.donorId || '';
+
+  const request = requestType === 'urgent'
+    ? urgentRequests.find(item => item.id === requestId)
+    : scheduledRequests.find(item => item.id === requestId);
+
+  const donor = request?.acceptedDonors?.find(item => item.id === donorId);
+
+  const handleConfirm = () => {
+    if (!request || !donor) {
+      return;
+    }
+
+    confirmDonation(requestType, request.id, donor.id);
+    setConfirmed(true);
+  };
 
   if (confirmed) {
     return (
@@ -18,10 +37,28 @@ const DonationConfirmationScreen: React.FC<{ navigation: any }> = ({ navigation 
           <Icon name="check-circle" size={72} color={Colors.success} />
         </View>
         <Text style={styles.successTitle}>Donation Confirmed!</Text>
-        <Text style={styles.successSub}>Thank you for confirming. The donor has been awarded tokens and the donation has been recorded.</Text>
-        <TouchableOpacity onPress={() => navigation.popToTop()} activeOpacity={0.8} style={{ width: '80%', marginTop: 32 }}>
+        <Text style={styles.successSub}>The accepted donation has been marked as confirmed in your request list.</Text>
+        <TouchableOpacity onPress={goToMyRequests} activeOpacity={0.8} style={{ width: '80%', marginTop: 32 }}>
           <LinearGradient colors={['#DC2626', '#991B1B']} style={[styles.btn, Shadow.red]}>
-            <Text style={styles.btnText}>Back to Home</Text>
+            <Text style={styles.btnText}>Back to My Requests</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (!request || !donor) {
+    return (
+      <View style={styles.successContainer}>
+        <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+        <View style={styles.successCircle}>
+          <Icon name="alert-circle" size={72} color={Colors.warning} />
+        </View>
+        <Text style={styles.successTitle}>Confirmation unavailable</Text>
+        <Text style={styles.successSub}>The selected request or donor could not be loaded.</Text>
+        <TouchableOpacity onPress={goToMyRequests} activeOpacity={0.8} style={{ width: '80%', marginTop: 32 }}>
+          <LinearGradient colors={['#DC2626', '#991B1B']} style={[styles.btn, Shadow.red]}>
+            <Text style={styles.btnText}>Back to My Requests</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -36,55 +73,55 @@ const DonationConfirmationScreen: React.FC<{ navigation: any }> = ({ navigation 
           <Icon name="arrow-left" size={24} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Confirm Donation</Text>
-        <Text style={styles.headerSub}>Verify the blood donation details</Text>
+        <Text style={styles.headerSub}>Requester approval before the donation is finalised</Text>
       </LinearGradient>
 
       <View style={styles.form}>
-        <Text style={styles.label}>Donation Source</Text>
-        <View style={styles.sourceRow}>
-          {([
-            { key: 'individual' as const, icon: 'account', title: 'Individual Donor' },
-            { key: 'bank' as const, icon: 'hospital-building', title: 'Blood Bank' },
-          ]).map(s => (
-            <TouchableOpacity key={s.key} style={[styles.sourceCard, source === s.key && styles.sourceCardActive]} onPress={() => setSource(s.key)}>
-              <Icon name={s.icon} size={24} color={source === s.key ? Colors.primary : Colors.textTertiary} />
-              <Text style={[styles.sourceText, source === s.key && { color: Colors.primary }]}>{s.title}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>{source === 'individual' ? 'Donor Name' : 'Blood Bank Name'}</Text>
-          <View style={styles.inputRow}>
-            <Icon name={source === 'individual' ? 'account' : 'hospital-building'} size={20} color={Colors.textTertiary} />
-            <TextInput style={styles.input} placeholder={source === 'individual' ? 'Enter donor name' : 'Enter blood bank name'} placeholderTextColor={Colors.textTertiary} value={donorName} onChangeText={setDonorName} />
+        <AppCard style={styles.confirmCard}>
+          <View style={styles.confirmHeader}>
+            <View style={styles.confirmAvatar}>
+              <Icon name="account-check" size={28} color={Colors.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>Selected donor</Text>
+              <Text style={styles.confirmTitle}>{donor.name}</Text>
+              <Text style={styles.confirmSub}>{donor.bloodGroup} · {donor.distance} · {donor.rating.toFixed(1)} rating</Text>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Units Donated</Text>
-          <View style={styles.unitsRow}>
-            {['1', '2', '3', '4', '5+'].map(u => (
-              <TouchableOpacity key={u} style={[styles.unitChip, units === u && styles.unitChipActive]} onPress={() => setUnits(u)}>
-                <Text style={[styles.unitText, units === u && styles.unitTextActive]}>{u}</Text>
-              </TouchableOpacity>
-            ))}
+          <View style={styles.summaryBox}>
+            <Icon name="information" size={18} color={Colors.info} />
+            <Text style={styles.summaryText}>
+              Confirm that {donor.name} will donate {request.units} unit{request.units > 1 ? 's' : ''} of {request.bloodGroup} blood for {request.requesterName} at {request.hospital}.
+            </Text>
           </View>
-        </View>
 
-        <View style={styles.summaryBox}>
-          <Icon name="information" size={18} color={Colors.info} />
-          <Text style={styles.summaryText}>
-            By confirming, you verify that {units} unit(s) of blood was donated by {source === 'individual' ? 'an individual donor' : 'a blood bank'}. This will award tokens to the donor.
-          </Text>
-        </View>
+          <View style={styles.detailGrid}>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Request type</Text>
+              <Text style={styles.detailValue}>{requestType === 'urgent' ? 'Urgent' : 'Scheduled'}</Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Units</Text>
+              <Text style={styles.detailValue}>{request.units}</Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Hospital</Text>
+              <Text style={styles.detailValue}>{request.hospital}</Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Requester</Text>
+              <Text style={styles.detailValue}>{request.requesterName}</Text>
+            </View>
+          </View>
 
-        <TouchableOpacity onPress={() => setConfirmed(true)} activeOpacity={0.8} style={{ marginTop: 24 }}>
-          <LinearGradient colors={['#059669', '#047857']} style={[styles.btn, { shadowColor: '#059669' }, Shadow.lg]}>
-            <Icon name="check-decagram" size={20} color="#FFF" />
-            <Text style={styles.btnText}>Confirm Donation</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={handleConfirm} activeOpacity={0.8} style={{ marginTop: 24 }}>
+            <LinearGradient colors={['#059669', '#047857']} style={[styles.btn, { shadowColor: '#059669' }, Shadow.lg]}>
+              <Icon name="check-decagram" size={20} color="#FFF" />
+              <Text style={styles.btnText}>Confirm Donation</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </AppCard>
       </View>
     </ScrollView>
   );
@@ -98,18 +135,15 @@ const styles = StyleSheet.create({
   headerSub: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.8)', marginTop: 4 },
   form: { padding: 24, marginTop: -16, backgroundColor: Colors.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, flex: 1, ...Shadow.lg },
   label: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: Colors.textPrimary, marginBottom: 8 },
-  sourceRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
-  sourceCard: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 14, borderRadius: BorderRadius.md, borderWidth: 1.5, borderColor: Colors.border },
-  sourceCardActive: { borderColor: Colors.primary, backgroundColor: Colors.primarySurface },
-  sourceText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: Colors.textSecondary },
-  inputGroup: { marginBottom: 20 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderColor: Colors.border, borderRadius: BorderRadius.md, paddingHorizontal: 16, height: 52, backgroundColor: Colors.surfaceVariant },
-  input: { flex: 1, marginLeft: 12, fontSize: FontSize.md, color: Colors.textPrimary },
-  unitsRow: { flexDirection: 'row', gap: 10 },
-  unitChip: { flex: 1, height: 48, borderRadius: BorderRadius.md, borderWidth: 1.5, borderColor: Colors.border, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.surfaceVariant },
-  unitChipActive: { borderColor: Colors.primary, backgroundColor: Colors.primarySurface },
-  unitText: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.textSecondary },
-  unitTextActive: { color: Colors.primary },
+  confirmCard: { marginBottom: 8 },
+  confirmHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
+  confirmAvatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.primarySurface, justifyContent: 'center', alignItems: 'center' },
+  confirmTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.textPrimary },
+  confirmSub: { fontSize: FontSize.sm, color: Colors.textSecondary, marginTop: 2 },
+  detailGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 },
+  detailItem: { width: '48%', padding: 12, borderRadius: BorderRadius.md, backgroundColor: Colors.surfaceVariant },
+  detailLabel: { fontSize: FontSize.xs, color: Colors.textTertiary, textTransform: 'uppercase', letterSpacing: 0.5 },
+  detailValue: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: Colors.textPrimary, marginTop: 4 },
   summaryBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 14, borderRadius: BorderRadius.md, backgroundColor: Colors.infoLight },
   summaryText: { flex: 1, fontSize: FontSize.sm, color: Colors.info, lineHeight: 20 },
   btn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 52, borderRadius: BorderRadius.md, gap: 8 },

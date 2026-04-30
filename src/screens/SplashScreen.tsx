@@ -35,13 +35,6 @@ const SplashScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <Text style={styles.appName}>SevaSethu</Text>
         <Text style={styles.tagline}>Saving Lives Faster</Text>
       </View>
-      <View style={styles.bottomRow}>
-        <View style={styles.dots}>
-          <View style={[styles.dot, styles.dotActive]} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-        </View>
-      </View>
     </LinearGradient>
   );
 };
@@ -56,10 +49,6 @@ const styles = StyleSheet.create({
   },
   appName: { fontSize: FontSize.display, fontWeight: FontWeight.extrabold, color: '#FFFFFF', letterSpacing: 1 },
   tagline: { fontSize: FontSize.lg, color: 'rgba(255,255,255,0.85)', marginTop: 8, fontWeight: FontWeight.medium, letterSpacing: 0.5 },
-  bottomRow: { position: 'absolute', bottom: 60 },
-  dots: { flexDirection: 'row', gap: 8 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.3)' },
-  dotActive: { backgroundColor: '#FFFFFF', width: 24 },
 });
 
 export default SplashScreen;

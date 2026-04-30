@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { User, UrgentRequest, ScheduledRequest, Notification } from '../utils/types';
+import { User, UrgentRequest, ScheduledRequest, Notification, RequestAcceptance } from '../utils/types';
 import { currentUser } from '../data/users';
 import { urgentRequests, scheduledRequests } from '../data/requests';
 import { notifications as mockNotifications } from '../data/mockData';
@@ -7,6 +7,7 @@ import { notifications as mockNotifications } from '../data/mockData';
 interface AppState {
   user: User;
   isDarkMode: boolean;
+  notificationsEnabled: boolean;
   urgentRequests: UrgentRequest[];
   scheduledRequests: ScheduledRequest[];
   notifications: Notification[];
@@ -16,6 +17,7 @@ interface AppState {
 
 interface AppContextType extends AppState {
   toggleDarkMode: () => void;
+  toggleNotifications: () => void;
   toggleAvailability: () => void;
   setUser: (user: User) => void;
   login: () => void;
@@ -24,6 +26,8 @@ interface AppContextType extends AppState {
   markNotificationRead: (id: string) => void;
   addUrgentRequest: (request: UrgentRequest) => void;
   addScheduledRequest: (request: ScheduledRequest) => void;
+  acceptRequest: (requestType: 'urgent' | 'scheduled', requestId: string, donor: RequestAcceptance) => void;
+  confirmDonation: (requestType: 'urgent' | 'scheduled', requestId: string, donorId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -31,6 +35,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User>(currentUser);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [urgentReqs, setUrgentReqs] = useState<UrgentRequest[]>(urgentRequests);
   const [scheduledReqs, setScheduledReqs] = useState<ScheduledRequest[]>(scheduledRequests);
   const [notifs, setNotifs] = useState<Notification[]>(mockNotifications);
@@ -38,6 +43,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
 
   const toggleDarkMode = useCallback(() => setIsDarkMode(prev => !prev), []);
+  const toggleNotifications = useCallback(() => setNotificationsEnabled(prev => !prev), []);
 
   const toggleAvailability = useCallback(() => {
     setUser(prev => ({ ...prev, isAvailable: !prev.isAvailable }));
@@ -59,15 +65,64 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setScheduledReqs(prev => [request, ...prev]);
   }, []);
 
+  const acceptRequest = useCallback((requestType: 'urgent' | 'scheduled', requestId: string, donor: RequestAcceptance) => {
+    const nextAcceptance: RequestAcceptance = {
+      ...donor,
+      acceptedAt: donor.acceptedAt || new Date().toISOString(),
+      confirmed: donor.confirmed ?? false,
+    };
+
+    const updateRequests = (requests: (UrgentRequest | ScheduledRequest)[]) => requests.map(request => {
+      if (request.id !== requestId) {
+        return request;
+      }
+
+      const acceptedDonors = (request.acceptedDonors || []).filter(existing => existing.id !== nextAcceptance.id);
+      return {
+        ...request,
+        acceptedDonors: [nextAcceptance, ...acceptedDonors],
+      };
+    });
+
+    if (requestType === 'urgent') {
+      setUrgentReqs(prev => updateRequests(prev) as UrgentRequest[]);
+      return;
+    }
+
+    setScheduledReqs(prev => updateRequests(prev) as ScheduledRequest[]);
+  }, []);
+
+  const confirmDonation = useCallback((requestType: 'urgent' | 'scheduled', requestId: string, donorId: string) => {
+    const updateRequests = (requests: (UrgentRequest | ScheduledRequest)[]) => requests.map(request => {
+      if (request.id !== requestId) {
+        return request;
+      }
+
+      return {
+        ...request,
+        acceptedDonors: (request.acceptedDonors || []).map(donor => donor.id === donorId ? { ...donor, confirmed: true } : donor),
+      };
+    });
+
+    if (requestType === 'urgent') {
+      setUrgentReqs(prev => updateRequests(prev) as UrgentRequest[]);
+      return;
+    }
+
+    setScheduledReqs(prev => updateRequests(prev) as ScheduledRequest[]);
+  }, []);
+
   const value: AppContextType = {
     user,
     isDarkMode,
+    notificationsEnabled,
     urgentRequests: urgentReqs,
     scheduledRequests: scheduledReqs,
     notifications: notifs,
     isLoggedIn,
     hasCompletedOnboarding,
     toggleDarkMode,
+    toggleNotifications,
     toggleAvailability,
     setUser,
     login,
@@ -76,6 +131,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     markNotificationRead,
     addUrgentRequest,
     addScheduledRequest,
+    acceptRequest,
+    confirmDonation,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

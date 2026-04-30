@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
+import { Colors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 
 const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
@@ -62,17 +62,6 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </LinearGradient>
           </TouchableOpacity>
 
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <TouchableOpacity style={styles.socialBtn} onPress={handleLogin}>
-            <Icon name="google" size={20} color="#DB4437" />
-            <Text style={styles.socialBtnText}>Continue with Google</Text>
-          </TouchableOpacity>
-
           <View style={styles.signupRow}>
             <Text style={styles.signupText}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
@@ -104,11 +93,6 @@ const styles = StyleSheet.create({
   forgotText: { fontSize: FontSize.md, color: Colors.primary, fontWeight: FontWeight.semibold },
   loginBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 52, borderRadius: BorderRadius.md, gap: 8 },
   loginBtnText: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: '#FFF' },
-  divider: { flexDirection: 'row', alignItems: 'center', marginVertical: 24 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.border },
-  dividerText: { marginHorizontal: 16, fontSize: FontSize.sm, color: Colors.textTertiary, fontWeight: FontWeight.medium },
-  socialBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 52, borderRadius: BorderRadius.md, borderWidth: 1.5, borderColor: Colors.border, gap: 12 },
-  socialBtnText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: Colors.textPrimary },
   signupRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
   signupText: { fontSize: FontSize.md, color: Colors.textSecondary },
   signupLink: { fontSize: FontSize.md, color: Colors.primary, fontWeight: FontWeight.bold },

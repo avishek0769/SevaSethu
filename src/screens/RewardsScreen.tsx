@@ -129,7 +129,7 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               </View>
               <Text style={[styles.badgeName, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>{badge.name}</Text>
               <View style={styles.badgeProgressBg}>
-                <View style={[styles.badgeProgressFill, { width: `${(badge.progress / badge.maxProgress) * 100}%`, backgroundColor: badge.color }]} />
+                <View style={[styles.badgeProgressFill, { width: `${Math.min((badge.progress / badge.maxProgress) * 100, 100)}%`, backgroundColor: badge.color }]} />
               </View>
               <Text style={styles.badgeProgressText}>{badge.progress}/{badge.maxProgress}</Text>
             </View>
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   badgeIcon: { width: 56, height: 56, borderRadius: 28, justifyContent: 'center', alignItems: 'center', marginBottom: 8, position: 'relative' },
   lockOverlay: { position: 'absolute', bottom: -2, right: -2, width: 22, height: 22, borderRadius: 11, backgroundColor: Colors.textTertiary, justifyContent: 'center', alignItems: 'center' },
   badgeName: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold, color: Colors.textPrimary, textAlign: 'center', marginBottom: 6 },
-  badgeProgressBg: { width: '100%', height: 4, backgroundColor: Colors.surfaceVariant, borderRadius: 2 },
+  badgeProgressBg: { width: '100%', height: 4, backgroundColor: Colors.surfaceVariant, borderRadius: 2, overflow: 'hidden' },
   badgeProgressFill: { height: 4, borderRadius: 2 },
   badgeProgressText: { fontSize: 9, color: Colors.textTertiary, marginTop: 2 },
   scopeTabs: { flexDirection: 'row', backgroundColor: Colors.surfaceVariant, borderRadius: BorderRadius.md, padding: 4, marginBottom: 12 },

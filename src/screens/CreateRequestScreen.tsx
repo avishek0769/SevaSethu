@@ -20,6 +20,16 @@ const CreateRequestScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [createdRequest, setCreatedRequest] = useState<{
+    id: string;
+    type: 'urgent' | 'scheduled';
+    bloodGroup: BloodGroup;
+    units: number;
+    hospital: string;
+    address: string;
+    date: string;
+    time: string;
+  } | null>(null);
 
   const handleSubmit = () => {
     const requestBloodGroup = (bloodGroup || user.bloodGroup) as BloodGroup;
@@ -30,10 +40,11 @@ const CreateRequestScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const safeAddress = address.trim() || user.city;
     const safeContact = contact.trim() || user.phone;
     const safeNotes = notes.trim() || 'Created from SevaSethu prototype';
+    const requestId = `${type === 'urgent' ? 'ur' : 'sr'}-new-${Date.now()}`;
 
     if (type === 'urgent') {
       addUrgentRequest({
-        id: `ur-new-${Date.now()}`,
+        id: requestId,
         patientName: `${user.city} Emergency`,
         bloodGroup: requestBloodGroup,
         units: unitCount,
@@ -46,10 +57,11 @@ const CreateRequestScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         createdAt: new Date().toISOString(),
         requesterName: user.name,
         requesterId: user.id,
+        acceptedDonors: [],
       });
     } else {
       addScheduledRequest({
-        id: `sr-new-${Date.now()}`,
+        id: requestId,
         bloodGroup: requestBloodGroup,
         units: unitCount,
         hospital: safeHospital,
@@ -60,9 +72,20 @@ const CreateRequestScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         notes: safeNotes,
         requesterName: user.name,
         requesterId: user.id,
+        acceptedDonors: [],
       });
     }
 
+    setCreatedRequest({
+      id: requestId,
+      type,
+      bloodGroup: requestBloodGroup,
+      units: unitCount,
+      hospital: safeHospital,
+      address: safeAddress,
+      date: requestDate,
+      time: requestTime,
+    });
     setSubmitted(true);
   };
 
@@ -76,20 +99,30 @@ const CreateRequestScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <Text style={styles.successTitle}>Request Created!</Text>
         <Text style={styles.successSub}>
           {type === 'urgent'
-            ? 'Nearby donors will be notified immediately. Stay available for calls.'
-            : 'Your scheduled request has been posted. Donors will respond soon.'}
+            ? 'Nearby donors and blood banks are being shown now. You can revisit this request any time.'
+            : 'Your scheduled request has been posted. Accepted donors will appear in My Requests.'}
         </Text>
         <TouchableOpacity
-          onPress={() => (type === 'urgent' ? navigation.navigate('DonorMatch') : navigation.goBack())}
+              onPress={() => (createdRequest && createdRequest.type === 'urgent'
+                ? navigation.navigate('DonorMatch', {
+                  requestId: createdRequest.id,
+                  requestType: createdRequest.type,
+                  bloodGroup: createdRequest.bloodGroup,
+                  units: createdRequest.units,
+                  hospital: createdRequest.hospital,
+                  address: createdRequest.address,
+                  requesterName: user.name,
+                })
+                : navigation.navigate('MainApp', { screen: 'MyRequests' }))}
           activeOpacity={0.8}
           style={{ width: '80%', marginTop: 24 }}
         >
           <LinearGradient colors={['#DC2626', '#991B1B']} style={[styles.btn, Shadow.red]}>
-            <Text style={styles.btnText}>{type === 'urgent' ? 'View Matched Donors' : 'Back to Requests'}</Text>
+            <Text style={styles.btnText}>{type === 'urgent' ? 'View Nearby Matches' : 'Open My Requests'}</Text>
           </LinearGradient>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 16 }}>
-          <Text style={styles.backLink}>Back to Requests</Text>
+          <Text style={styles.backLink}>Back</Text>
         </TouchableOpacity>
       </View>
     );

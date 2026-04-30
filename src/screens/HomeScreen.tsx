@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, StatusBar, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, StatusBar, Linking, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
@@ -8,9 +8,42 @@ import { BloodGroupBadge, UrgencyChip, AppCard, SectionHeader, StatCard } from '
 import { bloodBanks, leaderboardData } from '../data/mockData';
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { user, isDarkMode, toggleAvailability, urgentRequests } = useApp();
+  const { user, isDarkMode, toggleAvailability, urgentRequests, acceptRequest } = useApp();
   const bg = isDarkMode ? Colors.darkBackground : Colors.background;
   const nearbyUrgent = urgentRequests.filter(r => r.urgency === 'critical').length;
+
+  const buildDonorAcceptance = (request: typeof urgentRequests[0]) => ({
+    id: user.id,
+    name: user.name,
+    bloodGroup: user.bloodGroup,
+    distance: request.distance || request.address,
+    rating: user.rating,
+    phone: user.phone,
+    lastDonation: user.lastDonation || new Date().toISOString().split('T')[0],
+    totalDonations: user.totalDonations,
+  });
+
+  const handleAcceptRequest = (request: typeof urgentRequests[0]) => {
+    if (user.role !== 'donor') {
+      Alert.alert('Requester mode', 'Use My Requests to review the requests you created.');
+      return;
+    }
+
+    Alert.alert(
+      'Confirm donation',
+      `You will be giving ${request.units} unit${request.units > 1 ? 's' : ''} of ${request.bloodGroup} blood for ${request.patientName} at ${request.hospital}. Confirm?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Confirm',
+          onPress: () => {
+            acceptRequest('urgent', request.id, buildDonorAcceptance(request));
+            Alert.alert('Accepted', 'Your response has been recorded for the requester.');
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: bg }]} showsVerticalScrollIndicator={false}>
@@ -23,10 +56,15 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Text style={styles.greeting}>Hello, {user.name.split(' ')[0]} 👋</Text>
             <Text style={styles.heroSub}>Ready to save lives today?</Text>
           </View>
-          <TouchableOpacity style={styles.notifBtn} onPress={() => navigation.navigate('Notifications')}>
-            <Icon name="bell-outline" size={24} color="#FFF" />
-            <View style={styles.notifDot} />
-          </TouchableOpacity>
+          <View style={styles.heroActions}>
+            <TouchableOpacity style={styles.heroActionBtn} onPress={() => navigation.navigate('Chatbot')}>
+              <Icon name="robot" size={22} color="#FFF" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.heroActionBtn} onPress={() => navigation.navigate('Notifications')}>
+              <Icon name="bell-outline" size={24} color="#FFF" />
+              <View style={styles.notifDot} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.heroCard}>
@@ -61,7 +99,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <SectionHeader title="Urgent Requests" actionText="View All" onAction={() => navigation.navigate('Requests')} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hScroll}>
         {urgentRequests.slice(0, 5).map(req => (
-          <TouchableOpacity key={req.id} activeOpacity={0.8} onPress={() => navigation.navigate('DonorMatch')}>
+          <TouchableOpacity key={req.id} activeOpacity={0.8} onPress={() => navigation.navigate('Requests')}>
             <View style={[styles.urgentCard, isDarkMode && { backgroundColor: Colors.darkSurface, borderColor: Colors.darkBorder, borderWidth: 1 }]}>
               <View style={styles.urgentTop}>
                 <BloodGroupBadge bloodGroup={req.bloodGroup} size="sm" />
@@ -78,7 +116,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               </View>
               <View style={styles.urgentBottom}>
                 <Text style={styles.urgentUnits}>{req.units} unit{req.units > 1 ? 's' : ''}</Text>
-                <TouchableOpacity style={styles.acceptBtn} onPress={() => navigation.navigate('DonorMatch')}>
+                <TouchableOpacity style={styles.acceptBtn} onPress={() => handleAcceptRequest(req)}>
                   <Text style={styles.acceptText}>Accept</Text>
                 </TouchableOpacity>
               </View>
@@ -142,9 +180,10 @@ const styles = StyleSheet.create({
   hero: { paddingTop: 50, paddingBottom: 80, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
   heroTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
   heroLeft: {},
+  heroActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  heroActionBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.15)', justifyContent: 'center', alignItems: 'center' },
   greeting: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: '#FFF' },
   heroSub: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.8)', marginTop: 4 },
-  notifBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.15)', justifyContent: 'center', alignItems: 'center' },
   notifDot: { position: 'absolute', top: 10, right: 12, width: 8, height: 8, borderRadius: 4, backgroundColor: '#FDE047' },
   heroCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: BorderRadius.lg, padding: 16 },
   heroCardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },

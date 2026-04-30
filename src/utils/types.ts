@@ -11,6 +11,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  password?: string;
   phone: string;
   bloodGroup: BloodGroup;
   age: number;
@@ -44,6 +45,7 @@ export interface UrgentRequest {
   createdAt: string;
   requesterName: string;
   requesterId: string;
+  acceptedDonors?: RequestAcceptance[];
 }
 
 export interface ScheduledRequest {
@@ -58,6 +60,12 @@ export interface ScheduledRequest {
   notes: string;
   requesterName: string;
   requesterId: string;
+  acceptedDonors?: RequestAcceptance[];
+}
+
+export interface RequestAcceptance extends DonorMatch {
+  acceptedAt?: string;
+  confirmed?: boolean;
 }
 
 export interface BloodBank {

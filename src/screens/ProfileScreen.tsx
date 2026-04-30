@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Switch, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
@@ -7,29 +7,42 @@ import { useApp } from '../context/AppContext';
 import { BloodGroupBadge } from '../components/CommonComponents';
 
 const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { user, isDarkMode, toggleAvailability, toggleDarkMode, logout } = useApp();
+  const { user, isDarkMode, toggleAvailability, toggleDarkMode, toggleNotifications, notificationsEnabled, logout } = useApp();
   const bg = isDarkMode ? Colors.darkBackground : Colors.background;
 
   const menuSections = [
     {
       title: 'Account',
       items: [
-        { icon: 'account-edit', label: 'Edit Profile', color: Colors.info, onPress: () => navigation.navigate('DonorRegistration') },
-        { icon: 'medical-bag', label: 'Medical Information', color: Colors.success, onPress: () => navigation.navigate('DonorRegistration') },
-        { icon: 'bell-outline', label: 'Notification Settings', color: Colors.warning, onPress: () => navigation.navigate('Notifications') },
-        { icon: 'shield-lock', label: 'Privacy Settings', color: Colors.primary, onPress: () => navigation.navigate('Notifications') },
+        { icon: 'account-edit', label: 'Edit Profile', color: Colors.info, onPress: () => navigation.navigate('EditProfile') },
+        { icon: 'medical-bag', label: 'Medical Information', color: Colors.success, onPress: () => navigation.navigate('MedicalInfo') },
+        { icon: 'shield-lock', label: 'Privacy Policy', color: Colors.primary, onPress: () => navigation.navigate('PrivacyPolicy') },
+        { icon: 'information', label: 'About SevaSethu', color: Colors.textSecondary, onPress: () => navigation.navigate('AboutSevaSethu') },
+        { icon: 'help-circle', label: 'Help & Support', color: Colors.info, onPress: () => {} },
       ],
     },
     {
       title: 'App',
       items: [
-        { icon: 'robot', label: 'AI Chat Assistant', color: '#9333EA', onPress: () => navigation.navigate('Chatbot') },
+        { icon: 'trophy', label: 'Rewards', color: '#D97706', onPress: () => navigation.navigate('Rewards') },
         { icon: 'hospital-building', label: 'Nearby Blood Banks', color: Colors.primary, onPress: () => navigation.navigate('NearbyBloodBanks') },
-        { icon: 'information', label: 'About SevaSethu', color: Colors.textSecondary, onPress: () => navigation.navigate('Chatbot') },
-        { icon: 'help-circle', label: 'Help & Support', color: Colors.info, onPress: () => navigation.navigate('Chatbot') },
       ],
     },
   ];
+
+  const handleLogout = () => {
+    Alert.alert('Log out', 'Are you sure you want to log out?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Log Out',
+        style: 'destructive',
+        onPress: () => {
+          logout();
+          navigation.replace('Login');
+        },
+      },
+    ]);
+  };
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: bg }]} showsVerticalScrollIndicator={false}>
@@ -87,6 +100,20 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <Switch value={user.isAvailable} onValueChange={toggleAvailability} trackColor={{ true: Colors.successLight, false: Colors.border }} thumbColor={user.isAvailable ? Colors.success : Colors.textTertiary} />
       </View>
 
+      {/* Notification Toggle */}
+      <View style={[styles.toggleCard, isDarkMode && { backgroundColor: Colors.darkSurface, borderColor: Colors.darkBorder }]}> 
+        <View style={styles.toggleLeft}>
+          <View style={[styles.toggleIcon, { backgroundColor: notificationsEnabled ? Colors.warningLight : Colors.surfaceVariant }]}> 
+            <Icon name="bell-outline" size={24} color={notificationsEnabled ? Colors.warning : Colors.textTertiary} />
+          </View>
+          <View>
+            <Text style={[styles.toggleTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>Notifications</Text>
+            <Text style={styles.toggleSub}>{notificationsEnabled ? 'You will receive alerts and updates' : 'Notifications are turned off'}</Text>
+          </View>
+        </View>
+        <Switch value={notificationsEnabled} onValueChange={toggleNotifications} trackColor={{ true: Colors.warningLight, false: Colors.border }} thumbColor={notificationsEnabled ? Colors.warning : Colors.textTertiary} />
+      </View>
+
       {/* Dark Mode Toggle */}
       <View style={[styles.toggleCard, isDarkMode && { backgroundColor: Colors.darkSurface, borderColor: Colors.darkBorder }]}>
         <View style={styles.toggleLeft}>
@@ -120,7 +147,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       ))}
 
       {/* Logout */}
-      <TouchableOpacity style={styles.logoutBtn} onPress={() => { logout(); navigation.replace('Login'); }} activeOpacity={0.7}>
+      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7}>
         <Icon name="logout" size={20} color={Colors.error} />
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>

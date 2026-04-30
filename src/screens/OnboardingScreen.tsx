@@ -100,8 +100,8 @@ const styles = StyleSheet.create({
   dots: { flexDirection: 'row', gap: 8 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.border },
   dotActive: { backgroundColor: Colors.primary, width: 28 },
-  nextBtn: { width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center' },
-  nextText: { color: '#FFF', fontWeight: FontWeight.bold, fontSize: FontSize.md },
+  nextBtn: { minWidth: 150, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
+  nextText: { color: '#FFF', fontWeight: FontWeight.bold, fontSize: FontSize.lg, textAlign: 'center' },
 });
 
 export default OnboardingScreen;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, FlatList, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, FlatList, Linking, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
@@ -9,7 +9,7 @@ import { BloodGroupBadge, UrgencyChip, AppCard, FilterChip, SearchBar, EmptyStat
 const BLOOD_FILTERS = ['All', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
 const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { urgentRequests, scheduledRequests, isDarkMode } = useApp();
+  const { urgentRequests, scheduledRequests, isDarkMode, user, acceptRequest } = useApp();
   const [activeTab, setActiveTab] = useState<'urgent' | 'scheduled'>('urgent');
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,6 +40,39 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const clearFilters = () => {
     setSelectedFilter('All');
     setSearchTerm('');
+  };
+
+  const buildDonorAcceptance = () => ({
+    id: user.id,
+    name: user.name,
+    bloodGroup: user.bloodGroup,
+    distance: 'Nearby',
+    rating: user.rating,
+    phone: user.phone,
+    lastDonation: user.lastDonation || new Date().toISOString().split('T')[0],
+    totalDonations: user.totalDonations,
+  });
+
+  const handleAcceptRequest = (requestType: 'urgent' | 'scheduled', request: typeof urgentRequests[0] | typeof scheduledRequests[0]) => {
+    if (user.role !== 'donor') {
+      Alert.alert('Requester mode', 'Use My Requests to track the requests you created.');
+      return;
+    }
+
+    const requestContext = requestType === 'urgent'
+      ? `${request.requesterName} at ${request.hospital}`
+      : `${request.hospital} on ${request.date} at ${request.time}`;
+
+    Alert.alert('Confirm donation', `You will be giving ${request.units} unit${request.units > 1 ? 's' : ''} of ${request.bloodGroup} blood for ${requestContext}. Confirm?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Confirm',
+        onPress: () => {
+          acceptRequest(requestType, request.id, buildDonorAcceptance());
+          Alert.alert('Accepted', 'The requester has been notified.');
+        },
+      },
+    ]);
   };
 
   const renderSkeletonCard = (index: number) => (
@@ -96,7 +129,7 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           <Icon name="phone" size={18} color={Colors.success} />
           <Text style={[styles.callActionText, { color: Colors.success }]}>Call</Text>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.8} style={{ flex: 1 }} onPress={() => navigation.navigate('DonationConfirmation')}>
+        <TouchableOpacity activeOpacity={0.8} style={{ flex: 1 }} onPress={() => handleAcceptRequest('urgent', item)}>
           <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.acceptActionBtn}>
             <Icon name="hand-heart" size={18} color="#FFF" />
             <Text style={styles.acceptActionText}>Accept to Donate</Text>
@@ -140,7 +173,7 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
       ) : null}
 
-      <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('DonationConfirmation')}>
+      <TouchableOpacity activeOpacity={0.8} onPress={() => handleAcceptRequest('scheduled', item)}>
         <LinearGradient colors={['#2563EB', '#1D4ED8']} style={styles.scheduleAcceptBtn}>
           <Icon name="check-circle" size={18} color="#FFF" />
           <Text style={styles.acceptActionText}>Accept Schedule</Text>
@@ -235,7 +268,7 @@ const styles = StyleSheet.create({
   tabBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: BorderRadius.full },
   tabBadgeText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold, color: Colors.textTertiary },
   filterScroll: { marginTop: 12, maxHeight: 44 },
-  filterContent: { paddingHorizontal: 20 },
+  filterContent: { paddingHorizontal: 20, height: 44, alignItems: 'center' },
   listContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 100 },
   reqCard: { marginBottom: 12 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },

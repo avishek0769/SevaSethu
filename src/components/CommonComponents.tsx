@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: FontSize.xs, color: Colors.textSecondary, marginTop: 2, textAlign: 'center' },
   searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surfaceVariant, borderRadius: BorderRadius.md, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md, marginHorizontal: Spacing.xl, marginBottom: Spacing.md, borderWidth: 1, borderColor: Colors.border },
   searchInput: { flex: 1, marginLeft: Spacing.sm, fontSize: FontSize.md, color: Colors.textTertiary, paddingVertical: 0 },
-  filterChip: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm, borderRadius: BorderRadius.full, backgroundColor: Colors.surfaceVariant, marginRight: Spacing.sm, borderWidth: 1, borderColor: Colors.border },
+  filterChip: { minHeight: 40, paddingHorizontal: Spacing.lg, paddingVertical: 10, borderRadius: BorderRadius.full, backgroundColor: Colors.surfaceVariant, marginRight: Spacing.sm, borderWidth: 1, borderColor: Colors.border, justifyContent: 'center' },
   filterChipActive: { backgroundColor: Colors.primarySurface, borderColor: Colors.primary },
   filterChipText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium, color: Colors.textSecondary },
   filterChipTextActive: { color: Colors.primary, fontWeight: FontWeight.semibold },
