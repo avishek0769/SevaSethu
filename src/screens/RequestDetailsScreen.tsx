@@ -1,14 +1,15 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linking } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useApp } from '../context/AppContext';
 import { Colors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
-import { AppCard, BloodGroupBadge, EmptyState, UrgencyChip } from '../components/CommonComponents';
+import { AppCard, BloodGroupBadge, EmptyState, UrgencyChip, ConfirmationDialog } from '../components/CommonComponents';
 import { bloodBanks, donorMatches } from '../data/mockData';
 
 const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
-  const { user, urgentRequests, scheduledRequests, isDarkMode } = useApp();
+  const { urgentRequests, scheduledRequests, isDarkMode, rejectAcceptance } = useApp();
+  const [rejectDialog, setRejectDialog] = useState<{ visible: boolean; donorId: string; donorName: string } | null>(null);
   const goToMyRequests = () => navigation.navigate('MainApp', { screen: 'MyRequests' });
   const requestType: 'urgent' | 'scheduled' = route?.params?.requestType || 'urgent';
   const requestId = route?.params?.requestId;
@@ -31,8 +32,8 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
   }
 
   const acceptedDonors = request.acceptedDonors || [];
-  const matchingDonors = requestType === 'urgent' ? donorMatches.filter(donor => donor.bloodGroup === request.bloodGroup) : [];
-  const matchingBanks = requestType === 'urgent' ? bloodBanks.filter(bank => bank.availableGroups.includes(request.bloodGroup)) : [];
+  const matchingDonors = donorMatches.filter(donor => donor.bloodGroup === request.bloodGroup);
+  const matchingBanks = bloodBanks.filter(bank => bank.availableGroups.includes(request.bloodGroup));
 
   const openConfirmation = (donor: typeof acceptedDonors[number]) => {
     navigation.navigate('DonationConfirmation', {
@@ -46,6 +47,11 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
       address: request.address,
       requesterName: request.requesterName,
     });
+  };
+
+  const handleRejectAcceptance = (donorId: string, donorName: string) => {
+    rejectAcceptance(requestType, request.id, donorId);
+    setRejectDialog(null);
   };
 
   return (
@@ -147,61 +153,70 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
               ) : null}
 
               <View style={styles.acceptedActions}>
-                <TouchableOpacity style={styles.callBtn} onPress={() => navigation.navigate('Profile')}>
-                  <Icon name="account" size={18} color={Colors.success} />
-                  <Text style={[styles.callText, { color: Colors.success }]}>View Profile</Text>
+                <TouchableOpacity style={styles.callBtn} onPress={() => Linking.openURL(`tel:${donor.phone}`)} activeOpacity={0.7}>
+                  <Icon name="phone" size={18} color={Colors.success} />
+                  <Text style={[styles.callText, { color: Colors.success }]} numberOfLines={1}>Call</Text>
                 </TouchableOpacity>
-                {user.role === 'requester' ? (
-                  <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8} onPress={() => openConfirmation(donor)}>
-                    <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.confirmBtn}>
-                      <Icon name="check-decagram" size={18} color="#FFF" />
-                      <Text style={styles.confirmText}>Confirm Donation</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                ) : (
-                  <View style={styles.pendingChip}>
-                    <Text style={styles.pendingChipText}>{donor.confirmed ? 'Confirmed' : 'Awaiting requester confirmation'}</Text>
-                  </View>
-                )}
+                <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8} onPress={() => openConfirmation(donor)}>
+                  <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.confirmBtn}>
+                    <Icon name="check-decagram" size={18} color="#FFF" />
+                    <Text style={styles.confirmText} numberOfLines={1}>Confirm Donation</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8} onPress={() => setRejectDialog({ visible: true, donorId: donor.id, donorName: donor.name })}>
+                  <LinearGradient colors={['#6B7280', '#374151']} style={styles.rejectBtn}>
+                    <Icon name="close-circle" size={18} color="#FFF" />
+                    <Text style={styles.confirmText} numberOfLines={1}>Reject</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
               </View>
             </AppCard>
           ))
         )}
 
-        {requestType === 'urgent' ? (
-          <>
-            <View style={styles.sectionHead}>
-              <Text style={[styles.sectionTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>Potential donors</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('DonorMatch', { requestId: request.id, bloodGroup: request.bloodGroup })}>
-                <Text style={styles.sectionAction}>Open full view</Text>
-              </TouchableOpacity>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
-              {matchingDonors.map(donor => (
-                <AppCard key={donor.id} style={styles.miniCard}>
-                  <Text style={[styles.miniName, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>{donor.name}</Text>
-                  <Text style={styles.miniSub}>{donor.distance} away</Text>
-                  <Text style={styles.miniSub}>{donor.totalDonations} donations</Text>
-                </AppCard>
-              ))}
-            </ScrollView>
+        <View style={styles.sectionHead}>
+          <Text style={[styles.sectionTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>Potential donors</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('DonorMatch', { requestId: request.id, requestType, bloodGroup: request.bloodGroup, hospital: request.hospital, address: request.address, requesterName: request.requesterName })}>
+            <Text style={styles.sectionAction}>Open full view</Text>
+          </TouchableOpacity>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
+          {matchingDonors.map(donor => (
+            <AppCard key={donor.id} style={styles.miniCard}>
+              <Text style={[styles.miniName, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>{donor.name}</Text>
+              <Text style={styles.miniSub}>{donor.distance} away</Text>
+              <Text style={styles.miniSub}>{donor.totalDonations} donations</Text>
+            </AppCard>
+          ))}
+        </ScrollView>
 
-            <View style={styles.sectionHead}>
-              <Text style={[styles.sectionTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>Nearby blood banks</Text>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
-              {matchingBanks.map(bank => (
-                <AppCard key={bank.id} style={styles.bankCard}>
-                  <Text style={[styles.miniName, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>{bank.name}</Text>
-                  <Text style={styles.miniSub}>{bank.distance}</Text>
-                  <Text style={styles.miniSub}>{bank.isOpen ? 'Open now' : 'Closed'}</Text>
-                </AppCard>
-              ))}
-            </ScrollView>
-          </>
-        ) : null}
+        <View style={styles.sectionHead}>
+          <Text style={[styles.sectionTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>Nearby blood banks</Text>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
+          {matchingBanks.map(bank => (
+            <AppCard key={bank.id} style={styles.bankCard}>
+              <Text style={[styles.miniName, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>{bank.name}</Text>
+              <Text style={styles.miniSub}>{bank.distance}</Text>
+              <Text style={styles.miniSub}>{bank.isOpen ? 'Open now' : 'Closed'}</Text>
+            </AppCard>
+          ))}
+        </ScrollView>
       </View>
       <View style={{ height: 100 }} />
+
+      <ConfirmationDialog
+        visible={!!rejectDialog}
+        title="Reject acceptance?"
+        message={rejectDialog ? `This will remove ${rejectDialog.donorName} from the accepted list and add a polite note to history.` : ''}
+        icon="account-remove"
+        accentColor={Colors.textSecondary}
+        confirmColors={['#6B7280', '#374151']}
+        confirmText="Reject"
+        cancelText="Keep"
+        onCancel={() => setRejectDialog(null)}
+        onConfirm={() => rejectDialog ? handleRejectAcceptance(rejectDialog.donorId, rejectDialog.donorName) : setRejectDialog(null)}
+      />
     </ScrollView>
   );
 };
@@ -242,10 +257,11 @@ const styles = StyleSheet.create({
   acceptedMeta: { fontSize: FontSize.sm, color: Colors.textSecondary, marginTop: 2 },
   acceptedInfoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
   acceptedInfo: { fontSize: FontSize.sm, color: Colors.textSecondary, flex: 1 },
-  acceptedActions: { flexDirection: 'row', gap: 10, marginTop: 12 },
-  callBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: BorderRadius.md, borderWidth: 1.5, borderColor: Colors.success },
-  callText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
-  confirmBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: BorderRadius.md },
+  acceptedActions: { flexDirection: 'row', gap: 8, marginTop: 12, alignItems: 'stretch' },
+  callBtn: { flex: 1, minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 12, borderRadius: BorderRadius.md, borderWidth: 1.5, borderColor: Colors.success },
+  callText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, textAlign: 'center' },
+  confirmBtn: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 12, borderRadius: BorderRadius.md, width: '100%' },
+  rejectBtn: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 12, borderRadius: BorderRadius.md, width: '100%' },
   confirmText: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: '#FFF' },
   pendingChip: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 12, borderRadius: BorderRadius.md, backgroundColor: Colors.surfaceVariant },
   pendingChipText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, color: Colors.textSecondary, textAlign: 'center' },

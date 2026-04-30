@@ -37,7 +37,7 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
           <Icon name="check-circle" size={72} color={Colors.success} />
         </View>
         <Text style={styles.successTitle}>Donation Confirmed!</Text>
-        <Text style={styles.successSub}>The accepted donation has been marked as confirmed in your request list.</Text>
+        <Text style={styles.successSub}>The donation is now marked complete. The requester can view the verified certificate and token update.</Text>
         <TouchableOpacity onPress={goToMyRequests} activeOpacity={0.8} style={{ width: '80%', marginTop: 32 }}>
           <LinearGradient colors={['#DC2626', '#991B1B']} style={[styles.btn, Shadow.red]}>
             <Text style={styles.btnText}>Back to My Requests</Text>
@@ -73,7 +73,7 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
           <Icon name="arrow-left" size={24} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Confirm Donation</Text>
-        <Text style={styles.headerSub}>Requester approval before the donation is finalised</Text>
+        <Text style={styles.headerSub}>Confirm only after the donor has already donated the blood</Text>
       </LinearGradient>
 
       <View style={styles.form}>
@@ -92,7 +92,7 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
           <View style={styles.summaryBox}>
             <Icon name="information" size={18} color={Colors.info} />
             <Text style={styles.summaryText}>
-              Confirm that {donor.name} will donate {request.units} unit{request.units > 1 ? 's' : ''} of {request.bloodGroup} blood for {request.requesterName} at {request.hospital}.
+              Confirm that {donor.name} has donated {request.units} unit{request.units > 1 ? 's' : ''} of {request.bloodGroup} blood for {request.requesterName} at {request.hospital}.
             </Text>
           </View>
 

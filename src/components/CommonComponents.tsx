@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, TextStyle, StyleProp, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, TextStyle, StyleProp, TextInput, Modal, Pressable } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, Spacing, BorderRadius, FontSize, FontWeight, Shadow } from '../utils/theme';
@@ -223,6 +223,72 @@ export const FilterChip: React.FC<FilterChipProps> = ({ label, isSelected, onPre
   </TouchableOpacity>
 );
 
+// ============ ConfirmationDialog ==========
+interface ConfirmationDialogProps {
+  visible: boolean;
+  title: string;
+  message: string;
+  icon?: string;
+  accentColor?: string;
+  confirmText?: string;
+  cancelText?: string;
+  showCancel?: boolean;
+  confirmColors?: [string, string];
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
+  visible,
+  title,
+  message,
+  icon = 'information-outline',
+  accentColor = Colors.primary,
+  confirmText = 'Continue',
+  cancelText = 'Cancel',
+  showCancel = true,
+  confirmColors = ['#DC2626', '#991B1B'],
+  onConfirm,
+  onCancel,
+}) => {
+  const { isDarkMode } = useApp();
+
+  if (!visible) {
+    return null;
+  }
+
+  const cardBackground = isDarkMode ? Colors.darkSurface : Colors.white;
+  const textPrimary = isDarkMode ? Colors.darkTextPrimary : Colors.textPrimary;
+  const textSecondary = isDarkMode ? Colors.darkTextSecondary : Colors.textSecondary;
+
+  return (
+    <Modal transparent visible={visible} animationType="fade" onRequestClose={onCancel}>
+      <Pressable style={styles.dialogOverlay} onPress={onCancel}>
+        <Pressable style={[styles.dialogCard, { backgroundColor: cardBackground, borderColor: isDarkMode ? Colors.darkBorder : Colors.border }]} onPress={() => {}}>
+          <View style={[styles.dialogIconWrap, { backgroundColor: `${accentColor}18` }]}>
+            <Icon name={icon} size={28} color={accentColor} />
+          </View>
+          <Text style={[styles.dialogTitle, { color: textPrimary }]}>{title}</Text>
+          <Text style={[styles.dialogMessage, { color: textSecondary }]}>{message}</Text>
+
+          <View style={[styles.dialogActions, !showCancel && { marginTop: 20 }]}>
+            {showCancel ? (
+              <TouchableOpacity style={[styles.dialogCancelBtn, { borderColor: isDarkMode ? Colors.darkBorder : Colors.border }]} onPress={onCancel} activeOpacity={0.8}>
+                <Text style={[styles.dialogCancelText, { color: textPrimary }]}>{cancelText}</Text>
+              </TouchableOpacity>
+            ) : null}
+            <TouchableOpacity style={showCancel ? { flex: 1 } : { width: '100%' }} onPress={onConfirm} activeOpacity={0.8}>
+              <LinearGradient colors={confirmColors} style={styles.dialogConfirmBtn}>
+                <Text style={styles.dialogConfirmText}>{confirmText}</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+};
+
 // ============ SkeletonLoader ============
 export const SkeletonLoader: React.FC<{ width?: number | string; height?: number; style?: ViewStyle }> = ({ width = '100%', height = 16, style }) => (
   <View style={[styles.skeleton, { width: width as any, height }, style]} />
@@ -256,4 +322,14 @@ const styles = StyleSheet.create({
   filterChipText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium, color: Colors.textSecondary },
   filterChipTextActive: { color: Colors.primary, fontWeight: FontWeight.semibold },
   skeleton: { backgroundColor: '#E2E8F0', borderRadius: BorderRadius.sm, overflow: 'hidden' },
+  dialogOverlay: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.55)', justifyContent: 'center', padding: 24 },
+  dialogCard: { borderRadius: 24, padding: 20, borderWidth: 1, ...Shadow.lg },
+  dialogIconWrap: { width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 16 },
+  dialogTitle: { fontSize: FontSize.xl, fontWeight: FontWeight.extrabold, textAlign: 'center' },
+  dialogMessage: { fontSize: FontSize.md, lineHeight: 22, textAlign: 'center', marginTop: 8 },
+  dialogActions: { flexDirection: 'row', gap: 12, marginTop: 24 },
+  dialogCancelBtn: { flex: 1, height: 48, borderRadius: BorderRadius.md, borderWidth: 1.5, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.white },
+  dialogCancelText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
+  dialogConfirmBtn: { height: 48, borderRadius: BorderRadius.md, justifyContent: 'center', alignItems: 'center' },
+  dialogConfirmText: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: '#FFF' },
 });

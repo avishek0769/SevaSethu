@@ -12,8 +12,8 @@ export const bloodBanks: BloodBank[] = [
 ];
 
 export const historyEntries: HistoryEntry[] = [
-  { id: 'h1', type: 'donated', date: '2026-04-15', bloodGroup: 'O+', units: 1, hospital: 'Lilavati Hospital', status: 'completed', isVerified: true, tokensEarned: 40, description: 'Donated 1 unit of O+ blood' },
-  { id: 'h2', type: 'accepted', date: '2026-04-10', bloodGroup: 'O+', units: 2, hospital: 'KEM Hospital', status: 'completed', isVerified: true, tokensEarned: 80, description: 'Accepted urgent request and donated' },
+  { id: 'h1', type: 'donated', date: '2026-04-15', bloodGroup: 'O+', units: 1, hospital: 'Lilavati Hospital', status: 'completed', isVerified: true, tokensEarned: 40, certificateAvailable: true, description: 'Donated 1 unit of O+ blood' },
+  { id: 'h2', type: 'accepted', date: '2026-04-10', acceptedAt: '2026-04-10T09:20:00.000Z', confirmedAt: '2026-04-10T12:30:00.000Z', bloodGroup: 'O+', units: 2, hospital: 'KEM Hospital', status: 'completed', isVerified: true, tokensEarned: 80, requesterName: 'Sneha Patel', requesterPhone: '+91 98765 11111', certificateAvailable: true, approvalNote: 'Requester approved. Certificate ready for download.', description: 'Accepted urgent request and donated' },
   { id: 'h3', type: 'reward', date: '2026-04-08', bloodGroup: 'O+', units: 0, status: 'completed', isVerified: true, tokensEarned: 50, description: 'Earned Gold Donor badge bonus' },
   { id: 'h4', type: 'donated', date: '2026-03-20', bloodGroup: 'O+', units: 1, hospital: 'Hinduja Hospital', status: 'completed', isVerified: true, tokensEarned: 40, description: 'Regular scheduled donation' },
   { id: 'h5', type: 'missed', date: '2026-03-15', bloodGroup: 'O+', units: 1, hospital: 'Fortis Hospital', status: 'missed', isVerified: false, description: 'Could not attend scheduled donation' },
@@ -21,22 +21,23 @@ export const historyEntries: HistoryEntry[] = [
   { id: 'h7', type: 'received', date: '2026-02-20', bloodGroup: 'O+', units: 2, hospital: 'AIIMS Delhi', status: 'completed', isVerified: true, description: 'Received blood during surgery' },
   { id: 'h8', type: 'reward', date: '2026-02-15', bloodGroup: 'O+', units: 0, status: 'completed', isVerified: true, tokensEarned: 100, description: 'Reached 10 donations milestone' },
   { id: 'h9', type: 'donated', date: '2026-02-01', bloodGroup: 'O+', units: 1, hospital: 'Max Hospital', status: 'completed', isVerified: true, tokensEarned: 40, description: 'Donated at blood drive event' },
-  { id: 'h10', type: 'accepted', date: '2026-01-25', bloodGroup: 'O+', units: 1, hospital: 'Medanta Hospital', status: 'completed', isVerified: true, tokensEarned: 40, description: 'Responded to critical request' },
+  { id: 'h10', type: 'accepted', date: '2026-01-25', acceptedAt: '2026-01-25T08:15:00.000Z', confirmedAt: '2026-01-25T11:05:00.000Z', bloodGroup: 'O+', units: 1, hospital: 'Medanta Hospital', status: 'completed', isVerified: true, tokensEarned: 40, requesterName: 'Meera Joshi', requesterPhone: '+91 98765 22215', certificateAvailable: true, approvalNote: 'Requester approved. Certificate ready for download.', description: 'Responded to critical request' },
   { id: 'h11', type: 'donated', date: '2026-01-10', bloodGroup: 'O+', units: 1, hospital: 'Narayana Health', status: 'completed', isVerified: true, tokensEarned: 40, description: 'Scheduled donation completed' },
   { id: 'h12', type: 'missed', date: '2025-12-28', bloodGroup: 'O+', units: 1, hospital: 'Ruby Hall Clinic', status: 'missed', isVerified: false, description: 'Health issue prevented donation' },
   { id: 'h13', type: 'donated', date: '2025-12-15', bloodGroup: 'O+', units: 1, hospital: 'Kokilaben Hospital', status: 'completed', isVerified: true, tokensEarned: 40, description: 'Year-end donation drive' },
   { id: 'h14', type: 'reward', date: '2025-12-10', bloodGroup: 'O+', units: 0, status: 'completed', isVerified: true, tokensEarned: 25, description: 'Weekly streak bonus earned' },
-  { id: 'h15', type: 'accepted', date: '2025-12-01', bloodGroup: 'O+', units: 2, hospital: 'Breach Candy Hospital', status: 'completed', isVerified: true, tokensEarned: 80, description: 'Emergency response donation' },
+  { id: 'h15', type: 'accepted', date: '2025-12-01', acceptedAt: '2025-12-01T10:00:00.000Z', confirmedAt: '2025-12-01T15:45:00.000Z', bloodGroup: 'O+', units: 2, hospital: 'Breach Candy Hospital', status: 'completed', isVerified: true, tokensEarned: 80, requesterName: 'Pooja Deshmukh', requesterPhone: '+91 98765 22212', certificateAvailable: true, approvalNote: 'Requester approved. Certificate ready for download.', description: 'Emergency response donation' },
   { id: 'h16', type: 'donated', date: '2025-11-20', bloodGroup: 'O+', units: 1, hospital: 'NIMHANS', status: 'completed', isVerified: true, tokensEarned: 40, description: 'Donated at blood bank' },
   { id: 'h17', type: 'reward', date: '2025-11-15', bloodGroup: 'O+', units: 0, status: 'completed', isVerified: true, tokensEarned: 30, description: 'Community champion recognition' },
   { id: 'h18', type: 'donated', date: '2025-11-01', bloodGroup: 'O+', units: 1, hospital: 'Sir Ganga Ram Hospital', status: 'completed', isVerified: true, tokensEarned: 40, description: 'Regular donation' },
   { id: 'h19', type: 'missed', date: '2025-10-15', bloodGroup: 'O+', units: 1, hospital: 'Tata Memorial', status: 'cancelled', isVerified: false, description: 'Request was cancelled by requester' },
   { id: 'h20', type: 'donated', date: '2025-10-01', bloodGroup: 'O+', units: 1, hospital: 'Lilavati Hospital', status: 'completed', isVerified: true, tokensEarned: 40, description: 'Completed donation successfully' },
-  { id: 'h21', type: 'accepted', date: '2025-09-20', bloodGroup: 'O+', units: 1, hospital: 'Fortis Hospital', status: 'completed', isVerified: true, tokensEarned: 40, description: 'Accepted scheduled request' },
+  { id: 'h21', type: 'accepted', date: '2025-09-20', acceptedAt: '2025-09-20T08:40:00.000Z', confirmedAt: '2025-09-20T13:10:00.000Z', bloodGroup: 'O+', units: 1, hospital: 'Fortis Hospital', status: 'completed', isVerified: true, tokensEarned: 40, requesterName: 'Sneha Patel', requesterPhone: '+91 98765 22214', certificateAvailable: true, approvalNote: 'Requester approved. Certificate ready for download.', description: 'Accepted scheduled request' },
   { id: 'h22', type: 'reward', date: '2025-09-15', bloodGroup: 'O+', units: 0, status: 'completed', isVerified: true, tokensEarned: 50, description: 'Silver donor level achieved' },
   { id: 'h23', type: 'donated', date: '2025-09-01', bloodGroup: 'O+', units: 1, hospital: 'Apollo Hospital', status: 'completed', isVerified: true, tokensEarned: 40, description: 'First-time donation at Apollo' },
   { id: 'h24', type: 'donated', date: '2025-08-15', bloodGroup: 'O+', units: 1, hospital: 'KEM Hospital', status: 'completed', isVerified: true, tokensEarned: 40, description: 'Independence Day blood drive' },
   { id: 'h25', type: 'reward', date: '2025-08-10', bloodGroup: 'O+', units: 0, status: 'completed', isVerified: true, tokensEarned: 20, description: 'Referral bonus earned' },
+  { id: 'h26', type: 'rejected', date: '2026-04-29', rejectedAt: '2026-04-29T14:25:00.000Z', bloodGroup: 'A+', units: 1, hospital: 'Lilavati Hospital', status: 'cancelled', isVerified: false, requesterName: 'Sneha Patel', requesterPhone: '+91 98765 11111', description: 'Politely declined an acceptance after review. The donor was thanked for responding quickly.' },
 ];
 
 export const badges: Badge[] = [

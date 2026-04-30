@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, FlatList, Linking, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, FlatList, Linking } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
-import { BloodGroupBadge, UrgencyChip, AppCard, FilterChip, SearchBar, EmptyState, SkeletonLoader } from '../components/CommonComponents';
+import { ScheduledRequest } from '../utils/types';
+import { BloodGroupBadge, UrgencyChip, AppCard, FilterChip, SearchBar, EmptyState, SkeletonLoader, ConfirmationDialog } from '../components/CommonComponents';
 
 const BLOOD_FILTERS = ['All', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -14,6 +15,16 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [dialog, setDialog] = useState<{
+    title: string;
+    message: string;
+    icon: string;
+    accentColor: string;
+    confirmText: string;
+    confirmColors: [string, string];
+    showCancel: boolean;
+    onConfirm: () => void;
+  } | null>(null);
   const bg = isDarkMode ? Colors.darkBackground : Colors.background;
 
   useEffect(() => {
@@ -55,24 +66,45 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const handleAcceptRequest = (requestType: 'urgent' | 'scheduled', request: typeof urgentRequests[0] | typeof scheduledRequests[0]) => {
     if (user.role !== 'donor') {
-      Alert.alert('Requester mode', 'Use My Requests to track the requests you created.');
+      setDialog({
+        title: 'Requester mode',
+        message: 'Use My Requests to review the requests you created and track accepted donors there.',
+        icon: 'clipboard-text-outline',
+        accentColor: Colors.info,
+        confirmText: 'Got it',
+        confirmColors: ['#2563EB', '#1D4ED8'],
+        showCancel: false,
+        onConfirm: () => setDialog(null),
+      });
       return;
     }
 
     const requestContext = requestType === 'urgent'
       ? `${request.requesterName} at ${request.hospital}`
-      : `${request.hospital} on ${request.date} at ${request.time}`;
+      : `${request.hospital} on ${(request as ScheduledRequest).date} at ${(request as ScheduledRequest).time}`;
 
-    Alert.alert('Confirm donation', `You will be giving ${request.units} unit${request.units > 1 ? 's' : ''} of ${request.bloodGroup} blood for ${requestContext}. Confirm?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Confirm',
-        onPress: () => {
-          acceptRequest(requestType, request.id, buildDonorAcceptance());
-          Alert.alert('Accepted', 'The requester has been notified.');
-        },
+    setDialog({
+      title: 'Confirm donation',
+      message: `You will be giving ${request.units} unit${request.units > 1 ? 's' : ''} of ${request.bloodGroup} blood for ${requestContext}.`,
+      icon: 'hand-heart',
+      accentColor: Colors.primary,
+      confirmText: 'Confirm',
+      confirmColors: ['#DC2626', '#991B1B'],
+      showCancel: true,
+      onConfirm: () => {
+        acceptRequest(requestType, request.id, buildDonorAcceptance());
+        setDialog({
+          title: 'Accepted',
+          message: 'Your response has been recorded for the requester.',
+          icon: 'check-circle',
+          accentColor: Colors.success,
+          confirmText: 'Done',
+          confirmColors: ['#059669', '#047857'],
+          showCancel: false,
+          onConfirm: () => setDialog(null),
+        });
       },
-    ]);
+    });
   };
 
   const renderSkeletonCard = (index: number) => (
@@ -251,6 +283,19 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           <Icon name="plus" size={28} color="#FFF" />
         </LinearGradient>
       </TouchableOpacity>
+
+      <ConfirmationDialog
+        visible={!!dialog}
+        title={dialog?.title || ''}
+        message={dialog?.message || ''}
+        icon={dialog?.icon || 'information-outline'}
+        accentColor={dialog?.accentColor || Colors.primary}
+        confirmText={dialog?.confirmText || 'Continue'}
+        confirmColors={dialog?.confirmColors || ['#DC2626', '#991B1B']}
+        showCancel={dialog?.showCancel ?? true}
+        onCancel={() => setDialog(null)}
+        onConfirm={() => dialog?.onConfirm()}
+      />
     </View>
   );
 };
@@ -267,8 +312,8 @@ const styles = StyleSheet.create({
   tabTextActive: { color: Colors.primary, fontWeight: FontWeight.bold },
   tabBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: BorderRadius.full },
   tabBadgeText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold, color: Colors.textTertiary },
-  filterScroll: { marginTop: 12, maxHeight: 44 },
-  filterContent: { paddingHorizontal: 20, height: 44, alignItems: 'center' },
+  filterScroll: { marginTop: 12, minHeight: 52 },
+  filterContent: { paddingHorizontal: 20, paddingVertical: 4, alignItems: 'center' },
   listContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 100 },
   reqCard: { marginBottom: 12 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },

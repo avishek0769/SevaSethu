@@ -1,13 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Switch, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Switch } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
-import { BloodGroupBadge } from '../components/CommonComponents';
+import { BloodGroupBadge, ConfirmationDialog } from '../components/CommonComponents';
 
 const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { user, isDarkMode, toggleAvailability, toggleDarkMode, toggleNotifications, notificationsEnabled, logout } = useApp();
+  const [logoutDialogVisible, setLogoutDialogVisible] = React.useState(false);
   const bg = isDarkMode ? Colors.darkBackground : Colors.background;
 
   const menuSections = [
@@ -31,17 +32,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   ];
 
   const handleLogout = () => {
-    Alert.alert('Log out', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Log Out',
-        style: 'destructive',
-        onPress: () => {
-          logout();
-          navigation.replace('Login');
-        },
-      },
-    ]);
+    setLogoutDialogVisible(true);
   };
 
   return (
@@ -154,6 +145,23 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
       <Text style={styles.version}>SevaSethu v1.0.0</Text>
       <View style={{ height: 100 }} />
+
+      <ConfirmationDialog
+        visible={logoutDialogVisible}
+        title="Log out?"
+        message="You can always sign back in later."
+        icon="logout"
+        accentColor={Colors.error}
+        confirmText="Log Out"
+        cancelText="Cancel"
+        confirmColors={['#DC2626', '#991B1B']}
+        onCancel={() => setLogoutDialogVisible(false)}
+        onConfirm={() => {
+          setLogoutDialogVisible(false);
+          logout();
+          navigation.replace('Login');
+        }}
+      />
     </ScrollView>
   );
 };

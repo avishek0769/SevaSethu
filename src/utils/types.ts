@@ -84,8 +84,11 @@ export interface BloodBank {
 
 export interface HistoryEntry {
   id: string;
-  type: 'donated' | 'received' | 'accepted' | 'missed' | 'reward';
+  type: 'donated' | 'received' | 'accepted' | 'rejected' | 'missed' | 'reward';
   date: string;
+  acceptedAt?: string;
+  confirmedAt?: string;
+  rejectedAt?: string;
   bloodGroup: BloodGroup;
   units: number;
   hospital?: string;
@@ -93,6 +96,14 @@ export interface HistoryEntry {
   isVerified: boolean;
   tokensEarned?: number;
   description: string;
+  requestId?: string;
+  requestType?: 'urgent' | 'scheduled';
+  donorId?: string;
+  donorName?: string;
+  requesterName?: string;
+  requesterPhone?: string;
+  certificateAvailable?: boolean;
+  approvalNote?: string;
 }
 
 export interface Badge {

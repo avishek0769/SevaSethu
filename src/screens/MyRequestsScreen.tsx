@@ -13,10 +13,14 @@ const MyRequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const myUrgentRequests = urgentRequests.filter(request => request.requesterId === user.id);
   const myScheduledRequests = scheduledRequests.filter(request => request.requesterId === user.id);
-  const activeRequests = activeTab === 'urgent' ? myUrgentRequests : myScheduledRequests;
+  const showcaseUrgentRequests = urgentRequests.slice(0, 2);
+  const showcaseScheduledRequests = scheduledRequests.slice(0, 2);
+  const visibleUrgentRequests = myUrgentRequests.length > 0 ? myUrgentRequests : showcaseUrgentRequests;
+  const visibleScheduledRequests = myScheduledRequests.length > 0 ? myScheduledRequests : showcaseScheduledRequests;
+  const activeRequests = activeTab === 'urgent' ? visibleUrgentRequests : visibleScheduledRequests;
 
-  const acceptedCount = [...myUrgentRequests, ...myScheduledRequests].reduce((sum, request) => sum + (request.acceptedDonors?.length || 0), 0);
-  const confirmedCount = [...myUrgentRequests, ...myScheduledRequests].reduce(
+  const acceptedCount = [...visibleUrgentRequests, ...visibleScheduledRequests].reduce((sum, request) => sum + (request.acceptedDonors?.length || 0), 0);
+  const confirmedCount = [...visibleUrgentRequests, ...visibleScheduledRequests].reduce(
     (sum, request) => sum + (request.acceptedDonors || []).filter(donor => donor.confirmed).length,
     0,
   );
@@ -54,7 +58,7 @@ const MyRequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
         <View style={styles.metaRow}>
           <Icon name="account" size={15} color={Colors.textTertiary} />
-          <Text style={styles.metaText} numberOfLines={1}>Requested by you</Text>
+          <Text style={styles.metaText} numberOfLines={1}>Requested by {request.requesterName}</Text>
         </View>
 
         {request.notes ? <Text style={[styles.notes, isDarkMode && { color: Colors.darkTextSecondary }]} numberOfLines={2}>{request.notes}</Text> : null}

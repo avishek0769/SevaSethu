@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, StatusBar, Linking, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, StatusBar, Linking } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
-import { BloodGroupBadge, UrgencyChip, AppCard, SectionHeader, StatCard } from '../components/CommonComponents';
+import { BloodGroupBadge, UrgencyChip, AppCard, SectionHeader, StatCard, ConfirmationDialog } from '../components/CommonComponents';
 import { bloodBanks, leaderboardData } from '../data/mockData';
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { user, isDarkMode, toggleAvailability, urgentRequests, acceptRequest } = useApp();
   const bg = isDarkMode ? Colors.darkBackground : Colors.background;
   const nearbyUrgent = urgentRequests.filter(r => r.urgency === 'critical').length;
+  const [dialog, setDialog] = useState<{
+    title: string;
+    message: string;
+    icon: string;
+    accentColor: string;
+    confirmText: string;
+    confirmColors: [string, string];
+    showCancel: boolean;
+    onConfirm: () => void;
+  } | null>(null);
 
   const buildDonorAcceptance = (request: typeof urgentRequests[0]) => ({
     id: user.id,
@@ -25,24 +35,41 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const handleAcceptRequest = (request: typeof urgentRequests[0]) => {
     if (user.role !== 'donor') {
-      Alert.alert('Requester mode', 'Use My Requests to review the requests you created.');
+      setDialog({
+        title: 'Requester mode',
+        message: 'Use My Requests to review the requests you created and see accepted donors.',
+        icon: 'clipboard-text-outline',
+        accentColor: Colors.info,
+        confirmText: 'Got it',
+        confirmColors: ['#2563EB', '#1D4ED8'],
+        showCancel: false,
+        onConfirm: () => setDialog(null),
+      });
       return;
     }
 
-    Alert.alert(
-      'Confirm donation',
-      `You will be giving ${request.units} unit${request.units > 1 ? 's' : ''} of ${request.bloodGroup} blood for ${request.patientName} at ${request.hospital}. Confirm?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Confirm',
-          onPress: () => {
-            acceptRequest('urgent', request.id, buildDonorAcceptance(request));
-            Alert.alert('Accepted', 'Your response has been recorded for the requester.');
-          },
-        },
-      ],
-    );
+    setDialog({
+      title: 'Confirm donation',
+      message: `You will be giving ${request.units} unit${request.units > 1 ? 's' : ''} of ${request.bloodGroup} blood for ${request.patientName} at ${request.hospital}.`,
+      icon: 'hand-heart',
+      accentColor: Colors.primary,
+      confirmText: 'Confirm',
+      confirmColors: ['#DC2626', '#991B1B'],
+      showCancel: true,
+      onConfirm: () => {
+        acceptRequest('urgent', request.id, buildDonorAcceptance(request));
+        setDialog({
+          title: 'Accepted',
+          message: 'Your response has been recorded for the requester.',
+          icon: 'check-circle',
+          accentColor: Colors.success,
+          confirmText: 'Done',
+          confirmColors: ['#059669', '#047857'],
+          showCancel: false,
+          onConfirm: () => setDialog(null),
+        });
+      },
+    });
   };
 
   return (
@@ -171,6 +198,19 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       </AppCard>
 
       <View style={{ height: 100 }} />
+
+      <ConfirmationDialog
+        visible={!!dialog}
+        title={dialog?.title || ''}
+        message={dialog?.message || ''}
+        icon={dialog?.icon || 'information-outline'}
+        accentColor={dialog?.accentColor || Colors.primary}
+        confirmText={dialog?.confirmText || 'Continue'}
+        confirmColors={dialog?.confirmColors || ['#DC2626', '#991B1B']}
+        showCancel={dialog?.showCancel ?? true}
+        onCancel={() => setDialog(null)}
+        onConfirm={() => dialog?.onConfirm()}
+      />
     </ScrollView>
   );
 };
