@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, StatusBa
 import { useIsFocused } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Colors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
+import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
 import { chatMessages as initialMessages } from '../data/mockData';
 import { ChatMessage } from '../utils/types';
 import { useApp } from '../context/AppContext';
@@ -85,6 +85,7 @@ const buildInitialThreads = (): ChatThread[] => [
 
 const ChatbotScreen: React.FC = () => {
   const { isDarkMode, markChatbotRead, incrementChatbotUnread } = useApp();
+  const C = getColors(isDarkMode);
   const [threads, setThreads] = useState<ChatThread[]>(() => buildInitialThreads());
   const [activeThreadId, setActiveThreadId] = useState('general');
   const [input, setInput] = useState('');
@@ -95,10 +96,11 @@ const ChatbotScreen: React.FC = () => {
   const isFocused = useIsFocused();
   const { width } = useWindowDimensions();
 
-  const bg = isDarkMode ? Colors.darkBackground : Colors.background;
-  const surface = isDarkMode ? Colors.darkSurface : Colors.surface;
-  const surfaceVariant = isDarkMode ? Colors.darkSurfaceVariant : Colors.surfaceVariant;
-  const borderColor = isDarkMode ? Colors.darkBorder : Colors.border;
+  const bg = C.background;
+  const surface = C.surface;
+  const surfaceVariant = C.surfaceVariant;
+  const borderColor = C.border;
+  const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
   const sidebarWidth = Math.max(132, Math.min(180, Math.round(width * 0.34)));
 
   const activeThread = useMemo(
@@ -208,26 +210,26 @@ const ChatbotScreen: React.FC = () => {
         style={[
           styles.threadItem,
           {
-            backgroundColor: isActive ? (isDarkMode ? Colors.darkSurfaceVariant : Colors.white) : surfaceVariant,
-            borderColor: isActive ? Colors.primaryLight : 'transparent',
+            backgroundColor: isActive ? C.surface : surfaceVariant,
+            borderColor: isActive ? C.primary : C.border,
           },
-          isActive && styles.threadItemActive,
+          isActive && !isDarkMode && Shadow.sm,
         ]}
       >
-        <View style={[styles.threadIcon, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.primarySurface }]}>
+        <View style={[styles.threadIcon, { backgroundColor: isDarkMode ? C.surfaceVariant : C.primarySurface }]}>
           <Icon name={item.icon} size={18} color={item.accent} />
         </View>
         <View style={styles.threadCopy}>
-          <Text style={[styles.threadTitle, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>{item.title}</Text>
-          <Text style={[styles.threadSubtitle, isDarkMode && { color: Colors.darkTextSecondary }]} numberOfLines={1}>{item.subtitle}</Text>
-          <Text style={[styles.threadPreview, isDarkMode && { color: Colors.darkTextSecondary }]} numberOfLines={2}>
+          <Text style={[styles.threadTitle, { color: C.textPrimary }]} numberOfLines={1}>{item.title}</Text>
+          <Text style={[styles.threadSubtitle, { color: C.textSecondary }]} numberOfLines={1}>{item.subtitle}</Text>
+          <Text style={[styles.threadPreview, { color: C.textTertiary }]} numberOfLines={2}>
             {lastMessage?.text}
           </Text>
         </View>
         <View style={styles.threadMeta}>
-          <Text style={styles.threadTime}>{lastMessage?.timestamp}</Text>
+          <Text style={[styles.threadTime, { color: C.textTertiary }]}>{lastMessage?.timestamp}</Text>
           {item.unreadCount > 0 ? (
-            <View style={styles.threadUnread}>
+            <View style={[styles.threadUnread, { backgroundColor: C.primary }]}>
               <Text style={styles.threadUnreadText}>{item.unreadCount}</Text>
             </View>
           ) : null}
@@ -239,18 +241,19 @@ const ChatbotScreen: React.FC = () => {
   const renderMessage = ({ item }: { item: ChatMessage }) => (
     <View style={[styles.msgRow, item.isBot ? styles.botRow : styles.userRow]}>
       {item.isBot ? (
-        <View style={styles.botAvatar}>
-          <Icon name="robot" size={20} color={Colors.primary} />
+        <View style={[styles.botAvatar, { backgroundColor: C.primarySurface }]}>
+          <Icon name="robot" size={20} color={C.primary} />
         </View>
       ) : null}
       <View style={[
         styles.bubble,
         item.isBot ? styles.botBubble : styles.userBubble,
-        item.isBot && { backgroundColor: surface },
+        item.isBot && { backgroundColor: surfaceVariant },
+        item.isBot && !isDarkMode && Shadow.sm,
       ]}
       >
-        <Text style={[styles.msgText, item.isBot ? styles.botText : styles.userText]}>{item.text}</Text>
-        <Text style={[styles.timestamp, item.isBot ? { color: Colors.textTertiary } : { color: 'rgba(255,255,255,0.7)' }]}>{item.timestamp}</Text>
+        <Text style={[styles.msgText, item.isBot ? styles.botText : styles.userText, item.isBot && { color: C.textPrimary }]}>{item.text}</Text>
+        <Text style={[styles.timestamp, item.isBot ? { color: C.textTertiary } : { color: 'rgba(255,255,255,0.7)' }]}>{item.timestamp}</Text>
       </View>
     </View>
   );
@@ -264,25 +267,25 @@ const ChatbotScreen: React.FC = () => {
 
   return (
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: bg }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
-      <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.header}>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={bg} />
+      <LinearGradient colors={headerGradient} style={styles.header}>
         <View style={styles.headerRow}>
-          <View style={styles.headerAvatar}>
-            <Icon name="robot" size={24} color="#FFF" />
+          <View style={[styles.headerAvatar, { backgroundColor: C.primarySurface, borderColor: C.border }]}>
+            <Icon name="robot" size={24} color={C.primary} />
           </View>
           <View style={styles.headerCopy}>
-            <Text style={styles.headerTitle}>BloodBot AI</Text>
-            <Text style={styles.headerSub}>Live guidance, automatic reminders, and quick answers</Text>
+            <Text style={[styles.headerTitle, { color: C.textPrimary }]}>BloodBot AI</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>Live guidance, automatic reminders, and quick answers</Text>
           </View>
         </View>
         <View style={styles.headerPills}>
-          <View style={styles.headerPill}>
-            <View style={styles.onlineDot} />
-            <Text style={styles.onlineText}>Online</Text>
+          <View style={[styles.headerPill, { backgroundColor: C.surface, borderColor: C.border }]}> 
+            <View style={[styles.onlineDot, { backgroundColor: C.success }]} />
+            <Text style={[styles.onlineText, { color: C.textPrimary }]}>Online</Text>
           </View>
-          <View style={styles.headerPillMuted}>
-            <Icon name="bell-outline" size={14} color="#FFF" />
-            <Text style={styles.headerPillMutedText}>Auto replies enabled</Text>
+          <View style={[styles.headerPillMuted, { backgroundColor: C.surfaceVariant, borderColor: C.border }]}> 
+            <Icon name="bell-outline" size={14} color={C.textSecondary} />
+            <Text style={[styles.headerPillMutedText, { color: C.textSecondary }]}>Auto replies enabled</Text>
           </View>
         </View>
       </LinearGradient>
@@ -295,18 +298,20 @@ const ChatbotScreen: React.FC = () => {
             backgroundColor: surface,
             borderColor,
           },
+          isDarkMode && { shadowOpacity: 0, elevation: 0 },
+          !isDarkMode && Shadow.md,
         ]}
         >
           <View style={[
             styles.historyPanelHeader,
             {
-              backgroundColor: isDarkMode ? Colors.darkSurfaceVariant : Colors.primarySurface,
+              backgroundColor: isDarkMode ? C.surfaceVariant : C.primarySurface,
               borderBottomColor: borderColor,
             },
           ]}
           >
-            <Text style={[styles.panelTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>Recent chats</Text>
-            <Text style={[styles.panelSub, isDarkMode && { color: Colors.darkTextSecondary }]}>{threads.length} threads</Text>
+            <Text style={[styles.panelTitle, { color: C.textPrimary }]}>Recent chats</Text>
+            <Text style={[styles.panelSub, { color: C.textSecondary }]}>{threads.length} threads</Text>
           </View>
 
           <FlatList
@@ -324,30 +329,32 @@ const ChatbotScreen: React.FC = () => {
             backgroundColor: surface,
             borderColor,
           },
+          isDarkMode && { shadowOpacity: 0, elevation: 0 },
+          !isDarkMode && Shadow.md,
         ]}
         >
           <View style={[
             styles.chatPanelHeader,
             {
-              backgroundColor: isDarkMode ? Colors.darkSurfaceVariant : Colors.surfaceVariant,
+              backgroundColor: surfaceVariant,
               borderBottomColor: borderColor,
             },
           ]}
           >
             <View style={styles.chatHeaderRow}>
-              <View style={[styles.chatHeaderIcon, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white }]}>
+              <View style={[styles.chatHeaderIcon, { backgroundColor: C.surface }]}>
                 <Icon name={activeThread.icon} size={18} color={activeThread.accent} />
               </View>
               <View style={styles.chatHeaderCopy}>
-                <Text style={[styles.chatPanelTitle, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>
+                <Text style={[styles.chatPanelTitle, { color: C.textPrimary }]} numberOfLines={1}>
                   {activeThread.title}
                 </Text>
-                <Text style={[styles.chatPanelSub, isDarkMode && { color: Colors.darkTextSecondary }]} numberOfLines={1}>
+                <Text style={[styles.chatPanelSub, { color: C.textSecondary }]} numberOfLines={1}>
                   {activeThread.subtitle}
                 </Text>
               </View>
-              <View style={[styles.liveChip, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.primarySurface }]}>
-                <Text style={styles.liveChipText}>Auto reply</Text>
+              <View style={[styles.liveChip, { backgroundColor: C.primarySurface }]}>
+                <Text style={[styles.liveChipText, { color: C.primary }]}>Auto reply</Text>
               </View>
             </View>
           </View>
@@ -369,14 +376,14 @@ const ChatbotScreen: React.FC = () => {
                 style={[
                   styles.quickChip,
                   {
-                    backgroundColor: isDarkMode ? Colors.darkSurfaceVariant : Colors.primarySurface,
-                    borderColor: isDarkMode ? Colors.darkBorder : Colors.primaryLight,
+                    backgroundColor: isDarkMode ? C.surfaceVariant : C.primarySurface,
+                    borderColor: isDarkMode ? C.border : C.primaryLight,
                   },
                 ]}
                 onPress={() => setInput(qa.msg)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.quickText}>{qa.label}</Text>
+                <Text style={[styles.quickText, { color: C.primary }]}>{qa.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -389,18 +396,18 @@ const ChatbotScreen: React.FC = () => {
                   {
                     backgroundColor: surfaceVariant,
                     borderColor,
-                    color: isDarkMode ? Colors.darkTextPrimary : Colors.textPrimary,
+                    color: C.textPrimary,
                   },
                 ]}
                 placeholder="Type a message..."
-                placeholderTextColor={Colors.textTertiary}
+                placeholderTextColor={C.textTertiary}
                 value={input}
                 onChangeText={setInput}
                 multiline
                 maxLength={500}
               />
               <TouchableOpacity onPress={sendMessage} activeOpacity={0.8}>
-                <LinearGradient colors={input.trim() ? ['#DC2626', '#991B1B'] : ['#94A3B8', '#64748B']} style={styles.sendBtn}>
+                <LinearGradient colors={input.trim() ? Colors.gradientPrimary : [C.textTertiary, C.textSecondary]} style={styles.sendBtn}>
                   <Icon name="send" size={20} color="#FFF" />
                 </LinearGradient>
               </TouchableOpacity>
@@ -416,24 +423,23 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingTop: 50, paddingBottom: 18, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  headerAvatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: 'rgba(255,255,255,0.18)', justifyContent: 'center', alignItems: 'center' },
+  headerAvatar: { width: 42, height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
   headerCopy: { flex: 1 },
-  headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold, color: '#FFF' },
-  headerSub: { fontSize: FontSize.sm, color: 'rgba(255,255,255,0.82)', marginTop: 2, lineHeight: 18 },
+  headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold },
+  headerSub: { fontSize: FontSize.sm, marginTop: 2, lineHeight: 18 },
   headerPills: { flexDirection: 'row', gap: 8, marginTop: 14, flexWrap: 'wrap' },
-  headerPill: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,255,255,0.16)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: BorderRadius.full },
-  headerPillMuted: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,255,255,0.12)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: BorderRadius.full },
-  headerPillMutedText: { fontSize: FontSize.xs, color: 'rgba(255,255,255,0.85)', fontWeight: FontWeight.semibold },
-  onlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#86EFAC' },
-  onlineText: { fontSize: FontSize.xs, color: '#FFF', fontWeight: FontWeight.semibold },
+  headerPill: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: BorderRadius.full, borderWidth: 1 },
+  headerPillMuted: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: BorderRadius.full, borderWidth: 1 },
+  headerPillMutedText: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
+  onlineDot: { width: 6, height: 6, borderRadius: 3 },
+  onlineText: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
   shell: { flex: 1, flexDirection: 'row', gap: 12, padding: 12, marginTop: -14 },
-  historyPanel: { borderRadius: 24, borderWidth: 1, overflow: 'hidden', ...Shadow.md, minHeight: 0 },
+  historyPanel: { borderRadius: 24, borderWidth: 1, overflow: 'hidden', minHeight: 0 },
   historyPanelHeader: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1 },
   panelTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.textPrimary },
   panelSub: { fontSize: FontSize.xs, color: Colors.textSecondary, marginTop: 2 },
   historyList: { padding: 10, paddingBottom: 14 },
   threadItem: { flexDirection: 'row', gap: 10, padding: 10, borderRadius: 18, marginBottom: 8, borderWidth: 1 },
-  threadItemActive: { ...Shadow.sm },
   threadIcon: { width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
   threadCopy: { flex: 1, minWidth: 0 },
   threadTitle: { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.textPrimary },
@@ -441,9 +447,9 @@ const styles = StyleSheet.create({
   threadPreview: { fontSize: FontSize.xs, color: Colors.textTertiary, marginTop: 4, lineHeight: 16 },
   threadMeta: { alignItems: 'flex-end', justifyContent: 'space-between' },
   threadTime: { fontSize: FontSize.xs, color: Colors.textTertiary },
-  threadUnread: { minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center', backgroundColor: '#DC2626', marginTop: 6 },
+  threadUnread: { minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center', marginTop: 6 },
   threadUnreadText: { fontSize: FontSize.xs, color: '#FFF', fontWeight: FontWeight.bold },
-  chatPanel: { flex: 1, borderRadius: 24, borderWidth: 1, overflow: 'hidden', ...Shadow.md, minHeight: 0 },
+  chatPanel: { flex: 1, borderRadius: 24, borderWidth: 1, overflow: 'hidden', minHeight: 0 },
   chatPanelHeader: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1 },
   chatHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   chatHeaderIcon: { width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
@@ -456,9 +462,9 @@ const styles = StyleSheet.create({
   msgRow: { marginBottom: 12 },
   botRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   userRow: { alignItems: 'flex-end' },
-  botAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.primarySurface, justifyContent: 'center', alignItems: 'center' },
+  botAvatar: { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   bubble: { maxWidth: '82%', padding: 14, borderRadius: 18 },
-  botBubble: { backgroundColor: Colors.white, borderBottomLeftRadius: 4, ...Shadow.sm },
+  botBubble: { backgroundColor: Colors.white, borderBottomLeftRadius: 4 },
   userBubble: { backgroundColor: Colors.primary, borderBottomRightRadius: 4 },
   msgText: { fontSize: FontSize.md, lineHeight: 22 },
   botText: { color: Colors.textPrimary },

@@ -4,11 +4,13 @@ export const Colors = {
   primary: '#DC2626',
   primaryDark: '#991B1B',
   primaryLight: '#FCA5A5',
-  primarySurface: '#FEF2F2',
+  // Softer red for subtle backgrounds/tags
+  primarySoft: '#FEE2E2',
+  primarySurface: '#FFF1F2',
 
   // Neutral Palette
   white: '#FFFFFF',
-  background: '#F8FAFC',
+  background: '#FAFAFA',
   surface: '#FFFFFF',
   surfaceVariant: '#F1F5F9',
   border: '#E2E8F0',
@@ -32,18 +34,19 @@ export const Colors = {
   errorLight: '#FEE2E2',
 
   // Dark Mode
-  darkBackground: '#0F172A',
-  darkSurface: '#1E293B',
-  darkSurfaceVariant: '#334155',
-  darkBorder: '#334155',
-  darkTextPrimary: '#F8FAFC',
-  darkTextSecondary: '#94A3B8',
+  // True near-black dark palette
+  darkBackground: '#0A0A0A',
+  darkSurface: '#121212',
+  darkSurfaceVariant: '#1A1A1A',
+  darkBorder: '#262626',
+  darkTextPrimary: '#FAFAFA',
+  darkTextSecondary: '#B3B3B3',
 
   // Gradients (start, end)
   gradientPrimary: ['#DC2626', '#991B1B'],
   gradientWarm: ['#DC2626', '#EA580C'],
   gradientCool: ['#DC2626', '#9333EA'],
-  gradientDark: ['#1E293B', '#0F172A'],
+  gradientDark: ['#121212', '#0A0A0A'],
 
   // Blood Group Colors
   bloodGroupBg: '#FEF2F2',
@@ -56,7 +59,7 @@ export const Colors = {
   platinum: '#6366F1',
 
   // Overlay
-  overlay: 'rgba(0, 0, 0, 0.5)',
+  overlay: 'rgba(0, 0, 0, 0.55)',
   overlayLight: 'rgba(0, 0, 0, 0.3)',
 };
 
@@ -69,14 +72,17 @@ export const DarkColors = {
   borderLight: Colors.darkBorder,
   textPrimary: Colors.darkTextPrimary,
   textSecondary: Colors.darkTextSecondary,
-  textTertiary: '#64748B',
-  primarySurface: '#2D1B1B',
-  successLight: '#064E3B',
-  warningLight: '#78350F',
-  infoLight: '#1E3A5F',
-  errorLight: '#450A0A',
-  bloodGroupBg: '#2D1B1B',
+  textTertiary: '#8A8A8A',
+  primarySurface: '#2A1414',
+  primarySoft: '#3B0A0A',
+  successLight: '#052E1E',
+  warningLight: '#3A1F0A',
+  infoLight: '#0B2447',
+  errorLight: '#3B0A0A',
+  bloodGroupBg: '#2A1414',
 };
+
+export const getColors = (isDarkMode: boolean) => (isDarkMode ? DarkColors : Colors);
 
 export const Spacing = {
   xs: 4,

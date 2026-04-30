@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Colors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
+import { getColors, FontSize, FontWeight, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
+import { AppButton, AppTextField } from '../components/CommonComponents';
 
 const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { login } = useApp();
+  const { login, isDarkMode } = useApp();
+  const C = getColors(isDarkMode);
+  const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -18,54 +21,52 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
-        <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
-        <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.header}>
+      <ScrollView style={[styles.container, { backgroundColor: C.background }]} contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={C.background} />
+        <LinearGradient colors={headerGradient} style={styles.header}>
           <View style={styles.logoRow}>
-            <View style={styles.logoCircle}>
-              <Icon name="water" size={28} color="#DC2626" />
+            <View style={[styles.logoCircle, { backgroundColor: C.surface, borderColor: C.border }]}> 
+              <Icon name="water" size={28} color={C.primary} />
             </View>
-            <Text style={styles.logoText}>SevaSethu</Text>
+            <Text style={[styles.logoText, { color: C.textPrimary }]}>SevaSethu</Text>
           </View>
-          <Text style={styles.welcomeText}>Welcome Back</Text>
-          <Text style={styles.subText}>Sign in to continue saving lives</Text>
+          <Text style={[styles.welcomeText, { color: C.textPrimary }]}>Welcome Back</Text>
+          <Text style={[styles.subText, { color: C.textSecondary }]}>Sign in to continue saving lives</Text>
         </LinearGradient>
 
-        <View style={styles.formCard}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email Address</Text>
-            <View style={styles.inputContainer}>
-              <Icon name="email-outline" size={20} color={Colors.textTertiary} />
-              <TextInput style={styles.input} placeholder="Enter your email" placeholderTextColor={Colors.textTertiary} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-            </View>
-          </View>
+        <View style={[styles.formCard, { backgroundColor: C.surface, borderColor: C.border }, isDarkMode ? { borderWidth: 1 } : Shadow.lg]}>
+          <AppTextField
+            label="Email Address"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter your email"
+            iconLeft="email-outline"
+            inputProps={{ keyboardType: 'email-address', autoCapitalize: 'none', autoCorrect: false }}
+            containerStyle={{ marginBottom: 18 }}
+          />
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.inputContainer}>
-              <Icon name="lock-outline" size={20} color={Colors.textTertiary} />
-              <TextInput style={styles.input} placeholder="Enter your password" placeholderTextColor={Colors.textTertiary} value={password} onChangeText={setPassword} secureTextEntry={!showPassword} />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} color={Colors.textTertiary} />
-              </TouchableOpacity>
-            </View>
-          </View>
+          <AppTextField
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Enter your password"
+            iconLeft="lock-outline"
+            iconRight={showPassword ? 'eye-off' : 'eye'}
+            onPressIconRight={() => setShowPassword(!showPassword)}
+            inputProps={{ secureTextEntry: !showPassword }}
+            containerStyle={{ marginBottom: 10 }}
+          />
 
           <TouchableOpacity style={styles.forgotBtn} onPress={() => navigation.navigate('ForgotPassword')}>
-            <Text style={styles.forgotText}>Forgot Password?</Text>
+            <Text style={[styles.forgotText, { color: C.primary }]}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleLogin} activeOpacity={0.8}>
-            <LinearGradient colors={['#DC2626', '#991B1B']} style={[styles.loginBtn, Shadow.red]}>
-              <Text style={styles.loginBtnText}>Sign In</Text>
-              <Icon name="arrow-right" size={20} color="#FFF" />
-            </LinearGradient>
-          </TouchableOpacity>
+          <AppButton title="Sign In" onPress={handleLogin} iconRight="arrow-right" variant="primary" />
 
           <View style={styles.signupRow}>
-            <Text style={styles.signupText}>Don't have an account? </Text>
+            <Text style={[styles.signupText, { color: C.textSecondary }]}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-              <Text style={styles.signupLink}>Sign Up</Text>
+              <Text style={[styles.signupLink, { color: C.primary }]}>Sign Up</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -76,26 +77,20 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   contentContainer: { flexGrow: 1 },
   header: { paddingTop: 60, paddingBottom: 40, paddingHorizontal: 24, borderBottomLeftRadius: 32, borderBottomRightRadius: 32 },
   logoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
-  logoCircle: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
-  logoText: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: '#FFF' },
-  welcomeText: { fontSize: FontSize.xxxl, fontWeight: FontWeight.extrabold, color: '#FFF' },
-  subText: { fontSize: FontSize.lg, color: 'rgba(255,255,255,0.8)', marginTop: 4 },
-  formCard: { flex: 1, padding: 24, marginTop: -16, backgroundColor: Colors.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, ...Shadow.lg },
-  inputGroup: { marginBottom: 20 },
-  label: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: Colors.textPrimary, marginBottom: 8 },
-  inputContainer: { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderColor: Colors.border, borderRadius: BorderRadius.md, paddingHorizontal: 16, height: 52, backgroundColor: Colors.surfaceVariant },
-  input: { flex: 1, marginLeft: 12, fontSize: FontSize.md, color: Colors.textPrimary },
+  logoCircle: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginRight: 12, borderWidth: 1 },
+  logoText: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold },
+  welcomeText: { fontSize: FontSize.xxxl, fontWeight: FontWeight.extrabold },
+  subText: { fontSize: FontSize.lg, marginTop: 4 },
+  formCard: { flex: 1, padding: 24, marginTop: -16, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
   forgotBtn: { alignSelf: 'flex-end', marginBottom: 24 },
-  forgotText: { fontSize: FontSize.md, color: Colors.primary, fontWeight: FontWeight.semibold },
-  loginBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 52, borderRadius: BorderRadius.md, gap: 8 },
-  loginBtnText: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: '#FFF' },
+  forgotText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
   signupRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
-  signupText: { fontSize: FontSize.md, color: Colors.textSecondary },
-  signupLink: { fontSize: FontSize.md, color: Colors.primary, fontWeight: FontWeight.bold },
+  signupText: { fontSize: FontSize.md },
+  signupLink: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
 });
 
 export default LoginScreen;

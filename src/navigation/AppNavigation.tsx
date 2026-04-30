@@ -4,8 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import LinearGradient from 'react-native-linear-gradient';
-import { Colors, FontSize, FontWeight } from '../utils/theme';
+import { Colors, getColors, FontWeight } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 
 // Screens
@@ -46,7 +45,8 @@ const tabConfig = [
 
 function MainTabs() {
   const { isDarkMode, chatbotUnreadCount } = useApp();
-  const tabBarBackground = isDarkMode ? Colors.darkSurface : Colors.white;
+  const C = getColors(isDarkMode);
+  const tabBarBackground = C.surface;
 
   return (
     <Tab.Navigator
@@ -62,16 +62,18 @@ function MainTabs() {
           borderRadius: 20,
           backgroundColor: tabBarBackground,
           borderTopWidth: 0,
+          borderWidth: isDarkMode ? 1 : 0,
+          borderColor: isDarkMode ? C.border : 'transparent',
           paddingBottom: 8,
           paddingTop: 8,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.1,
+          shadowOpacity: isDarkMode ? 0 : 0.1,
           shadowRadius: 12,
-          elevation: 10,
+          elevation: isDarkMode ? 0 : 10,
         },
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: isDarkMode ? Colors.darkTextSecondary : Colors.textTertiary,
+        tabBarActiveTintColor: C.primary,
+        tabBarInactiveTintColor: C.textTertiary,
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: FontWeight.semibold,
@@ -102,13 +104,16 @@ function MainTabs() {
 }
 
 export default function AppNavigation() {
+  const { isDarkMode } = useApp();
+  const C = getColors(isDarkMode);
+
   return (
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
           ...TransitionPresets.SlideFromRightIOS,
-          cardStyle: { backgroundColor: Colors.background },
+          cardStyle: { backgroundColor: C.background },
         }}
       >
         {/* Auth Flow */}
@@ -154,7 +159,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#EF4444',
+    backgroundColor: Colors.primary,
     borderWidth: 1.5,
   },
 });

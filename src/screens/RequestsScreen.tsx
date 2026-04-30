@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, FlatList, Linking } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
+import { Colors, getColors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 import { ScheduledRequest } from '../utils/types';
-import { BloodGroupBadge, UrgencyChip, AppCard, FilterChip, SearchBar, EmptyState, SkeletonLoader, ConfirmationDialog } from '../components/CommonComponents';
+import { AppButton, BloodGroupBadge, UrgencyChip, AppCard, FilterChip, SearchBar, EmptyState, SkeletonLoader, ConfirmationDialog } from '../components/CommonComponents';
 
 const BLOOD_FILTERS = ['All', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -25,7 +25,9 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     showCancel: boolean;
     onConfirm: () => void;
   } | null>(null);
-  const bg = isDarkMode ? Colors.darkBackground : Colors.background;
+  const C = getColors(isDarkMode);
+  const bg = C.background;
+  const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 350);
@@ -89,7 +91,7 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       icon: 'hand-heart',
       accentColor: Colors.primary,
       confirmText: 'Confirm',
-      confirmColors: ['#DC2626', '#991B1B'],
+      confirmColors: C.gradientPrimary as [string, string],
       showCancel: true,
       onConfirm: () => {
         acceptRequest(requestType, request.id, buildDonorAcceptance());
@@ -127,8 +129,8 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.cardHeaderLeft}>
           <BloodGroupBadge bloodGroup={item.bloodGroup} size="md" />
           <View style={styles.cardHeaderInfo}>
-            <Text style={[styles.patientName, isDarkMode && { color: Colors.darkTextPrimary }]}>{item.patientName}</Text>
-            <Text style={styles.reqSub}>{item.units} unit{item.units > 1 ? 's' : ''} needed</Text>
+            <Text style={[styles.patientName, { color: C.textPrimary }]}>{item.patientName}</Text>
+            <Text style={[styles.reqSub, { color: C.textSecondary }]}>{item.units} unit{item.units > 1 ? 's' : ''} needed</Text>
           </View>
         </View>
         <UrgencyChip urgency={item.urgency} />
@@ -136,37 +138,42 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
       <View style={styles.detailsGrid}>
         <View style={styles.detailRow}>
-          <Icon name="hospital-building" size={16} color={Colors.textTertiary} />
-          <Text style={[styles.detailText, isDarkMode && { color: Colors.darkTextSecondary }]}>{item.hospital}</Text>
+          <Icon name="hospital-building" size={16} color={C.textTertiary} />
+          <Text style={[styles.detailText, { color: C.textSecondary }]}>{item.hospital}</Text>
         </View>
         <View style={styles.detailRow}>
-          <Icon name="map-marker" size={16} color={Colors.textTertiary} />
-          <Text style={[styles.detailText, isDarkMode && { color: Colors.darkTextSecondary }]}>{item.distance} · {item.address}</Text>
+          <Icon name="map-marker" size={16} color={C.textTertiary} />
+          <Text style={[styles.detailText, { color: C.textSecondary }]}>{item.distance} · {item.address}</Text>
         </View>
         <View style={styles.detailRow}>
-          <Icon name="account" size={16} color={Colors.textTertiary} />
-          <Text style={[styles.detailText, isDarkMode && { color: Colors.darkTextSecondary }]}>Requested by {item.requesterName}</Text>
+          <Icon name="account" size={16} color={C.textTertiary} />
+          <Text style={[styles.detailText, { color: C.textSecondary }]}>Requested by {item.requesterName}</Text>
         </View>
       </View>
 
       {item.notes ? (
-        <View style={styles.notesBox}>
-          <Icon name="note-text" size={14} color={Colors.textTertiary} />
-          <Text style={styles.notesText}>{item.notes}</Text>
+        <View style={[styles.notesBox, { backgroundColor: C.surfaceVariant }]}> 
+          <Icon name="note-text" size={14} color={C.textTertiary} />
+          <Text style={[styles.notesText, { color: C.textSecondary }]}>{item.notes}</Text>
         </View>
       ) : null}
 
       <View style={styles.cardActions}>
-        <TouchableOpacity style={styles.callActionBtn} onPress={() => Linking.openURL(`tel:${item.contact}`)}>
-          <Icon name="phone" size={18} color={Colors.success} />
-          <Text style={[styles.callActionText, { color: Colors.success }]}>Call</Text>
-        </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.8} style={{ flex: 1 }} onPress={() => handleAcceptRequest('urgent', item)}>
-          <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.acceptActionBtn}>
-            <Icon name="hand-heart" size={18} color="#FFF" />
-            <Text style={styles.acceptActionText}>Accept to Donate</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+        <AppButton
+          title="Call"
+          iconLeft="phone"
+          variant="outline"
+          accentColor={Colors.success}
+          onPress={() => Linking.openURL(`tel:${item.contact}`)}
+          style={{ width: 120 }}
+        />
+        <AppButton
+          title="Accept to Donate"
+          iconLeft="hand-heart"
+          variant="primary"
+          onPress={() => handleAcceptRequest('urgent', item)}
+          style={{ flex: 1 }}
+        />
       </View>
     </AppCard>
   );
@@ -177,61 +184,70 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.cardHeaderLeft}>
           <BloodGroupBadge bloodGroup={item.bloodGroup} size="md" />
           <View style={styles.cardHeaderInfo}>
-            <Text style={[styles.patientName, isDarkMode && { color: Colors.darkTextPrimary }]}>{item.hospital}</Text>
-            <Text style={styles.reqSub}>{item.units} unit{item.units > 1 ? 's' : ''} · {item.bloodGroup}</Text>
+            <Text style={[styles.patientName, { color: C.textPrimary }]}>{item.hospital}</Text>
+            <Text style={[styles.reqSub, { color: C.textSecondary }]}>{item.units} unit{item.units > 1 ? 's' : ''} · {item.bloodGroup}</Text>
           </View>
         </View>
-        <View style={styles.dateChip}>
-          <Icon name="calendar" size={14} color={Colors.info} />
-          <Text style={styles.dateChipText}>{new Date(item.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</Text>
+        <View style={[styles.dateChip, { backgroundColor: C.infoLight }]}>
+          <Icon name="calendar" size={14} color={C.info} />
+          <Text style={[styles.dateChipText, { color: C.info }]}>{new Date(item.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</Text>
         </View>
       </View>
 
       <View style={styles.detailsGrid}>
         <View style={styles.detailRow}>
-          <Icon name="clock-outline" size={16} color={Colors.textTertiary} />
-          <Text style={[styles.detailText, isDarkMode && { color: Colors.darkTextSecondary }]}>{item.time}</Text>
+          <Icon name="clock-outline" size={16} color={C.textTertiary} />
+          <Text style={[styles.detailText, { color: C.textSecondary }]}>{item.time}</Text>
         </View>
         <View style={styles.detailRow}>
-          <Icon name="map-marker" size={16} color={Colors.textTertiary} />
-          <Text style={[styles.detailText, isDarkMode && { color: Colors.darkTextSecondary }]}>{item.address}</Text>
+          <Icon name="map-marker" size={16} color={C.textTertiary} />
+          <Text style={[styles.detailText, { color: C.textSecondary }]}>{item.address}</Text>
         </View>
       </View>
 
       {item.notes ? (
-        <View style={styles.notesBox}>
-          <Icon name="note-text" size={14} color={Colors.textTertiary} />
-          <Text style={styles.notesText}>{item.notes}</Text>
+        <View style={[styles.notesBox, { backgroundColor: C.surfaceVariant }]}> 
+          <Icon name="note-text" size={14} color={C.textTertiary} />
+          <Text style={[styles.notesText, { color: C.textSecondary }]}>{item.notes}</Text>
         </View>
       ) : null}
 
-      <TouchableOpacity activeOpacity={0.8} onPress={() => handleAcceptRequest('scheduled', item)}>
-        <LinearGradient colors={['#2563EB', '#1D4ED8']} style={styles.scheduleAcceptBtn}>
-          <Icon name="check-circle" size={18} color="#FFF" />
-          <Text style={styles.acceptActionText}>Accept Schedule</Text>
-        </LinearGradient>
-      </TouchableOpacity>
+      <AppButton
+        title="Accept Schedule"
+        iconLeft="check-circle"
+        variant="primary"
+        onPress={() => handleAcceptRequest('scheduled', item)}
+      />
     </AppCard>
   );
 
   return (
     <View style={[styles.container, { backgroundColor: bg }]}>
-      <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
-      <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.header}>
-        <Text style={styles.headerTitle}>Blood Requests</Text>
-        <Text style={styles.headerSub}>{urgentRequests.length} urgent · {scheduledRequests.length} scheduled</Text>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={bg} />
+      <LinearGradient colors={headerGradient} style={styles.header}>
+        <Text style={[styles.headerTitle, { color: C.textPrimary }]}>Blood Requests</Text>
+        <Text style={[styles.headerSub, { color: C.textSecondary }]}>{urgentRequests.length} urgent · {scheduledRequests.length} scheduled</Text>
       </LinearGradient>
 
       {/* Tabs */}
-      <View style={styles.tabContainer}>
+      <View style={[styles.tabContainer, { backgroundColor: C.surfaceVariant, borderColor: C.border }]}>
         {(['urgent', 'scheduled'] as const).map(tab => (
-          <TouchableOpacity key={tab} style={[styles.tab, activeTab === tab && styles.tabActive]} onPress={() => setActiveTab(tab)}>
-            <Icon name={tab === 'urgent' ? 'alert-circle' : 'calendar-clock'} size={18} color={activeTab === tab ? Colors.primary : Colors.textTertiary} />
-            <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
+          <TouchableOpacity
+            key={tab}
+            style={[
+              styles.tab,
+              { backgroundColor: activeTab === tab ? C.surface : 'transparent' },
+              activeTab === tab && styles.tabActive,
+            ]}
+            onPress={() => setActiveTab(tab)}
+            activeOpacity={0.85}
+          >
+            <Icon name={tab === 'urgent' ? 'alert-circle' : 'calendar-clock'} size={18} color={activeTab === tab ? C.primary : C.textTertiary} />
+            <Text style={[styles.tabText, { color: activeTab === tab ? C.primary : C.textTertiary }, activeTab === tab && styles.tabTextActive]}>
               {tab === 'urgent' ? 'Urgent' : 'Scheduled'}
             </Text>
-            <View style={[styles.tabBadge, { backgroundColor: activeTab === tab ? Colors.primary : Colors.surfaceVariant }]}>
-              <Text style={[styles.tabBadgeText, activeTab === tab && { color: '#FFF' }]}>
+            <View style={[styles.tabBadge, { backgroundColor: activeTab === tab ? C.primary : C.surface }]}>
+              <Text style={[styles.tabBadgeText, { color: activeTab === tab ? C.textOnPrimary : C.textTertiary }]}>
                 {tab === 'urgent' ? filteredUrgent.length : filteredScheduled.length}
               </Text>
             </View>
@@ -279,7 +295,7 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
       {/* FAB - Create Request */}
       <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('CreateRequest')} activeOpacity={0.8}>
-        <LinearGradient colors={['#DC2626', '#991B1B']} style={[styles.fabInner, Shadow.red]}>
+        <LinearGradient colors={Colors.gradientPrimary} style={[styles.fabInner, !isDarkMode && Shadow.red]}>
           <Icon name="plus" size={28} color="#FFF" />
         </LinearGradient>
       </TouchableOpacity>
@@ -291,7 +307,7 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         icon={dialog?.icon || 'information-outline'}
         accentColor={dialog?.accentColor || Colors.primary}
         confirmText={dialog?.confirmText || 'Continue'}
-        confirmColors={dialog?.confirmColors || ['#DC2626', '#991B1B']}
+        confirmColors={dialog?.confirmColors || (C.gradientPrimary as [string, string])}
         showCancel={dialog?.showCancel ?? true}
         onCancel={() => setDialog(null)}
         onConfirm={() => dialog?.onConfirm()}
@@ -303,15 +319,15 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingTop: 50, paddingBottom: 20, paddingHorizontal: 20 },
-  headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold, color: '#FFF' },
-  headerSub: { fontSize: FontSize.sm, color: 'rgba(255,255,255,0.8)', marginTop: 4 },
-  tabContainer: { flexDirection: 'row', marginHorizontal: 20, marginTop: 12, backgroundColor: Colors.surfaceVariant, borderRadius: BorderRadius.md, padding: 4 },
+  headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold },
+  headerSub: { fontSize: FontSize.sm, marginTop: 4 },
+  tabContainer: { flexDirection: 'row', marginHorizontal: 20, marginTop: 12, borderRadius: BorderRadius.md, padding: 4, borderWidth: 1 },
   tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: BorderRadius.sm, gap: 6 },
-  tabActive: { backgroundColor: Colors.white, ...Shadow.sm },
-  tabText: { fontSize: FontSize.md, fontWeight: FontWeight.medium, color: Colors.textTertiary },
+  tabActive: { ...Shadow.sm },
+  tabText: { fontSize: FontSize.md, fontWeight: FontWeight.medium },
   tabTextActive: { color: Colors.primary, fontWeight: FontWeight.bold },
   tabBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: BorderRadius.full },
-  tabBadgeText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold, color: Colors.textTertiary },
+  tabBadgeText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold },
   filterScroll: { marginTop: 12, minHeight: 52 },
   filterContent: { paddingHorizontal: 20, paddingVertical: 4, alignItems: 'center' },
   listContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 100 },
@@ -323,15 +339,10 @@ const styles = StyleSheet.create({
   reqSub: { fontSize: FontSize.sm, color: Colors.textSecondary, marginTop: 2 },
   detailsGrid: { gap: 6, marginBottom: 10 },
   detailRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  detailText: { fontSize: FontSize.sm, color: Colors.textSecondary, flex: 1 },
-  notesBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 6, backgroundColor: Colors.surfaceVariant, padding: 10, borderRadius: BorderRadius.sm, marginBottom: 12 },
-  notesText: { fontSize: FontSize.sm, color: Colors.textSecondary, flex: 1, lineHeight: 18 },
+  detailText: { fontSize: FontSize.sm, flex: 1 },
+  notesBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 6, padding: 10, borderRadius: BorderRadius.sm, marginBottom: 12 },
+  notesText: { fontSize: FontSize.sm, flex: 1, lineHeight: 18 },
   cardActions: { flexDirection: 'row', gap: 10 },
-  callActionBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: BorderRadius.md, borderWidth: 1.5, borderColor: Colors.success },
-  callActionText: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
-  acceptActionBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: BorderRadius.md },
-  acceptActionText: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: '#FFF' },
-  scheduleAcceptBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: BorderRadius.md },
   dateChip: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Colors.infoLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: BorderRadius.full },
   dateChipText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold, color: Colors.info },
   fab: { position: 'absolute', bottom: 90, right: 20 },

@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, StatusBar, Linking } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
+import { Colors, getColors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 import { BloodGroupBadge, UrgencyChip, AppCard, SectionHeader, StatCard, ConfirmationDialog } from '../components/CommonComponents';
 import { bloodBanks, leaderboardData } from '../data/mockData';
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { user, isDarkMode, toggleAvailability, urgentRequests, acceptRequest } = useApp();
-  const bg = isDarkMode ? Colors.darkBackground : Colors.background;
+  const C = getColors(isDarkMode);
+  const bg = C.background;
+  const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
   const nearbyUrgent = urgentRequests.filter(r => r.urgency === 'critical').length;
   const [dialog, setDialog] = useState<{
     title: string;
@@ -74,44 +76,52 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: bg }]} showsVerticalScrollIndicator={false}>
-      <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={bg} />
 
       {/* Hero Header */}
-      <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.hero}>
+      <LinearGradient colors={headerGradient} style={styles.hero}>
         <View style={styles.heroTop}>
           <View style={styles.heroLeft}>
-            <Text style={styles.greeting}>Hello, {user.name.split(' ')[0]} 👋</Text>
-            <Text style={styles.heroSub}>Ready to save lives today?</Text>
+            <Text style={[styles.greeting, { color: C.textPrimary }]}>Hello, {user.name.split(' ')[0]} 👋</Text>
+            <Text style={[styles.heroSub, { color: C.textSecondary }]}>Ready to save lives today?</Text>
           </View>
           <View style={styles.heroActions}>
-            <TouchableOpacity style={styles.heroActionBtn} onPress={() => navigation.navigate('Chatbot')}>
-              <Icon name="robot" size={22} color="#FFF" />
+            <TouchableOpacity
+              style={[styles.heroActionBtn, { backgroundColor: C.surface, borderColor: C.border }]}
+              onPress={() => navigation.navigate('Chatbot')}
+              activeOpacity={0.85}
+            >
+              <Icon name="robot" size={22} color={C.textPrimary} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.heroActionBtn} onPress={() => navigation.navigate('Notifications')}>
-              <Icon name="bell-outline" size={24} color="#FFF" />
-              <View style={styles.notifDot} />
+            <TouchableOpacity
+              style={[styles.heroActionBtn, { backgroundColor: C.surface, borderColor: C.border }]}
+              onPress={() => navigation.navigate('Notifications')}
+              activeOpacity={0.85}
+            >
+              <Icon name="bell-outline" size={24} color={C.textPrimary} />
+              <View style={[styles.notifDot, { backgroundColor: C.warning }]} />
             </TouchableOpacity>
           </View>
         </View>
 
-        <View style={styles.heroCard}>
+        <AppCard style={styles.heroCard}>
           <View style={styles.heroCardLeft}>
             <BloodGroupBadge bloodGroup={user.bloodGroup} size="lg" />
             <View style={styles.heroCardInfo}>
-              <Text style={styles.heroCardName}>{user.name}</Text>
+              <Text style={[styles.heroCardName, { color: C.textPrimary }]}>{user.name}</Text>
               <View style={styles.availRow}>
                 <View style={[styles.availDot, { backgroundColor: user.isAvailable ? Colors.success : Colors.textTertiary }]} />
-                <Text style={styles.availText}>{user.isAvailable ? 'Available' : 'Unavailable'}</Text>
+                <Text style={[styles.availText, { color: C.textSecondary }]}>{user.isAvailable ? 'Available' : 'Unavailable'}</Text>
               </View>
             </View>
           </View>
           <Switch
             value={user.isAvailable}
             onValueChange={toggleAvailability}
-            trackColor={{ true: '#86EFAC', false: 'rgba(255,255,255,0.3)' }}
-            thumbColor={user.isAvailable ? '#059669' : '#94A3B8'}
+            trackColor={{ true: C.successLight, false: C.border }}
+            thumbColor={user.isAvailable ? C.success : C.textTertiary}
           />
-        </View>
+        </AppCard>
       </LinearGradient>
 
       {/* Stats Row */}
@@ -127,24 +137,24 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hScroll}>
         {urgentRequests.slice(0, 5).map(req => (
           <TouchableOpacity key={req.id} activeOpacity={0.8} onPress={() => navigation.navigate('Requests')}>
-            <View style={[styles.urgentCard, isDarkMode && { backgroundColor: Colors.darkSurface, borderColor: Colors.darkBorder, borderWidth: 1 }]}>
+            <View style={[styles.urgentCard, { backgroundColor: C.surface, borderColor: C.border, borderWidth: isDarkMode ? 1 : 0 }, !isDarkMode && Shadow.md]}>
               <View style={styles.urgentTop}>
                 <BloodGroupBadge bloodGroup={req.bloodGroup} size="sm" />
                 <UrgencyChip urgency={req.urgency} />
               </View>
-              <Text style={[styles.urgentName, isDarkMode && { color: Colors.darkTextPrimary }]}>{req.patientName}</Text>
+              <Text style={[styles.urgentName, { color: C.textPrimary }]}>{req.patientName}</Text>
               <View style={styles.urgentInfo}>
-                <Icon name="hospital-building" size={14} color={Colors.textTertiary} />
-                <Text style={styles.urgentInfoText} numberOfLines={1}>{req.hospital}</Text>
+                <Icon name="hospital-building" size={14} color={C.textTertiary} />
+                <Text style={[styles.urgentInfoText, { color: C.textSecondary }]} numberOfLines={1}>{req.hospital}</Text>
               </View>
               <View style={styles.urgentInfo}>
-                <Icon name="map-marker" size={14} color={Colors.textTertiary} />
-                <Text style={styles.urgentInfoText}>{req.distance}</Text>
+                <Icon name="map-marker" size={14} color={C.textTertiary} />
+                <Text style={[styles.urgentInfoText, { color: C.textSecondary }]}>{req.distance}</Text>
               </View>
               <View style={styles.urgentBottom}>
-                <Text style={styles.urgentUnits}>{req.units} unit{req.units > 1 ? 's' : ''}</Text>
-                <TouchableOpacity style={styles.acceptBtn} onPress={() => handleAcceptRequest(req)}>
-                  <Text style={styles.acceptText}>Accept</Text>
+                <Text style={[styles.urgentUnits, { color: C.primary }]}>{req.units} unit{req.units > 1 ? 's' : ''}</Text>
+                <TouchableOpacity style={[styles.acceptBtn, { backgroundColor: C.primarySurface }]} onPress={() => handleAcceptRequest(req)}>
+                  <Text style={[styles.acceptText, { color: C.primary }]}>Accept</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -158,21 +168,21 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <TouchableOpacity key={bank.id} activeOpacity={0.8} onPress={() => navigation.navigate('NearbyBloodBanks')}>
           <AppCard style={styles.bankCard}>
             <View style={styles.bankTop}>
-              <View style={[styles.bankIcon, { backgroundColor: bank.isOpen ? Colors.successLight : Colors.surfaceVariant }]}>
-                <Icon name="hospital-building" size={24} color={bank.isOpen ? Colors.success : Colors.textTertiary} />
+              <View style={[styles.bankIcon, { backgroundColor: bank.isOpen ? C.successLight : C.surfaceVariant }]}>
+                <Icon name="hospital-building" size={24} color={bank.isOpen ? C.success : C.textTertiary} />
               </View>
               <View style={styles.bankInfo}>
-                <Text style={[styles.bankName, isDarkMode && { color: Colors.darkTextPrimary }]}>{bank.name}</Text>
-                <Text style={styles.bankDistance}>{bank.distance} · {bank.isOpen ? 'Open Now' : 'Closed'}</Text>
+                <Text style={[styles.bankName, { color: C.textPrimary }]}>{bank.name}</Text>
+                <Text style={[styles.bankDistance, { color: C.textSecondary }]}>{bank.distance} · {bank.isOpen ? 'Open Now' : 'Closed'}</Text>
               </View>
-              <TouchableOpacity style={styles.callBtn} onPress={() => Linking.openURL(`tel:${bank.phone}`)}>
-                <Icon name="phone" size={18} color={Colors.primary} />
+              <TouchableOpacity style={[styles.callBtn, { backgroundColor: C.primarySurface }]} onPress={() => Linking.openURL(`tel:${bank.phone}`)}>
+                <Icon name="phone" size={18} color={C.primary} />
               </TouchableOpacity>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
               {bank.availableGroups.map(g => (
-                <View key={g} style={styles.bgMiniChip}>
-                  <Text style={styles.bgMiniText}>{g}</Text>
+                <View key={g} style={[styles.bgMiniChip, { backgroundColor: C.primarySurface }]}>
+                  <Text style={[styles.bgMiniText, { color: C.primary }]}>{g}</Text>
                 </View>
               ))}
             </ScrollView>
@@ -184,13 +194,13 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <SectionHeader title="Top Donors" actionText="Full Board" onAction={() => navigation.navigate('Rewards')} />
       <AppCard style={styles.leaderCard}>
         {leaderboardData.slice(0, 3).map((entry, i) => (
-          <View key={entry.id} style={[styles.leaderRow, i < 2 && styles.leaderRowBorder]}>
-            <View style={[styles.rankBadge, { backgroundColor: i === 0 ? '#FEF3C7' : i === 1 ? '#F1F5F9' : '#FEF2F2' }]}>
-              <Text style={[styles.rankText, { color: i === 0 ? '#D97706' : i === 1 ? '#64748B' : '#DC2626' }]}>#{entry.rank}</Text>
+          <View key={entry.id} style={[styles.leaderRow, i < 2 && { borderBottomWidth: 1, borderBottomColor: C.border }]}>
+            <View style={[styles.rankBadge, { backgroundColor: i === 0 ? C.warningLight : i === 1 ? C.surfaceVariant : C.primarySurface }]}> 
+              <Text style={[styles.rankText, { color: i === 0 ? C.warning : i === 1 ? C.textSecondary : C.primary }]}>#{entry.rank}</Text>
             </View>
             <View style={styles.leaderInfo}>
-              <Text style={[styles.leaderName, isDarkMode && { color: Colors.darkTextPrimary }]}>{entry.name}</Text>
-              <Text style={styles.leaderSub}>{entry.donations} donations · {entry.city}</Text>
+              <Text style={[styles.leaderName, { color: C.textPrimary }]}>{entry.name}</Text>
+              <Text style={[styles.leaderSub, { color: C.textSecondary }]}>{entry.donations} donations · {entry.city}</Text>
             </View>
             <BloodGroupBadge bloodGroup={entry.bloodGroup} size="sm" />
           </View>
@@ -206,7 +216,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         icon={dialog?.icon || 'information-outline'}
         accentColor={dialog?.accentColor || Colors.primary}
         confirmText={dialog?.confirmText || 'Continue'}
-        confirmColors={dialog?.confirmColors || ['#DC2626', '#991B1B']}
+        confirmColors={dialog?.confirmColors || (Colors.gradientPrimary as unknown as [string, string])}
         showCancel={dialog?.showCancel ?? true}
         onCancel={() => setDialog(null)}
         onConfirm={() => dialog?.onConfirm()}
@@ -217,24 +227,24 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  hero: { paddingTop: 50, paddingBottom: 80, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
+  hero: { paddingTop: 50, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
   heroTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
   heroLeft: {},
   heroActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  heroActionBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.15)', justifyContent: 'center', alignItems: 'center' },
-  greeting: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: '#FFF' },
-  heroSub: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.8)', marginTop: 4 },
-  notifDot: { position: 'absolute', top: 10, right: 12, width: 8, height: 8, borderRadius: 4, backgroundColor: '#FDE047' },
-  heroCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: BorderRadius.lg, padding: 16 },
+  heroActionBtn: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
+  greeting: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold },
+  heroSub: { fontSize: FontSize.md, marginTop: 4 },
+  notifDot: { position: 'absolute', top: 10, right: 12, width: 8, height: 8, borderRadius: 4 },
+  heroCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: BorderRadius.lg, padding: 16 },
   heroCardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   heroCardInfo: {},
-  heroCardName: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: '#FFF' },
+  heroCardName: { fontSize: FontSize.lg, fontWeight: FontWeight.bold },
   availRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
   availDot: { width: 8, height: 8, borderRadius: 4 },
-  availText: { fontSize: FontSize.sm, color: 'rgba(255,255,255,0.8)' },
-  statsRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, marginTop: -40 },
+  availText: { fontSize: FontSize.sm },
+  statsRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, marginTop: 16 },
   hScroll: { paddingLeft: 20, paddingRight: 8, paddingBottom: 4 },
-  urgentCard: { width: 200, backgroundColor: Colors.white, borderRadius: BorderRadius.lg, padding: 16, marginRight: 12, ...Shadow.md },
+  urgentCard: { width: 200, borderRadius: BorderRadius.lg, padding: 16, marginRight: 12 },
   urgentTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   urgentName: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.textPrimary, marginBottom: 6 },
   urgentInfo: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 },
@@ -254,7 +264,6 @@ const styles = StyleSheet.create({
   bgMiniText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold, color: Colors.primary },
   leaderCard: { marginHorizontal: 20 },
   leaderRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
-  leaderRowBorder: { borderBottomWidth: 1, borderBottomColor: Colors.borderLight },
   rankBadge: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
   rankText: { fontSize: FontSize.sm, fontWeight: FontWeight.extrabold },
   leaderInfo: { flex: 1 },
