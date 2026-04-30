@@ -40,15 +40,17 @@ const tabConfig = [
   { name: 'Home', label: 'Home', component: HomeScreen, icon: 'home', iconOutline: 'home-outline' },
   { name: 'MyRequests', label: 'My Requests', component: MyRequestsScreen, icon: 'clipboard-text', iconOutline: 'clipboard-text-outline' },
   { name: 'Requests', label: 'Requests', component: RequestsScreen, icon: 'water', iconOutline: 'water-outline' },
-  { name: 'History', label: 'History', component: HistoryScreen, icon: 'history', iconOutline: 'history' },
+  { name: 'Chatbot', label: 'Chatbot', component: ChatbotScreen, icon: 'robot', iconOutline: 'robot-outline' },
   { name: 'Profile', label: 'Profile', component: ProfileScreen, icon: 'account', iconOutline: 'account-outline' },
 ];
 
 function MainTabs() {
-  const { isDarkMode } = useApp();
+  const { isDarkMode, chatbotUnreadCount } = useApp();
+  const tabBarBackground = isDarkMode ? Colors.darkSurface : Colors.white;
 
   return (
     <Tab.Navigator
+      lazy={false}
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
@@ -58,7 +60,7 @@ function MainTabs() {
           right: 16,
           height: 64,
           borderRadius: 20,
-          backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white,
+          backgroundColor: tabBarBackground,
           borderTopWidth: 0,
           paddingBottom: 8,
           paddingTop: 8,
@@ -84,9 +86,12 @@ function MainTabs() {
           component={tab.component}
           options={{
             tabBarLabel: tab.label,
-            tabBarIcon: ({ focused, color, size }) => (
-              <View style={focused ? styles.activeTab : undefined}>
+            tabBarIcon: ({ focused, color }) => (
+              <View style={styles.tabIconWrap}>
                 <Icon name={focused ? tab.icon : tab.iconOutline} size={focused ? 26 : 22} color={color} />
+                {tab.name === 'Chatbot' && chatbotUnreadCount > 0 && !focused ? (
+                  <View style={[styles.badgeDot, { borderColor: tabBarBackground }]} />
+                ) : null}
               </View>
             ),
           }}
@@ -117,6 +122,7 @@ export default function AppNavigation() {
         {/* Main App */}
         <Stack.Screen name="MainApp" component={MainTabs} options={{ ...TransitionPresets.FadeFromBottomAndroid }} />
         <Stack.Screen name="Rewards" component={RewardsScreen} />
+        <Stack.Screen name="History" component={HistoryScreen} />
 
         {/* Additional Screens */}
         <Stack.Screen name="CreateRequest" component={CreateRequestScreen} />
@@ -124,7 +130,6 @@ export default function AppNavigation() {
         <Stack.Screen name="NearbyBloodBanks" component={NearbyBloodBanksScreen} />
         <Stack.Screen name="DonorMatch" component={DonorMatchScreen} />
         <Stack.Screen name="DonationConfirmation" component={DonationConfirmationScreen} />
-        <Stack.Screen name="Chatbot" component={ChatbotScreen} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         <Stack.Screen name="MedicalInfo" component={MedicalInfoScreen} />
@@ -136,7 +141,20 @@ export default function AppNavigation() {
 }
 
 const styles = StyleSheet.create({
-  activeTab: {
-    marginTop: -2,
+  tabIconWrap: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeDot: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#EF4444',
+    borderWidth: 1.5,
   },
 });

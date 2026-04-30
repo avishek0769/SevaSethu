@@ -8,6 +8,7 @@ interface AppState {
   user: User;
   isDarkMode: boolean;
   notificationsEnabled: boolean;
+  chatbotUnreadCount: number;
   urgentRequests: UrgentRequest[];
   scheduledRequests: ScheduledRequest[];
   historyEntries: HistoryEntry[];
@@ -25,6 +26,8 @@ interface AppContextType extends AppState {
   logout: () => void;
   completeOnboarding: () => void;
   markNotificationRead: (id: string) => void;
+  markChatbotRead: () => void;
+  incrementChatbotUnread: () => void;
   addUrgentRequest: (request: UrgentRequest) => void;
   addScheduledRequest: (request: ScheduledRequest) => void;
   acceptRequest: (requestType: 'urgent' | 'scheduled', requestId: string, donor: RequestAcceptance) => void;
@@ -38,6 +41,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [user, setUser] = useState<User>(currentUser);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [chatbotUnreadCount, setChatbotUnreadCount] = useState(0);
   const [urgentReqs, setUrgentReqs] = useState<UrgentRequest[]>(urgentRequests);
   const [scheduledReqs, setScheduledReqs] = useState<ScheduledRequest[]>(scheduledRequests);
   const [history, setHistory] = useState<HistoryEntry[]>(mockHistoryEntries);
@@ -58,6 +62,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const markNotificationRead = useCallback((id: string) => {
     setNotifs(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+  }, []);
+
+  const markChatbotRead = useCallback(() => {
+    setChatbotUnreadCount(0);
+  }, []);
+
+  const incrementChatbotUnread = useCallback(() => {
+    setChatbotUnreadCount(prev => prev + 1);
   }, []);
 
   const addUrgentRequest = useCallback((request: UrgentRequest) => {
@@ -221,6 +233,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     user,
     isDarkMode,
     notificationsEnabled,
+    chatbotUnreadCount,
     urgentRequests: urgentReqs,
     scheduledRequests: scheduledReqs,
     historyEntries: history,
@@ -235,6 +248,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     logout,
     completeOnboarding,
     markNotificationRead,
+    markChatbotRead,
+    incrementChatbotUnread,
     addUrgentRequest,
     addScheduledRequest,
     acceptRequest,
