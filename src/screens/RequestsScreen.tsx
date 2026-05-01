@@ -165,10 +165,10 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           variant="outline"
           accentColor={Colors.success}
           onPress={() => Linking.openURL(`tel:${item.contact}`)}
-          style={{ width: 120 }}
+          style={{ width: 100 }}
         />
         <AppButton
-          title="Accept to Donate"
+          title="Accept"
           iconLeft="hand-heart"
           variant="primary"
           onPress={() => handleAcceptRequest('urgent', item)}

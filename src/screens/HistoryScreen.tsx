@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, FlatList, Linking, Modal, Pressable } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Colors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
+import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 import { AppCard, BloodGroupBadge, EmptyState, FilterChip } from '../components/CommonComponents';
 import { HistoryEntry } from '../utils/types';
@@ -150,9 +150,11 @@ const buildTimeline = (entry: AcceptedHistoryCard): TimelineStep[] => {
 
 const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { isDarkMode, historyEntries, user } = useApp();
+  const C = getColors(isDarkMode);
+  const bg = C.background;
+  const headerGradient = [C.primary, C.primaryDark];
   const [selectedFilter, setSelectedFilter] = useState<HistoryFilter>('All');
   const [selectedEntry, setSelectedEntry] = useState<AcceptedHistoryCard | null>(null);
-  const bg = isDarkMode ? Colors.darkBackground : Colors.background;
 
   const acceptedEntries = useMemo<AcceptedHistoryCard[]>(() => {
     const cards = historyEntries
@@ -208,13 +210,13 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     return (
       <TouchableOpacity activeOpacity={0.9} onPress={() => setSelectedEntry(item)} style={styles.cardWrap}>
-        <AppCard style={[styles.historyCard, isDarkMode && styles.darkCard]}>
+        <AppCard style={[styles.historyCard, isDarkMode && { backgroundColor: C.darkSurface }]}>
           <View style={styles.cardTop}>
             <View style={styles.cardTitleCol}>
-              <Text style={[styles.cardTitle, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>
+              <Text style={[styles.cardTitle, { color: C.textPrimary }]} numberOfLines={1}>
                 {item.requesterName || 'Requester'}
               </Text>
-              <Text style={[styles.cardSubtitle, isDarkMode && { color: Colors.darkTextSecondary }]} numberOfLines={1}>
+              <Text style={[styles.cardSubtitle, { color: C.textSecondary }]} numberOfLines={1}>
                 {item.hospital || 'Blood request'} · {item.requestType === 'urgent' ? 'Urgent' : 'Scheduled'}
               </Text>
             </View>
@@ -229,8 +231,8 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           <View style={styles.metaRowTop}>
             <BloodGroupBadge bloodGroup={item.bloodGroup} size="sm" />
             <View style={styles.metaPill}>
-              <Icon name="calendar-check" size={14} color={Colors.textTertiary} />
-              <Text style={[styles.metaPillText, isDarkMode && { color: Colors.darkTextSecondary }]} numberOfLines={1}>
+              <Icon name="calendar-check" size={14} color={C.textTertiary} />
+              <Text style={[styles.metaPillText, { color: C.textSecondary }]} numberOfLines={1}>
                 Accepted {acceptedOn}
               </Text>
             </View>
@@ -255,7 +257,7 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             ) : null}
           </View>
 
-          <Text style={[styles.cardNote, isDarkMode && { color: Colors.darkTextSecondary }]} numberOfLines={2}>
+          <Text style={[styles.cardNote, { color: C.textSecondary }]} numberOfLines={2}>
             {config.note}
           </Text>
 
@@ -272,8 +274,8 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: bg }]}>
-      <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
-      <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.header}>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={bg} />
+      <LinearGradient colors={headerGradient} style={styles.header}>
         <Text style={styles.headerTitle}>Accepted Requests</Text>
         <Text style={styles.headerSub}>Tap any card to review the requester, donation status, certificate, and timeline.</Text>
         <View style={styles.statsGrid}>
@@ -323,15 +325,15 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
       <Modal visible={!!selectedEntry} transparent animationType="fade" onRequestClose={() => setSelectedEntry(null)}>
         <Pressable style={styles.modalOverlay} onPress={() => setSelectedEntry(null)}>
-          <Pressable style={[styles.modalCard, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.surface }]} onPress={event => event.stopPropagation()}>
+          <Pressable style={[styles.modalCard, { backgroundColor: isDarkMode ? C.darkSurface : C.surface }]} onPress={event => event.stopPropagation()}>
             {selectedEntry ? (
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalContent}>
                 <View style={styles.modalHeader}>
                   <View style={styles.modalHeaderCopy}>
-                    <Text style={[styles.modalTitle, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>
+                    <Text style={[styles.modalTitle, { color: C.textPrimary }]} numberOfLines={1}>
                       {selectedEntry.requesterName || 'Requester'}
                     </Text>
-                    <Text style={[styles.modalSubTitle, isDarkMode && { color: Colors.darkTextSecondary }]} numberOfLines={1}>
+                    <Text style={[styles.modalSubTitle, { color: C.textSecondary }]} numberOfLines={1}>
                       {selectedEntry.hospital || 'Blood request'} · {selectedEntry.requestType === 'urgent' ? 'Urgent' : 'Scheduled'}
                     </Text>
                   </View>
@@ -352,30 +354,30 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                 <View style={styles.modalSummaryGrid}>
                   <View style={styles.modalInfoCard}>
-                    <Text style={[styles.modalInfoLabel, isDarkMode && { color: Colors.darkTextSecondary }]}>Accepted on</Text>
-                    <Text style={[styles.modalInfoValue, isDarkMode && { color: Colors.darkTextPrimary }]}>{formatDateTime(selectedEntry.acceptedAt || selectedEntry.date)}</Text>
+                    <Text style={[styles.modalInfoLabel, { color: C.textSecondary }]}>Accepted on</Text>
+                    <Text style={[styles.modalInfoValue, { color: C.textPrimary }]}>{formatDateTime(selectedEntry.acceptedAt || selectedEntry.date)}</Text>
                   </View>
                   <View style={styles.modalInfoCard}>
-                    <Text style={[styles.modalInfoLabel, isDarkMode && { color: Colors.darkTextSecondary }]}>Units</Text>
-                    <Text style={[styles.modalInfoValue, isDarkMode && { color: Colors.darkTextPrimary }]}>{selectedEntry.units}</Text>
+                    <Text style={[styles.modalInfoLabel, { color: C.textSecondary }]}>Units</Text>
+                    <Text style={[styles.modalInfoValue, { color: C.textPrimary }]}>{selectedEntry.units}</Text>
                   </View>
                   <View style={styles.modalInfoCard}>
-                    <Text style={[styles.modalInfoLabel, isDarkMode && { color: Colors.darkTextSecondary }]}>Requester</Text>
-                    <Text style={[styles.modalInfoValue, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>
+                    <Text style={[styles.modalInfoLabel, { color: C.textSecondary }]}>Requester</Text>
+                    <Text style={[styles.modalInfoValue, { color: C.textPrimary }]} numberOfLines={1}>
                       {selectedEntry.requesterName || 'Unknown'}
                     </Text>
                   </View>
                   <View style={styles.modalInfoCard}>
-                    <Text style={[styles.modalInfoLabel, isDarkMode && { color: Colors.darkTextSecondary }]}>Status</Text>
-                    <Text style={[styles.modalInfoValue, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>
+                    <Text style={[styles.modalInfoLabel, { color: C.textSecondary }]}>Status</Text>
+                    <Text style={[styles.modalInfoValue, { color: C.textPrimary }]} numberOfLines={1}>
                       {STATUS_CONFIG[selectedEntry.outcome].label}
                     </Text>
                   </View>
                 </View>
 
-                <View style={[styles.noteCard, { backgroundColor: isDarkMode ? Colors.darkSurfaceVariant : Colors.surfaceVariant }]}>
-                  <Icon name="information-outline" size={18} color={selectedEntry.outcome === 'rejected' ? Colors.textSecondary : Colors.info} />
-                  <Text style={[styles.noteText, isDarkMode && { color: Colors.darkTextSecondary }]}>
+                <View style={[styles.noteCard, { backgroundColor: isDarkMode ? C.darkSurfaceVariant : C.surfaceVariant }]}>
+                  <Icon name="information-outline" size={18} color={selectedEntry.outcome === 'rejected' ? C.textSecondary : C.info} />
+                  <Text style={[styles.noteText, { color: C.textSecondary }]}>
                     {selectedEntry.outcome === 'confirmed'
                       ? 'Confirm this only after the donor has already donated the blood. The certificate and tokens unlock once the donation is verified.'
                       : selectedEntry.outcome === 'rejected'
@@ -385,8 +387,8 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 </View>
 
                 <View style={styles.timelineHeader}>
-                  <Text style={[styles.sectionTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>Timeline</Text>
-                  <Text style={styles.sectionMeta}>Event by event</Text>
+                  <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>Timeline</Text>
+                  <Text style={[styles.sectionMeta, { color: C.textSecondary }]}>Event by event</Text>
                 </View>
 
                 <View style={styles.timelineList}>

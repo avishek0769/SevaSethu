@@ -2,11 +2,13 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, StatusBar } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { FontSize, FontWeight } from '../utils/theme';
+import { Colors, getColors, FontSize, FontWeight } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 
 const SplashScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { isLoggedIn, hasCompletedOnboarding } = useApp();
+  const { isLoggedIn, hasCompletedOnboarding, isDarkMode } = useApp();
+  const C = getColors(isDarkMode);
+  const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -26,14 +28,14 @@ const SplashScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   }, [hasCompletedOnboarding, isLoggedIn, navigation]);
 
   return (
-    <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
+    <LinearGradient colors={headerGradient} style={styles.container}>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={C.background} />
       <View style={styles.logoContainer}>
-        <View style={styles.logoCircle}>
-          <Icon name="water" size={48} color="#DC2626" />
+        <View style={[styles.logoCircle, { backgroundColor: C.surface }]}>
+          <Icon name="water" size={48} color={C.primary} />
         </View>
-        <Text style={styles.appName}>SevaSethu</Text>
-        <Text style={styles.tagline}>Saving Lives Faster</Text>
+        <Text style={[styles.appName, { color: C.primary }]}>SevaSethu</Text>
+        <Text style={[styles.tagline, { color: C.primary }]}>Saving Lives Faster</Text>
       </View>
     </LinearGradient>
   );

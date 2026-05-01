@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Colors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
+import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 import { AppCard } from '../components/CommonComponents';
 
 const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
-  const { user, urgentRequests, scheduledRequests, confirmDonation } = useApp();
+  const { user, urgentRequests, scheduledRequests, confirmDonation, isDarkMode } = useApp();
+  const C = getColors(isDarkMode);
+  const bg = C.background;
+  const headerGradient = [C.primary, C.primaryDark];
   const [confirmed, setConfirmed] = useState(false);
   const goToMyRequests = () => navigation.navigate('MainApp', { screen: 'MyRequests' });
   const requestType: 'urgent' | 'scheduled' = route?.params?.requestType || 'urgent';
@@ -31,15 +34,15 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
 
   if (confirmed) {
     return (
-      <View style={styles.successContainer}>
-        <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+      <View style={[styles.successContainer, { backgroundColor: bg }]}>
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={bg} />
         <View style={styles.successCircle}>
-          <Icon name="check-circle" size={72} color={Colors.success} />
+          <Icon name="check-circle" size={72} color={C.success} />
         </View>
-        <Text style={styles.successTitle}>Donation Confirmed!</Text>
-        <Text style={styles.successSub}>The donation is now marked complete. The requester can view the verified certificate and token update.</Text>
+        <Text style={[styles.successTitle, { color: C.textPrimary }]}>Donation Confirmed!</Text>
+        <Text style={[styles.successSub, { color: C.textSecondary }]}>The donation is now marked complete. The requester can view the verified certificate and token update.</Text>
         <TouchableOpacity onPress={goToMyRequests} activeOpacity={0.8} style={{ width: '80%', marginTop: 32 }}>
-          <LinearGradient colors={['#DC2626', '#991B1B']} style={[styles.btn, Shadow.red]}>
+          <LinearGradient colors={headerGradient} style={[styles.btn, Shadow.red]}>
             <Text style={styles.btnText}>Back to My Requests</Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -49,15 +52,15 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
 
   if (!request || !donor) {
     return (
-      <View style={styles.successContainer}>
-        <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+      <View style={[styles.successContainer, { backgroundColor: bg }]}>
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={bg} />
         <View style={styles.successCircle}>
-          <Icon name="alert-circle" size={72} color={Colors.warning} />
+          <Icon name="alert-circle" size={72} color={C.warning} />
         </View>
-        <Text style={styles.successTitle}>Confirmation unavailable</Text>
-        <Text style={styles.successSub}>The selected request or donor could not be loaded.</Text>
+        <Text style={[styles.successTitle, { color: C.textPrimary }]}>Confirmation unavailable</Text>
+        <Text style={[styles.successSub, { color: C.textSecondary }]}>The selected request or donor could not be loaded.</Text>
         <TouchableOpacity onPress={goToMyRequests} activeOpacity={0.8} style={{ width: '80%', marginTop: 32 }}>
-          <LinearGradient colors={['#DC2626', '#991B1B']} style={[styles.btn, Shadow.red]}>
+          <LinearGradient colors={headerGradient} style={[styles.btn, Shadow.red]}>
             <Text style={styles.btnText}>Back to My Requests</Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -66,11 +69,11 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
-      <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.header}>
+    <ScrollView style={[styles.container, { backgroundColor: bg }]} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={bg} />
+      <LinearGradient colors={headerGradient} style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={24} color="#FFF" />
+          <Icon name="arrow-left" size={24} color={C.textOnPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Confirm Donation</Text>
         <Text style={styles.headerSub}>Confirm only after the donor has already donated the blood</Text>
@@ -90,8 +93,8 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
           </View>
 
           <View style={styles.summaryBox}>
-            <Icon name="information" size={18} color={Colors.info} />
-            <Text style={styles.summaryText}>
+            <Icon name="information" size={18} color={C.info} />
+            <Text style={[styles.summaryText, { color: C.info }]}>
               Confirm that {donor.name} has donated {request.units} unit{request.units > 1 ? 's' : ''} of {request.bloodGroup} blood for {request.requesterName} at {request.hospital}.
             </Text>
           </View>
@@ -117,7 +120,7 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
 
           <TouchableOpacity onPress={handleConfirm} activeOpacity={0.8} style={{ marginTop: 24 }}>
             <LinearGradient colors={['#059669', '#047857']} style={[styles.btn, { shadowColor: '#059669' }, Shadow.lg]}>
-              <Icon name="check-decagram" size={20} color="#FFF" />
+              <Icon name="check-decagram" size={20} color={C.textOnPrimary} />
               <Text style={styles.btnText}>Confirm Donation</Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -128,13 +131,13 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   content: { flexGrow: 1 },
   header: { paddingTop: 50, paddingBottom: 24, paddingHorizontal: 24, borderBottomLeftRadius: 32, borderBottomRightRadius: 32 },
-  headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold, color: '#FFF', marginTop: 16 },
+  headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold, color: Colors.textOnPrimary, marginTop: 16 },
   headerSub: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.8)', marginTop: 4 },
-  form: { padding: 24, marginTop: -16, backgroundColor: Colors.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, flex: 1, ...Shadow.lg },
-  label: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: Colors.textPrimary, marginBottom: 8 },
+  form: { padding: 24, marginTop: -16, borderTopLeftRadius: 24, borderTopRightRadius: 24, flex: 1, ...Shadow.lg },
+  label: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, marginBottom: 8 },
   confirmCard: { marginBottom: 8 },
   confirmHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
   confirmAvatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.primarySurface, justifyContent: 'center', alignItems: 'center' },
@@ -145,13 +148,13 @@ const styles = StyleSheet.create({
   detailLabel: { fontSize: FontSize.xs, color: Colors.textTertiary, textTransform: 'uppercase', letterSpacing: 0.5 },
   detailValue: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: Colors.textPrimary, marginTop: 4 },
   summaryBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 14, borderRadius: BorderRadius.md, backgroundColor: Colors.infoLight },
-  summaryText: { flex: 1, fontSize: FontSize.sm, color: Colors.info, lineHeight: 20 },
+  summaryText: { flex: 1, fontSize: FontSize.sm, lineHeight: 20 },
   btn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 52, borderRadius: BorderRadius.md, gap: 8 },
-  btnText: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: '#FFF' },
-  successContainer: { flex: 1, backgroundColor: Colors.white, justifyContent: 'center', alignItems: 'center', padding: 32 },
+  btnText: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.textOnPrimary },
+  successContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   successCircle: { width: 120, height: 120, borderRadius: 60, backgroundColor: Colors.successLight, justifyContent: 'center', alignItems: 'center', marginBottom: 24 },
-  successTitle: { fontSize: FontSize.xxxl, fontWeight: FontWeight.extrabold, color: Colors.textPrimary },
-  successSub: { fontSize: FontSize.md, color: Colors.textSecondary, textAlign: 'center', lineHeight: 22, marginTop: 12 },
+  successTitle: { fontSize: FontSize.xxxl, fontWeight: FontWeight.extrabold },
+  successSub: { fontSize: FontSize.md, textAlign: 'center', lineHeight: 22, marginTop: 12 },
 });
 
 export default DonationConfirmationScreen;

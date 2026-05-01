@@ -50,7 +50,6 @@ function MainTabs() {
 
   return (
     <Tab.Navigator
-      lazy={false}
       screenOptions={{
         headerShown: false,
         tabBarStyle: {

@@ -17,6 +17,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     {
       title: 'Account',
       items: [
+        { icon: 'history', label: 'Donation History', color: Colors.primary, onPress: () => navigation.navigate('History') },
         { icon: 'account-edit', label: 'Edit Profile', color: Colors.info, onPress: () => navigation.navigate('EditProfile') },
         { icon: 'medical-bag', label: 'Medical Information', color: Colors.success, onPress: () => navigation.navigate('MedicalInfo') },
         { icon: 'shield-lock', label: 'Privacy Policy', color: Colors.primary, onPress: () => navigation.navigate('PrivacyPolicy') },

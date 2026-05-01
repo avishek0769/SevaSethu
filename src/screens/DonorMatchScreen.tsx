@@ -3,10 +3,14 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linkin
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
+import { useApp } from '../context/AppContext';
 import { AppCard, BloodGroupBadge, EmptyState } from '../components/CommonComponents';
 import { bloodBanks, donorMatches } from '../data/mockData';
 
 const DonorMatchScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
+  const { isDarkMode } = useApp();
+  const C = getColors(isDarkMode);
+  const headerGradient = [C.primary, C.primaryDark];
   const requestType = route?.params?.requestType || 'urgent';
   const bloodGroup = route?.params?.bloodGroup || 'O+';
   const requestId = route?.params?.requestId;

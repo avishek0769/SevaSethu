@@ -2,16 +2,18 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
+import { Colors, getColors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 import { AppCard } from '../components/CommonComponents';
 import { badges, leaderboardData, bloodBanks } from '../data/mockData';
 
 const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { user, isDarkMode } = useApp();
-  const bg = isDarkMode ? Colors.darkBackground : Colors.background;
+  const C = getColors(isDarkMode);
+  const bg = C.background;
   const [leaderTab, setLeaderTab] = useState<'city' | 'state' | 'country'>('city');
   const [subTab, setSubTab] = useState<'individuals' | 'banks'>('individuals');
+  const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
 
   const unlockedBadges = badges.filter(b => b.status === 'unlocked');
   const lockedBadges = badges.filter(b => b.status === 'locked');
@@ -80,45 +82,45 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: bg }]} showsVerticalScrollIndicator={false}>
-      <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
-      <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.header}>
-        <Text style={styles.headerTitle}>Rewards</Text>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={bg} />
+      <LinearGradient colors={headerGradient} style={styles.header}>
+        <Text style={[styles.headerTitle, { color: C.textPrimary }]}>Rewards</Text>
 
         {/* Token Card */}
-        <View style={styles.tokenCard}>
+        <View style={[styles.tokenCard, { backgroundColor: 'rgba(88,108,226,0.1)', borderColor: C.primary }]}>
           <View style={styles.tokenLeft}>
-            <Icon name="star-circle" size={40} color="#FDE047" />
+            <Icon name="star-circle" size={40} color={C.warning} />
             <View>
-              <Text style={styles.tokenValue}>{user.tokensEarned}</Text>
-              <Text style={styles.tokenLabel}>Total Tokens</Text>
+              <Text style={[styles.tokenValue, { color: C.textPrimary }]}>{user.tokensEarned}</Text>
+              <Text style={[styles.tokenLabel, { color: C.textSecondary }]}>Total Tokens</Text>
             </View>
           </View>
-          <View style={styles.levelBadge}>
-            <Icon name="shield-star" size={20} color={level.color} />
-            <Text style={[styles.levelText, { color: level.color }]}>{user.level}</Text>
+          <View style={[styles.levelBadge, { backgroundColor: C.primaryLight }]}>
+            <Icon name="shield-star" size={20} color={C.primary} />
+            <Text style={[styles.levelText, { color: C.primary }]}>{user.level}</Text>
           </View>
         </View>
 
         {/* Level Progress */}
         <View style={styles.levelProgress}>
           <View style={styles.levelRow}>
-            <Text style={styles.levelLabel}>{user.level} Donor</Text>
-            <Text style={styles.levelLabel}>Next: {level.next}</Text>
+            <Text style={[styles.levelLabel, { color: C.textSecondary }]}>{user.level} Donor</Text>
+            <Text style={[styles.levelLabel, { color: C.textSecondary }]}>Next: {level.next}</Text>
           </View>
-          <View style={styles.progressBg}>
-            <View style={[styles.progressFill, { width: `${level.progress}%` }]} />
+          <View style={[styles.progressBg, { backgroundColor: C.surfaceVariant }]}>
+            <View style={[styles.progressFill, { width: `${level.progress}%`, backgroundColor: C.warning }]} />
           </View>
         </View>
       </LinearGradient>
 
       {/* Badges Section */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>
+        <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>
           Badges ({unlockedBadges.length}/{badges.length})
         </Text>
         <View style={styles.badgeGrid}>
           {badges.map(badge => (
-            <View key={badge.id} style={[styles.badgeItem, isDarkMode && { backgroundColor: Colors.darkSurface }]}>
+            <View key={badge.id} style={[styles.badgeItem, { backgroundColor: C.surface, borderColor: C.border }, !isDarkMode && Shadow.sm]}>
               <View style={[styles.badgeIcon, { backgroundColor: badge.color + '20', opacity: badge.status === 'locked' ? 0.4 : 1 }]}>
                 <Icon name={badge.icon} size={28} color={badge.color} />
                 {badge.status === 'locked' && (
@@ -127,11 +129,11 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                   </View>
                 )}
               </View>
-              <Text style={[styles.badgeName, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>{badge.name}</Text>
-              <View style={styles.badgeProgressBg}>
+              <Text style={[styles.badgeName, { color: C.textPrimary }]} numberOfLines={1}>{badge.name}</Text>
+              <View style={[styles.badgeProgressBg, { backgroundColor: C.surfaceVariant }]}>
                 <View style={[styles.badgeProgressFill, { width: `${Math.min((badge.progress / badge.maxProgress) * 100, 100)}%`, backgroundColor: badge.color }]} />
               </View>
-              <Text style={styles.badgeProgressText}>{badge.progress}/{badge.maxProgress}</Text>
+              <Text style={[styles.badgeProgressText, { color: C.textTertiary }]}>{badge.progress}/{badge.maxProgress}</Text>
             </View>
           ))}
         </View>
@@ -139,13 +141,13 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
       {/* Leaderboard */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>Leaderboard</Text>
+        <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>Leaderboard</Text>
 
         {/* Scope Tabs */}
-        <View style={styles.scopeTabs}>
+        <View style={[styles.scopeTabs, { backgroundColor: C.surfaceVariant, borderColor: C.border }]}>
           {(['city', 'state', 'country'] as const).map(tab => (
-            <TouchableOpacity key={tab} style={[styles.scopeTab, leaderTab === tab && styles.scopeTabActive]} onPress={() => setLeaderTab(tab)}>
-              <Text style={[styles.scopeTabText, leaderTab === tab && styles.scopeTabTextActive]}>
+            <TouchableOpacity key={tab} style={[styles.scopeTab, leaderTab === tab && [styles.scopeTabActive, { backgroundColor: C.surface }]]} onPress={() => setLeaderTab(tab)}>
+              <Text style={[styles.scopeTabText, { color: leaderTab === tab ? C.primary : C.textTertiary }, leaderTab === tab && { fontWeight: FontWeight.bold }]}>
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>
             </TouchableOpacity>
@@ -155,9 +157,9 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         {/* Sub Tabs */}
         <View style={styles.subTabs}>
           {(['individuals', 'banks'] as const).map(tab => (
-            <TouchableOpacity key={tab} style={[styles.subTab, subTab === tab && styles.subTabActive]} onPress={() => setSubTab(tab)}>
-              <Icon name={tab === 'individuals' ? 'account-group' : 'hospital-building'} size={16} color={subTab === tab ? Colors.primary : Colors.textTertiary} />
-              <Text style={[styles.subTabText, subTab === tab && styles.subTabTextActive]}>
+            <TouchableOpacity key={tab} style={[styles.subTab, { borderColor: C.border }, subTab === tab && [styles.subTabActive, { borderColor: C.primary, backgroundColor: C.primaryLight }]]} onPress={() => setSubTab(tab)}>
+              <Icon name={tab === 'individuals' ? 'account-group' : 'hospital-building'} size={16} color={subTab === tab ? C.primary : C.textTertiary} />
+              <Text style={[styles.subTabText, { color: subTab === tab ? C.primary : C.textTertiary }, subTab === tab && { fontWeight: FontWeight.semibold }]}>
                 {tab === 'individuals' ? 'Individuals' : 'Blood Banks'}
               </Text>
             </TouchableOpacity>
@@ -168,24 +170,24 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         {filteredLeaderboard.map((entry, i) => (
           <AppCard key={entry.id} style={styles.leaderItem}>
             <View style={styles.leaderRow}>
-              <View style={[styles.rankCircle, { backgroundColor: i === 0 ? '#FEF3C7' : i === 1 ? '#F1F5F9' : i === 2 ? '#FEF2F2' : Colors.surfaceVariant }]}>
+              <View style={[styles.rankCircle, { backgroundColor: i === 0 ? C.warningLight : i === 1 ? C.primaryLight : i === 2 ? C.primaryLight : C.surfaceVariant }]}>
                 {i < 3 ? (
-                  <Icon name={subTab === 'individuals' ? 'trophy' : 'hospital-building'} size={18} color={i === 0 ? '#D97706' : i === 1 ? '#9CA3AF' : '#DC2626'} />
+                  <Icon name={subTab === 'individuals' ? 'trophy' : 'hospital-building'} size={18} color={i === 0 ? C.warning : i === 1 ? C.primary : C.primary} />
                 ) : (
-                  <Text style={styles.rankNumber}>{entry.rank}</Text>
+                  <Text style={[styles.rankNumber, { color: C.textSecondary }]}>{entry.rank}</Text>
                 )}
               </View>
               <View style={styles.leaderInfo}>
-                <Text style={[styles.leaderName, isDarkMode && { color: Colors.darkTextPrimary }]}>{entry.name}</Text>
-                <Text style={styles.leaderSub}>
+                <Text style={[styles.leaderName, { color: C.textPrimary }]}>{entry.name}</Text>
+                <Text style={[styles.leaderSub, { color: C.textSecondary }]}>
                   {subTab === 'individuals'
                     ? `${entry.city} · ${entry.donations} donations`
                     : `${entry.city} · ${entry.groups} groups · ${entry.isOpen ? 'Open now' : 'Closed'}`}
                 </Text>
               </View>
               <View style={styles.tokenCol}>
-                <Text style={styles.leaderTokens}>{subTab === 'individuals' ? entry.tokens : entry.rating.toFixed(1)}</Text>
-                <Text style={styles.leaderTokenLabel}>{subTab === 'individuals' ? 'tokens' : 'rating'}</Text>
+                <Text style={[styles.leaderTokens, { color: C.warning }]}>{subTab === 'individuals' ? entry.tokens : entry.rating.toFixed(1)}</Text>
+                <Text style={[styles.leaderTokenLabel, { color: C.textTertiary }]}>{subTab === 'individuals' ? 'tokens' : 'rating'}</Text>
               </View>
             </View>
           </AppCard>
@@ -200,48 +202,48 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingTop: 50, paddingBottom: 24, paddingHorizontal: 20 },
-  headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold, color: '#FFF', marginBottom: 16 },
-  tokenCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: BorderRadius.lg, padding: 16 },
+  headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold, marginBottom: 16 },
+  tokenCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: BorderRadius.lg, padding: 16, borderWidth: 1 },
   tokenLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  tokenValue: { fontSize: FontSize.xxxl, fontWeight: FontWeight.extrabold, color: '#FFF' },
-  tokenLabel: { fontSize: FontSize.sm, color: 'rgba(255,255,255,0.8)' },
-  levelBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: BorderRadius.full },
+  tokenValue: { fontSize: FontSize.xxxl, fontWeight: FontWeight.extrabold },
+  tokenLabel: { fontSize: FontSize.sm, marginTop: 2 },
+  levelBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 6, borderRadius: BorderRadius.full },
   levelText: { fontSize: FontSize.sm, fontWeight: FontWeight.bold },
   levelProgress: { marginTop: 16 },
   levelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  levelLabel: { fontSize: FontSize.sm, color: 'rgba(255,255,255,0.8)' },
-  progressBg: { height: 6, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 3 },
-  progressFill: { height: 6, backgroundColor: '#FDE047', borderRadius: 3 },
+  levelLabel: { fontSize: FontSize.sm },
+  progressBg: { height: 6, borderRadius: 3 },
+  progressFill: { height: 6, borderRadius: 3 },
   section: { paddingHorizontal: 20, marginTop: 24 },
-  sectionTitle: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, color: Colors.textPrimary, marginBottom: 16 },
+  sectionTitle: { fontSize: FontSize.xl, fontWeight: FontWeight.bold, marginBottom: 16 },
   badgeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  badgeItem: { width: '30%', alignItems: 'center', padding: 12, borderRadius: BorderRadius.md, backgroundColor: Colors.white, ...Shadow.sm },
+  badgeItem: { width: '30%', alignItems: 'center', padding: 12, borderRadius: BorderRadius.md, borderWidth: 1 },
   badgeIcon: { width: 56, height: 56, borderRadius: 28, justifyContent: 'center', alignItems: 'center', marginBottom: 8, position: 'relative' },
   lockOverlay: { position: 'absolute', bottom: -2, right: -2, width: 22, height: 22, borderRadius: 11, backgroundColor: Colors.textTertiary, justifyContent: 'center', alignItems: 'center' },
-  badgeName: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold, color: Colors.textPrimary, textAlign: 'center', marginBottom: 6 },
-  badgeProgressBg: { width: '100%', height: 4, backgroundColor: Colors.surfaceVariant, borderRadius: 2, overflow: 'hidden' },
+  badgeName: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold, textAlign: 'center', marginBottom: 6 },
+  badgeProgressBg: { width: '100%', height: 4, borderRadius: 2, overflow: 'hidden' },
   badgeProgressFill: { height: 4, borderRadius: 2 },
-  badgeProgressText: { fontSize: 9, color: Colors.textTertiary, marginTop: 2 },
-  scopeTabs: { flexDirection: 'row', backgroundColor: Colors.surfaceVariant, borderRadius: BorderRadius.md, padding: 4, marginBottom: 12 },
+  badgeProgressText: { fontSize: 9, marginTop: 2 },
+  scopeTabs: { flexDirection: 'row', borderRadius: BorderRadius.md, padding: 4, marginBottom: 12, borderWidth: 1 },
   scopeTab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: BorderRadius.sm },
-  scopeTabActive: { backgroundColor: Colors.white, ...Shadow.sm },
-  scopeTabText: { fontSize: FontSize.md, fontWeight: FontWeight.medium, color: Colors.textTertiary },
+  scopeTabActive: { ...Shadow.sm },
+  scopeTabText: { fontSize: FontSize.md, fontWeight: FontWeight.medium },
   scopeTabTextActive: { color: Colors.primary, fontWeight: FontWeight.bold },
   subTabs: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  subTab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8, borderRadius: BorderRadius.md, borderWidth: 1, borderColor: Colors.border },
-  subTabActive: { borderColor: Colors.primary, backgroundColor: Colors.primarySurface },
-  subTabText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium, color: Colors.textTertiary },
+  subTab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8, borderRadius: BorderRadius.md, borderWidth: 1 },
+  subTabActive: { borderWidth: 1 },
+  subTabText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
   subTabTextActive: { color: Colors.primary, fontWeight: FontWeight.semibold },
   leaderItem: { marginBottom: 8, padding: 12 },
   leaderRow: { flexDirection: 'row', alignItems: 'center' },
   rankCircle: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
-  rankNumber: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.textSecondary },
+  rankNumber: { fontSize: FontSize.md, fontWeight: FontWeight.bold },
   leaderInfo: { flex: 1 },
-  leaderName: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: Colors.textPrimary },
-  leaderSub: { fontSize: FontSize.sm, color: Colors.textSecondary, marginTop: 2 },
+  leaderName: { fontSize: FontSize.md, fontWeight: FontWeight.semibold },
+  leaderSub: { fontSize: FontSize.sm, marginTop: 2 },
   tokenCol: { alignItems: 'flex-end' },
-  leaderTokens: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.gold },
-  leaderTokenLabel: { fontSize: FontSize.xs, color: Colors.textTertiary },
+  leaderTokens: { fontSize: FontSize.lg, fontWeight: FontWeight.bold },
+  leaderTokenLabel: { fontSize: FontSize.xs },
 });
 
 export default RewardsScreen;

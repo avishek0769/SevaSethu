@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, StatusBar, Switch } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Colors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
+import { Colors, getColors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
 import { BloodGroup, Gender } from '../utils/types';
 import { useApp } from '../context/AppContext';
 
@@ -10,7 +10,10 @@ const BLOOD_GROUPS: BloodGroup[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 
 const GENDERS = ['Male', 'Female', 'Other'];
 
 const DonorRegistrationScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { login, setUser, user: baseUser } = useApp();
+  const { login, setUser, user: baseUser, isDarkMode } = useApp();
+  const C = getColors(isDarkMode);
+  const bg = C.background;
+  const headerGradient = [C.primary, C.primaryDark];
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -184,11 +187,11 @@ const DonorRegistrationScreen: React.FC<{ navigation: any }> = ({ navigation }) 
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
-      <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.header}>
+    <ScrollView style={[styles.container, { backgroundColor: bg }]} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={bg} />
+      <LinearGradient colors={headerGradient} style={styles.header}>
         <TouchableOpacity onPress={() => step > 1 ? setStep(step - 1) : navigation.goBack()}>
-          <Icon name="arrow-left" size={24} color="#FFF" />
+          <Icon name="arrow-left" size={24} color={C.textOnPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Donor Registration</Text>
         <Text style={styles.stepIndicator}>Step {step} of {totalSteps}</Text>
@@ -200,9 +203,9 @@ const DonorRegistrationScreen: React.FC<{ navigation: any }> = ({ navigation }) 
       <View style={styles.form}>
         {renderStep()}
         <TouchableOpacity onPress={() => step < totalSteps ? setStep(step + 1) : handleSubmit()} activeOpacity={0.8} style={{ marginTop: 24 }}>
-          <LinearGradient colors={['#DC2626', '#991B1B']} style={[styles.nextBtn, Shadow.red]}>
+          <LinearGradient colors={headerGradient} style={[styles.nextBtn, Shadow.red]}>
             <Text style={styles.nextBtnText}>{step < totalSteps ? 'Continue' : 'Complete Registration'}</Text>
-            <Icon name={step < totalSteps ? 'arrow-right' : 'check'} size={20} color="#FFF" />
+            <Icon name={step < totalSteps ? 'arrow-right' : 'check'} size={20} color={C.textOnPrimary} />
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -211,13 +214,13 @@ const DonorRegistrationScreen: React.FC<{ navigation: any }> = ({ navigation }) 
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   content: { flexGrow: 1 },
   header: { paddingTop: 50, paddingBottom: 24, paddingHorizontal: 24, borderBottomLeftRadius: 32, borderBottomRightRadius: 32 },
-  headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold, color: '#FFF', marginTop: 16 },
+  headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold, color: Colors.textOnPrimary, marginTop: 16 },
   stepIndicator: { fontSize: FontSize.sm, color: 'rgba(255,255,255,0.8)', marginTop: 4 },
   progressBg: { height: 4, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 2, marginTop: 12 },
-  progressFill: { height: 4, backgroundColor: '#FFF', borderRadius: 2 },
+  progressFill: { height: 4, backgroundColor: Colors.textOnPrimary, borderRadius: 2 },
   form: { padding: 24, marginTop: -16, backgroundColor: Colors.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, flex: 1, ...Shadow.lg },
   stepTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.textPrimary },
   stepSub: { fontSize: FontSize.md, color: Colors.textSecondary, marginBottom: 20, marginTop: 4 },
@@ -246,7 +249,7 @@ const styles = StyleSheet.create({
   summaryLabel: { fontSize: FontSize.md, color: Colors.textSecondary },
   summaryValue: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: Colors.textPrimary },
   nextBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 52, borderRadius: BorderRadius.md, gap: 8 },
-  nextBtnText: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: '#FFF' },
+  nextBtnText: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.textOnPrimary },
 });
 
 export default DonorRegistrationScreen;

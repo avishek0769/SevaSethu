@@ -2,16 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linking } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Colors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
+import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 import { AppCard, SearchBar, EmptyState, SkeletonLoader } from '../components/CommonComponents';
 import { bloodBanks } from '../data/mockData';
 
 const NearbyBloodBanksScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { isDarkMode } = useApp();
+  const C = getColors(isDarkMode);
+  const bg = C.background;
+  const headerGradient = [C.primary, C.primaryDark];
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const bg = isDarkMode ? Colors.darkBackground : Colors.background;
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 350);
@@ -63,10 +65,10 @@ const NearbyBloodBanksScreen: React.FC<{ navigation: any }> = ({ navigation }) =
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: bg }]} showsVerticalScrollIndicator={false}>
-      <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
-      <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.header}>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={bg} />
+      <LinearGradient colors={headerGradient} style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={24} color="#FFF" />
+          <Icon name="arrow-left" size={24} color={C.textOnPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Nearby Blood Banks</Text>
         <Text style={styles.headerSub}>{bloodBanks.length} blood banks found near you</Text>
@@ -95,35 +97,35 @@ const NearbyBloodBanksScreen: React.FC<{ navigation: any }> = ({ navigation }) =
           {filteredBanks.map(bank => (
             <AppCard key={bank.id} style={styles.bankCard}>
               <View style={styles.cardTop}>
-                <View style={[styles.bankIcon, { backgroundColor: bank.isOpen ? Colors.successLight : Colors.surfaceVariant }]}> 
-                  <Icon name="hospital-building" size={28} color={bank.isOpen ? Colors.success : Colors.textTertiary} />
+                <View style={[styles.bankIcon, { backgroundColor: bank.isOpen ? C.successLight : C.surfaceVariant }]}> 
+                  <Icon name="hospital-building" size={28} color={bank.isOpen ? C.success : C.textTertiary} />
                 </View>
                 <View style={styles.bankInfo}>
-                  <Text style={[styles.bankName, isDarkMode && { color: Colors.darkTextPrimary }]}>{bank.name}</Text>
+                  <Text style={[styles.bankName, { color: C.textPrimary }]}>{bank.name}</Text>
                   <View style={styles.infoRow}>
-                    <Icon name="map-marker" size={14} color={Colors.textTertiary} />
-                    <Text style={styles.infoText}>{bank.distance} · {bank.address}</Text>
+                    <Icon name="map-marker" size={14} color={C.textTertiary} />
+                    <Text style={[styles.infoText, { color: C.textSecondary }]}>{bank.distance} · {bank.address}</Text>
                   </View>
                   <View style={styles.infoRow}>
-                    <Icon name="clock-outline" size={14} color={Colors.textTertiary} />
-                    <Text style={styles.infoText}>{bank.openHours}</Text>
+                    <Icon name="clock-outline" size={14} color={C.textTertiary} />
+                    <Text style={[styles.infoText, { color: C.textSecondary }]}>{bank.openHours}</Text>
                   </View>
                   <View style={styles.statusRow}>
-                    <View style={[styles.statusChip, { backgroundColor: bank.isOpen ? Colors.successLight : Colors.warningLight }]}> 
-                      <View style={[styles.statusDot, { backgroundColor: bank.isOpen ? Colors.success : Colors.warning }]} />
-                      <Text style={[styles.statusText, { color: bank.isOpen ? Colors.success : Colors.warning }]}> 
+                    <View style={[styles.statusChip, { backgroundColor: bank.isOpen ? C.successLight : C.warningLight }]}> 
+                      <View style={[styles.statusDot, { backgroundColor: bank.isOpen ? C.success : C.warning }]} />
+                      <Text style={[styles.statusText, { color: bank.isOpen ? C.success : C.warning }]}> 
                         {bank.isOpen ? 'Open Now' : 'Closed'}
                       </Text>
                     </View>
                     <View style={styles.ratingChip}>
-                      <Icon name="star" size={14} color={Colors.gold} />
-                      <Text style={styles.ratingText}>{bank.rating}</Text>
+                      <Icon name="star" size={14} color={C.gold} />
+                      <Text style={[styles.ratingText, { color: C.gold }]}>{bank.rating}</Text>
                     </View>
                   </View>
                 </View>
               </View>
 
-              <Text style={[styles.availLabel, isDarkMode && { color: Colors.darkTextSecondary }]}>Available Blood Groups</Text>
+              <Text style={[styles.availLabel, { color: C.textSecondary }]}>Available Blood Groups</Text>
               <View style={styles.bgRow}>
                 {bank.availableGroups.map(g => (
                   <View key={g} style={styles.bgChip}>
@@ -154,23 +156,23 @@ const NearbyBloodBanksScreen: React.FC<{ navigation: any }> = ({ navigation }) =
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingTop: 50, paddingBottom: 24, paddingHorizontal: 24, borderBottomLeftRadius: 32, borderBottomRightRadius: 32 },
-  headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold, color: '#FFF', marginTop: 16 },
+  headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold, color: Colors.textOnPrimary, marginTop: 16 },
   headerSub: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.8)', marginTop: 4 },
   list: { paddingHorizontal: 20, paddingTop: 16 },
   bankCard: { marginBottom: 16 },
   cardTop: { flexDirection: 'row', gap: 14 },
   bankIcon: { width: 56, height: 56, borderRadius: 28, justifyContent: 'center', alignItems: 'center' },
   bankInfo: { flex: 1 },
-  bankName: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.textPrimary, marginBottom: 6 },
+  bankName: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, marginBottom: 6 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 3 },
-  infoText: { fontSize: FontSize.sm, color: Colors.textSecondary },
+  infoText: { fontSize: FontSize.sm },
   statusRow: { flexDirection: 'row', gap: 8, marginTop: 4 },
   statusChip: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: BorderRadius.full },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
   statusText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold },
-  ratingChip: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingHorizontal: 8, paddingVertical: 3, borderRadius: BorderRadius.full, backgroundColor: '#FEF3C7' },
+  ratingChip: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingHorizontal: 8, paddingVertical: 3, borderRadius: BorderRadius.full, backgroundColor: Colors.warningLight },
   ratingText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold, color: Colors.gold },
-  availLabel: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, color: Colors.textSecondary, marginTop: 14, marginBottom: 8 },
+  availLabel: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, marginTop: 14, marginBottom: 8 },
   bgRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   bgChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: BorderRadius.full, backgroundColor: Colors.primarySurface },
   bgChipText: { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.primary },

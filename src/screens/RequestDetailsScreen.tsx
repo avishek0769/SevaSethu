@@ -3,17 +3,16 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linkin
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useApp } from '../context/AppContext';
-import { Colors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
+import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
 import { AppCard, BloodGroupBadge, EmptyState, UrgencyChip, ConfirmationDialog } from '../components/CommonComponents';
 import { bloodBanks, donorMatches } from '../data/mockData';
 
 const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
   const { urgentRequests, scheduledRequests, isDarkMode, rejectAcceptance } = useApp();
+  const C = getColors(isDarkMode);
+  const bg = C.background;
+  const headerGradient = [C.primary, C.primaryDark];
   const [rejectDialog, setRejectDialog] = useState<{ visible: boolean; donorId: string; donorName: string } | null>(null);
-  const goToMyRequests = () => navigation.navigate('MainApp', { screen: 'MyRequests' });
-  const requestType: 'urgent' | 'scheduled' = route?.params?.requestType || 'urgent';
-  const requestId = route?.params?.requestId;
-  const bg = isDarkMode ? Colors.darkBackground : Colors.background;
 
   const request = requestType === 'urgent'
     ? urgentRequests.find(item => item.id === requestId)
@@ -56,10 +55,10 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: bg }]} showsVerticalScrollIndicator={false}>
-      <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
-      <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.header}>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={bg} />
+      <LinearGradient colors={headerGradient} style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={24} color="#FFF" />
+          <Icon name="arrow-left" size={24} color={C.textOnPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Request Details</Text>
         <Text style={styles.headerSub}>Everything you need to revisit this request.</Text>
@@ -70,7 +69,7 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
           <View style={styles.summaryTop}>
             <BloodGroupBadge bloodGroup={request.bloodGroup} size="lg" />
             <View style={styles.summaryInfo}>
-              <Text style={[styles.summaryTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>{request.hospital}</Text>
+              <Text style={[styles.summaryTitle, { color: C.textPrimary }]}>{request.hospital}</Text>
               <Text style={styles.summarySub}>{request.requesterName}</Text>
               <Text style={styles.summarySub}>{requestType === 'urgent' ? `${request.units} unit${request.units > 1 ? 's' : ''} needed urgently` : `${request.units} unit${request.units > 1 ? 's' : ''} scheduled for ${new Date(request.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`}</Text>
             </View>
@@ -79,22 +78,22 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
 
           <View style={styles.metaBlock}>
             <View style={styles.metaRow}>
-              <Icon name="map-marker" size={16} color={Colors.textTertiary} />
-              <Text style={[styles.metaText, isDarkMode && { color: Colors.darkTextSecondary }]}>{request.address}</Text>
+              <Icon name="map-marker" size={16} color={C.textTertiary} />
+              <Text style={[styles.metaText, { color: C.textSecondary }]}>{request.address}</Text>
             </View>
             <View style={styles.metaRow}>
-              <Icon name="phone" size={16} color={Colors.textTertiary} />
-              <Text style={[styles.metaText, isDarkMode && { color: Colors.darkTextSecondary }]}>{request.contact}</Text>
+              <Icon name="phone" size={16} color={C.textTertiary} />
+              <Text style={[styles.metaText, { color: C.textSecondary }]}>{request.contact}</Text>
             </View>
             {requestType === 'urgent' ? (
               <View style={styles.metaRow}>
-                <Icon name="clock-fast" size={16} color={Colors.textTertiary} />
-                <Text style={[styles.metaText, isDarkMode && { color: Colors.darkTextSecondary }]}>Created on {new Date(request.createdAt).toLocaleString('en-IN')}</Text>
+                <Icon name="clock-fast" size={16} color={C.textTertiary} />
+                <Text style={[styles.metaText, { color: C.textSecondary }]}>Created on {new Date(request.createdAt).toLocaleString('en-IN')}</Text>
               </View>
             ) : (
               <View style={styles.metaRow}>
-                <Icon name="clock-outline" size={16} color={Colors.textTertiary} />
-                <Text style={[styles.metaText, isDarkMode && { color: Colors.darkTextSecondary }]}>{request.date} at {request.time}</Text>
+                <Icon name="clock-outline" size={16} color={C.textTertiary} />
+                <Text style={[styles.metaText, { color: C.textSecondary }]}>{request.date} at {request.time}</Text>
               </View>
             )}
           </View>
@@ -116,13 +115,13 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
         </AppCard>
 
         <View style={styles.sectionHead}>
-          <Text style={[styles.sectionTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>Accepted by</Text>
+          <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>Accepted by</Text>
           <Text style={styles.sectionMeta}>{acceptedDonors.length} people</Text>
         </View>
 
         {acceptedDonors.length === 0 ? (
           <AppCard style={styles.emptyCard}>
-            <Text style={[styles.emptyTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>No one has accepted yet</Text>
+            <Text style={[styles.emptyTitle, { color: C.textPrimary }]}>No one has accepted yet</Text>
             <Text style={styles.emptyText}>Accepted donors will appear here. For scheduled requests, this is the only list you need to revisit.</Text>
           </AppCard>
         ) : (
@@ -134,7 +133,7 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
                     <Text style={styles.acceptedRankText}>✓</Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.acceptedName, isDarkMode && { color: Colors.darkTextPrimary }]}>{donor.name}</Text>
+                    <Text style={[styles.acceptedName, { color: C.textPrimary }]}>{donor.name}</Text>
                     <Text style={styles.acceptedMeta}>{donor.distance} · {donor.rating.toFixed(1)} rating · {donor.totalDonations} donations</Text>
                   </View>
                 </View>
@@ -154,18 +153,18 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
 
               <View style={styles.acceptedActions}>
                 <TouchableOpacity style={styles.callBtn} onPress={() => Linking.openURL(`tel:${donor.phone}`)} activeOpacity={0.7}>
-                  <Icon name="phone" size={18} color={Colors.success} />
-                  <Text style={[styles.callText, { color: Colors.success }]} numberOfLines={1}>Call</Text>
+                  <Icon name="phone" size={18} color={C.success} />
+                  <Text style={[styles.callText, { color: C.success }]} numberOfLines={1}>Call</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8} onPress={() => openConfirmation(donor)}>
-                  <LinearGradient colors={['#DC2626', '#991B1B']} style={styles.confirmBtn}>
-                    <Icon name="check-decagram" size={18} color="#FFF" />
+                  <LinearGradient colors={headerGradient} style={styles.confirmBtn}>
+                    <Icon name="check-decagram" size={18} color={C.textOnPrimary} />
                     <Text style={styles.confirmText} numberOfLines={1}>Confirm Donation</Text>
                   </LinearGradient>
                 </TouchableOpacity>
                 <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8} onPress={() => setRejectDialog({ visible: true, donorId: donor.id, donorName: donor.name })}>
                   <LinearGradient colors={['#6B7280', '#374151']} style={styles.rejectBtn}>
-                    <Icon name="close-circle" size={18} color="#FFF" />
+                    <Icon name="close-circle" size={18} color={C.textOnPrimary} />
                     <Text style={styles.confirmText} numberOfLines={1}>Reject</Text>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -175,7 +174,7 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
         )}
 
         <View style={styles.sectionHead}>
-          <Text style={[styles.sectionTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>Potential donors</Text>
+          <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>Potential donors</Text>
           <TouchableOpacity onPress={() => navigation.navigate('DonorMatch', { requestId: request.id, requestType, bloodGroup: request.bloodGroup, hospital: request.hospital, address: request.address, requesterName: request.requesterName })}>
             <Text style={styles.sectionAction}>Open full view</Text>
           </TouchableOpacity>
@@ -183,7 +182,7 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
           {matchingDonors.map(donor => (
             <AppCard key={donor.id} style={styles.miniCard}>
-              <Text style={[styles.miniName, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>{donor.name}</Text>
+              <Text style={[styles.miniName, { color: C.textPrimary }]} numberOfLines={1}>{donor.name}</Text>
               <Text style={styles.miniSub}>{donor.distance} away</Text>
               <Text style={styles.miniSub}>{donor.totalDonations} donations</Text>
             </AppCard>
@@ -191,12 +190,12 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
         </ScrollView>
 
         <View style={styles.sectionHead}>
-          <Text style={[styles.sectionTitle, isDarkMode && { color: Colors.darkTextPrimary }]}>Nearby blood banks</Text>
+          <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>Nearby blood banks</Text>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
           {matchingBanks.map(bank => (
             <AppCard key={bank.id} style={styles.bankCard}>
-              <Text style={[styles.miniName, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>{bank.name}</Text>
+              <Text style={[styles.miniName, { color: C.textPrimary }]} numberOfLines={1}>{bank.name}</Text>
               <Text style={styles.miniSub}>{bank.distance}</Text>
               <Text style={styles.miniSub}>{bank.isOpen ? 'Open now' : 'Closed'}</Text>
             </AppCard>
@@ -210,7 +209,7 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
         title="Reject acceptance?"
         message={rejectDialog ? `This will remove ${rejectDialog.donorName} from the accepted list and add a polite note to history.` : ''}
         icon="account-remove"
-        accentColor={Colors.textSecondary}
+        accentColor={C.textSecondary}
         confirmColors={['#6B7280', '#374151']}
         confirmText="Reject"
         cancelText="Keep"
@@ -262,7 +261,7 @@ const styles = StyleSheet.create({
   callText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, textAlign: 'center' },
   confirmBtn: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 12, borderRadius: BorderRadius.md, width: '100%' },
   rejectBtn: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 12, borderRadius: BorderRadius.md, width: '100%' },
-  confirmText: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: '#FFF' },
+  confirmText: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.textOnPrimary },
   pendingChip: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 12, borderRadius: BorderRadius.md, backgroundColor: Colors.surfaceVariant },
   pendingChipText: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, color: Colors.textSecondary, textAlign: 'center' },
   horizontalList: { paddingVertical: 4, gap: 10 },

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, StatusBar, KeyboardAvoidingView, Platform, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, StatusBar, KeyboardAvoidingView, Platform, useWindowDimensions, Modal, Animated, Dimensions } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -89,19 +89,20 @@ const ChatbotScreen: React.FC = () => {
   const [threads, setThreads] = useState<ChatThread[]>(() => buildInitialThreads());
   const [activeThreadId, setActiveThreadId] = useState('general');
   const [input, setInput] = useState('');
+  const [sidebarVisible, setSidebarVisible] = useState(false);
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
   const timersRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
   const isFocusedRef = useRef(false);
   const activeThreadIdRef = useRef(activeThreadId);
   const isFocused = useIsFocused();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
 
   const bg = C.background;
   const surface = C.surface;
   const surfaceVariant = C.surfaceVariant;
   const borderColor = C.border;
   const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
-  const sidebarWidth = Math.max(132, Math.min(180, Math.round(width * 0.34)));
+  const sidebarWidth = Math.max(240, Math.min(280, Math.round(width * 0.65)));
 
   const activeThread = useMemo(
     () => threads.find(thread => thread.id === activeThreadId) || threads[0],
@@ -163,6 +164,7 @@ const ChatbotScreen: React.FC = () => {
   const selectThread = useCallback((threadId: string) => {
     setActiveThreadId(threadId);
     setThreads(prev => prev.map(thread => thread.id === threadId ? { ...thread, unreadCount: 0 } : thread));
+    setSidebarVisible(false);
   }, []);
 
   const sendMessage = useCallback(() => {
@@ -270,6 +272,9 @@ const ChatbotScreen: React.FC = () => {
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={bg} />
       <LinearGradient colors={headerGradient} style={styles.header}>
         <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => setSidebarVisible(true)} activeOpacity={0.7} style={styles.hamburger}>
+            <Icon name="menu" size={26} color={C.textPrimary} />
+          </TouchableOpacity>
           <View style={[styles.headerAvatar, { backgroundColor: C.primarySurface, borderColor: C.border }]}>
             <Icon name="robot" size={24} color={C.primary} />
           </View>
@@ -290,44 +295,13 @@ const ChatbotScreen: React.FC = () => {
         </View>
       </LinearGradient>
 
-      <View style={styles.shell}>
-        <View style={[
-          styles.historyPanel,
-          {
-            width: sidebarWidth,
-            backgroundColor: surface,
-            borderColor,
-          },
-          isDarkMode && { shadowOpacity: 0, elevation: 0 },
-          !isDarkMode && Shadow.md,
-        ]}
-        >
-          <View style={[
-            styles.historyPanelHeader,
-            {
-              backgroundColor: isDarkMode ? C.surfaceVariant : C.primarySurface,
-              borderBottomColor: borderColor,
-            },
-          ]}
-          >
-            <Text style={[styles.panelTitle, { color: C.textPrimary }]}>Recent chats</Text>
-            <Text style={[styles.panelSub, { color: C.textSecondary }]}>{threads.length} threads</Text>
-          </View>
-
-          <FlatList
-            data={threads}
-            renderItem={renderThread}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.historyList}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
-
+      <View style={[styles.shell, { backgroundColor: surface }]}>
         <View style={[
           styles.chatPanel,
           {
             backgroundColor: surface,
             borderColor,
+            flex: 1,
           },
           isDarkMode && { shadowOpacity: 0, elevation: 0 },
           !isDarkMode && Shadow.md,
@@ -415,6 +389,54 @@ const ChatbotScreen: React.FC = () => {
           </View>
         </View>
       </View>
+
+      {/* Sidebar Modal */}
+      <Modal
+        visible={sidebarVisible}
+        transparent
+        animationType="none"
+        onRequestClose={() => setSidebarVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={[styles.modalBackdrop, { backgroundColor: isDarkMode ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)' }]}
+            onPress={() => setSidebarVisible(false)}
+            activeOpacity={1}
+          />
+          <Animated.View
+            style={[
+              styles.sidebarContainer,
+              {
+                width: sidebarWidth,
+                backgroundColor: surface,
+                borderColor,
+              },
+              isDarkMode && { shadowOpacity: 0, elevation: 0 },
+              !isDarkMode && Shadow.lg,
+            ]}
+          >
+            <View style={[
+              styles.historyPanelHeader,
+              {
+                backgroundColor: isDarkMode ? C.surfaceVariant : C.primarySurface,
+                borderBottomColor: borderColor,
+              },
+            ]}
+            >
+              <Text style={[styles.panelTitle, { color: C.textPrimary }]}>Recent chats</Text>
+              <Text style={[styles.panelSub, { color: C.textSecondary }]}>{threads.length} threads</Text>
+            </View>
+
+            <FlatList
+              data={threads}
+              renderItem={renderThread}
+              keyExtractor={item => item.id}
+              contentContainerStyle={styles.historyList}
+              showsVerticalScrollIndicator={false}
+            />
+          </Animated.View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 };
@@ -423,6 +445,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingTop: 50, paddingBottom: 18, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  hamburger: { padding: 8 },
   headerAvatar: { width: 42, height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
   headerCopy: { flex: 1 },
   headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold },
@@ -433,7 +456,10 @@ const styles = StyleSheet.create({
   headerPillMutedText: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
   onlineDot: { width: 6, height: 6, borderRadius: 3 },
   onlineText: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
-  shell: { flex: 1, flexDirection: 'row', gap: 12, padding: 12, marginTop: -14 },
+  shell: { flex: 1, padding: 12, marginTop: -14 },
+  modalOverlay: { flex: 1, flexDirection: 'row' },
+  modalBackdrop: { flex: 1 },
+  sidebarContainer: { borderWidth: 1, overflow: 'hidden', minHeight: 0 },
   historyPanel: { borderRadius: 24, borderWidth: 1, overflow: 'hidden', minHeight: 0 },
   historyPanelHeader: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1 },
   panelTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.textPrimary },
@@ -449,7 +475,7 @@ const styles = StyleSheet.create({
   threadTime: { fontSize: FontSize.xs, color: Colors.textTertiary },
   threadUnread: { minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center', marginTop: 6 },
   threadUnreadText: { fontSize: FontSize.xs, color: '#FFF', fontWeight: FontWeight.bold },
-  chatPanel: { flex: 1, borderRadius: 24, borderWidth: 1, overflow: 'hidden', minHeight: 0 },
+  chatPanel: { borderRadius: 24, borderWidth: 1, overflow: 'hidden', minHeight: 0 },
   chatPanelHeader: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1 },
   chatHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   chatHeaderIcon: { width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
