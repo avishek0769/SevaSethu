@@ -13,6 +13,7 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
   const bg = C.background;
   const headerGradient = [C.primary, C.primaryDark];
   const [rejectDialog, setRejectDialog] = useState<{ visible: boolean; donorId: string; donorName: string } | null>(null);
+  const { requestType, requestId } = route.params;
 
   const request = requestType === 'urgent'
     ? urgentRequests.find(item => item.id === requestId)
@@ -25,7 +26,7 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
         title="Request not found"
         message="The request may have been removed or the link is out of date."
         actionText="Back to My Requests"
-        onAction={goToMyRequests}
+        onAction={() => navigation.goBack()}
       />
     );
   }
@@ -36,7 +37,7 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
 
   const openConfirmation = (donor: typeof acceptedDonors[number]) => {
     navigation.navigate('DonationConfirmation', {
-      requestType,
+      requestType: requestType,
       requestId: request.id,
       donorId: donor.id,
       donorName: donor.name,
@@ -88,7 +89,7 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
             {requestType === 'urgent' ? (
               <View style={styles.metaRow}>
                 <Icon name="clock-fast" size={16} color={C.textTertiary} />
-                <Text style={[styles.metaText, { color: C.textSecondary }]}>Created on {new Date(request.createdAt).toLocaleString('en-IN')}</Text>
+                <Text style={[styles.metaText, { color: C.textSecondary }]}>Created on {new Date(request.date).toLocaleString('en-IN')}</Text>
               </View>
             ) : (
               <View style={styles.metaRow}>

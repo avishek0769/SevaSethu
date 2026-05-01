@@ -46,6 +46,8 @@ export interface UrgentRequest {
   requesterName: string;
   requesterId: string;
   acceptedDonors?: RequestAcceptance[];
+  date: string;
+  time: string;
 }
 
 export interface ScheduledRequest {
@@ -61,6 +63,7 @@ export interface ScheduledRequest {
   requesterName: string;
   requesterId: string;
   acceptedDonors?: RequestAcceptance[];
+  urgency: string;
 }
 
 export interface RequestAcceptance extends DonorMatch {

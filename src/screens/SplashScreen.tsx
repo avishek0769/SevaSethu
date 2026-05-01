@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Image } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, getColors, FontSize, FontWeight } from '../utils/theme';
@@ -32,7 +32,7 @@ const SplashScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={C.background} />
       <View style={styles.logoContainer}>
         <View style={[styles.logoCircle, { backgroundColor: C.surface }]}>
-          <Icon name="water" size={48} color={C.primary} />
+          <Image source={require('../data/SevaSethu_Logo.png')} style={{ width: 70, height: 60 }} />
         </View>
         <Text style={[styles.appName, { color: C.primary }]}>SevaSethu</Text>
         <Text style={[styles.tagline, { color: C.primary }]}>Saving Lives Faster</Text>
