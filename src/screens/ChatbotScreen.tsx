@@ -280,17 +280,6 @@ const ChatbotScreen: React.FC = () => {
           </View>
           <View style={styles.headerCopy}>
             <Text style={[styles.headerTitle, { color: C.textPrimary }]}>BloodBot AI</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>Live guidance, automatic reminders, and quick answers</Text>
-          </View>
-        </View>
-        <View style={styles.headerPills}>
-          <View style={[styles.headerPill, { backgroundColor: C.surface, borderColor: C.border }]}> 
-            <View style={[styles.onlineDot, { backgroundColor: C.success }]} />
-            <Text style={[styles.onlineText, { color: C.textPrimary }]}>Online</Text>
-          </View>
-          <View style={[styles.headerPillMuted, { backgroundColor: C.surfaceVariant, borderColor: C.border }]}> 
-            <Icon name="bell-outline" size={14} color={C.textSecondary} />
-            <Text style={[styles.headerPillMutedText, { color: C.textSecondary }]}>Auto replies enabled</Text>
           </View>
         </View>
       </LinearGradient>
@@ -307,32 +296,6 @@ const ChatbotScreen: React.FC = () => {
           !isDarkMode && Shadow.md,
         ]}
         >
-          <View style={[
-            styles.chatPanelHeader,
-            {
-              backgroundColor: surfaceVariant,
-              borderBottomColor: borderColor,
-            },
-          ]}
-          >
-            <View style={styles.chatHeaderRow}>
-              <View style={[styles.chatHeaderIcon, { backgroundColor: C.surface }]}>
-                <Icon name={activeThread.icon} size={18} color={activeThread.accent} />
-              </View>
-              <View style={styles.chatHeaderCopy}>
-                <Text style={[styles.chatPanelTitle, { color: C.textPrimary }]} numberOfLines={1}>
-                  {activeThread.title}
-                </Text>
-                <Text style={[styles.chatPanelSub, { color: C.textSecondary }]} numberOfLines={1}>
-                  {activeThread.subtitle}
-                </Text>
-              </View>
-              <View style={[styles.liveChip, { backgroundColor: C.primarySurface }]}>
-                <Text style={[styles.liveChipText, { color: C.primary }]}>Auto reply</Text>
-              </View>
-            </View>
-          </View>
-
           <FlatList
             ref={flatListRef}
             data={activeThread.messages}
@@ -342,25 +305,6 @@ const ChatbotScreen: React.FC = () => {
             showsVerticalScrollIndicator={false}
             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
           />
-
-          <View style={styles.quickRow}>
-            {quickActions.map((qa, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.quickChip,
-                  {
-                    backgroundColor: isDarkMode ? C.surfaceVariant : C.primarySurface,
-                    borderColor: isDarkMode ? C.border : C.primaryLight,
-                  },
-                ]}
-                onPress={() => setInput(qa.msg)}
-                activeOpacity={0.8}
-              >
-                <Text style={[styles.quickText, { color: C.primary }]}>{qa.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
 
           <View style={[styles.inputContainer, { backgroundColor: surface, borderTopColor: borderColor }]}>
             <View style={styles.inputRow}>
@@ -443,7 +387,7 @@ const ChatbotScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingTop: 50, paddingBottom: 18, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
+  header: { paddingTop: 35, paddingBottom: 18, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   hamburger: { padding: 8 },
   headerAvatar: { width: 42, height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
@@ -499,7 +443,7 @@ const styles = StyleSheet.create({
   quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 16, paddingBottom: 8 },
   quickChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: BorderRadius.full, borderWidth: 1 },
   quickText: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: FontWeight.medium },
-  inputContainer: { padding: 12, borderTopWidth: 1 },
+  inputContainer: { marginBottom: 50, padding: 12, borderTopWidth: 1 },
   inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   textInput: { flex: 1, minHeight: 44, maxHeight: 100, borderRadius: BorderRadius.xl, paddingHorizontal: 16, paddingVertical: 10, fontSize: FontSize.md, borderWidth: 1 },
   sendBtn: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
