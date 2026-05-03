@@ -41,19 +41,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   });
 
   const handleAcceptRequest = (request: typeof urgentRequests[0]) => {
-    if (user.role !== 'donor') {
-      setDialog({
-        title: 'Requester mode',
-        message: 'Use My Requests to review the requests you created and see accepted donors.',
-        icon: 'clipboard-text-outline',
-        accentColor: Colors.info,
-        confirmText: 'Got it',
-        confirmColors: ['#2563EB', '#1D4ED8'],
-        showCancel: false,
-        onConfirm: () => setDialog(null),
-      });
-      return;
-    }
 
     setDialog({
       title: 'Confirm donation',
@@ -133,7 +120,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <View style={styles.statsRow}>
         <StatCard icon="water" label="Donations" value={user.totalDonations} color={Colors.primary} />
         <StatCard icon="alert-circle" label="Urgent Nearby" value={nearbyUrgent} color={Colors.warning} />
-        <StatCard icon="star-circle" label="Tokens" value={user.tokensEarned} color={Colors.gold} />
+        <StatCard icon="star-circle" label="Seva Coins" value={user.tokensEarned} color={Colors.gold} />
         <StatCard icon="trophy" label="Rank" value={`#${user.rank}`} color={Colors.info} />
       </View>
 
@@ -147,7 +134,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 <BloodGroupBadge bloodGroup={req.bloodGroup} size="sm" />
                 <UrgencyChip urgency={req.urgency} />
               </View>
-              <Text style={[styles.urgentName, { color: C.textPrimary }]}>{req.patientName}</Text>
+              <Text style={[styles.urgentName, { color: C.textPrimary }]} numberOfLines={1}>{req.hospital}</Text>
               <View style={styles.urgentInfo}>
                 <Icon name="hospital-building" size={14} color={C.textTertiary} />
                 <Text style={[styles.urgentInfoText, { color: C.textSecondary }]} numberOfLines={1}>{req.hospital}</Text>

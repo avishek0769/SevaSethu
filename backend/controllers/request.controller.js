@@ -144,28 +144,35 @@ const confirmDonation = asyncHandler(async (req, res) => {
     donorEntry.confirmed = true;
     await request.save();
 
+    // Calculate Seva coins with multi-factor scoring
+    const sevaCoins = calculateTokens(
+        request.units,
+        donorEntry.distance,        // how far the donor traveled
+        request.createdAt,           // when request was posted
+        donorEntry.acceptedAt,       // when donor accepted
+    );
+
     // Update history
-    const tokens = calculateTokens(request.units);
     await Donation.findOneAndUpdate(
         { request: request._id, donorId, type: "accepted" },
         {
             status: "completed",
             isVerified: true,
-            tokensEarned: tokens,
+            tokensEarned: sevaCoins,
             confirmedAt: new Date(),
             certificateAvailable: true,
-            description: `${request.requesterName} approved donation at ${request.hospital}. Certificate and tokens issued.`,
+            description: `${request.requesterName} approved donation at ${request.hospital}. Certificate and Seva coins issued.`,
             approvalNote: "Requester approved. Certificate ready.",
         },
     );
 
-    // Award tokens + increment donations to donor
+    // Award Seva coins + increment donations to donor
     await User.findByIdAndUpdate(donorId, {
-        $inc: { tokensEarned: tokens, totalDonations: 1 },
+        $inc: { tokensEarned: sevaCoins, totalDonations: 1 },
         lastDonation: new Date(),
     });
 
-    // Recalculate donor level
+    // Recalculate donor level based on new coin total
     const donor = await User.findById(donorId);
     if (donor) {
         donor.recalculateLevel();

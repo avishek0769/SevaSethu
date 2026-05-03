@@ -139,8 +139,8 @@ const buildTimeline = (entry: AcceptedHistoryCard): TimelineStep[] => {
       tone: 'info',
     },
     {
-      title: 'Tokens received',
-      description: `${entry.tokensEarned || 0} tokens have been credited to your wallet.`,
+      title: 'Seva coins received',
+      description: `${entry.tokensEarned || 0} Seva coins have been credited to your wallet.`,
       time: confirmedTime,
       icon: 'star-circle-outline',
       tone: 'info',
@@ -194,7 +194,7 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const totalConfirmed = acceptedEntries.filter(entry => entry.outcome === 'confirmed').length;
   const totalRejected = acceptedEntries.filter(entry => entry.outcome === 'rejected').length;
-  const totalTokens = acceptedEntries.reduce((acc, entry) => acc + (entry.tokensEarned || 0), 0);
+  const totalCoins = acceptedEntries.reduce((acc, entry) => acc + (entry.tokensEarned || 0), 0);
 
   const handleDownloadCertificate = (item: AcceptedHistoryCard) => {
     const certificateId = item.requestId || item.id;
@@ -250,7 +250,7 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             {item.tokensEarned && item.tokensEarned > 0 ? (
               <View style={[styles.infoChip, { backgroundColor: Colors.warningLight }]}>
                 <Icon name="star" size={14} color={Colors.gold} />
-                <Text style={[styles.infoChipText, { color: Colors.gold }]}>+{item.tokensEarned} tokens</Text>
+                <Text style={[styles.infoChipText, { color: Colors.gold }]}>+{item.tokensEarned} coins</Text>
               </View>
             ) : null}
             {item.requesterPhone ? (
@@ -296,8 +296,8 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Text style={styles.statLabel}>Rejected</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{totalTokens}</Text>
-            <Text style={styles.statLabel}>Tokens</Text>
+            <Text style={styles.statValue}>{totalCoins}</Text>
+            <Text style={styles.statLabel}>Seva Coins</Text>
           </View>
         </View>
       </LinearGradient>
@@ -331,7 +331,14 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <Pressable style={styles.modalOverlay} onPress={() => setSelectedEntry(null)}>
           <Pressable style={[styles.modalCard, { backgroundColor: isDarkMode ? C.darkSurface : C.surface }]} onPress={event => event.stopPropagation()}>
             {selectedEntry ? (
-              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalContent}>
+              <ScrollView
+                showsVerticalScrollIndicator={true}
+                nestedScrollEnabled={true}
+                bounces={true}
+                overScrollMode="always"
+                style={{ maxHeight: '100%' }}
+                contentContainerStyle={styles.modalContent}
+              >
                 <View style={styles.modalHeader}>
                   <View style={styles.modalHeaderCopy}>
                     <Text style={[styles.modalTitle, { color: C.textPrimary }]} numberOfLines={1}>
@@ -440,7 +447,7 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </Text>
                   </View>
                   <View style={styles.detailMetaItem}>
-                    <Text style={[styles.detailMetaLabel, isDarkMode && { color: Colors.darkTextSecondary }]}>Tokens</Text>
+                    <Text style={[styles.detailMetaLabel, isDarkMode && { color: Colors.darkTextSecondary }]}>Seva Coins</Text>
                     <Text style={[styles.detailMetaValue, isDarkMode && { color: Colors.darkTextPrimary }]} numberOfLines={1}>
                       +{selectedEntry.tokensEarned || 0}
                     </Text>

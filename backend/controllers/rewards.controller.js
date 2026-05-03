@@ -68,22 +68,29 @@ const getLeaderboard = asyncHandler(async (req, res) => {
 // ── GET /api/v1/rewards/summary ─────────────────────────
 const getRewardsSummary = asyncHandler(async (req, res) => {
     const user = req.user;
+    const coins = user.tokensEarned || 0;
 
-    const levelConfig = {
-        Bronze: { next: "Silver", progress: Math.min((user.totalDonations / 5) * 100, 100) },
-        Silver: { next: "Gold", progress: Math.min((user.totalDonations / 10) * 100, 100) },
-        Gold: { next: "Platinum", progress: Math.min((user.totalDonations / 25) * 100, 100) },
-        Platinum: { next: "Diamond", progress: 95 },
+    // Seva coin thresholds: Bronze 0-100, Silver 101-300, Gold 301-750, Platinum 751+
+    const levels = {
+        Bronze:   { next: "Silver",   min: 0,   max: 100 },
+        Silver:   { next: "Gold",     min: 101, max: 300 },
+        Gold:     { next: "Platinum", min: 301, max: 750 },
+        Platinum: { next: "Platinum", min: 751, max: 1500 },
     };
 
-    const level = levelConfig[user.level] || levelConfig.Bronze;
+    const config = levels[user.level] || levels.Bronze;
+    const range = config.max - config.min;
+    const progress = range > 0
+        ? Math.min(Math.round(((coins - config.min) / range) * 100), 100)
+        : 100;
 
     res.status(200).json(
         new ApiResponse(200, {
-            totalTokens: user.tokensEarned,
+            totalCoins: coins,
             level: user.level,
-            nextLevel: level.next,
-            levelProgress: Math.round(level.progress),
+            nextLevel: config.next,
+            levelProgress: Math.max(progress, 0),
+            coinsToNext: Math.max(config.max - coins + 1, 0),
             totalDonations: user.totalDonations,
             rank: user.rank,
         }, "Rewards summary fetched"),

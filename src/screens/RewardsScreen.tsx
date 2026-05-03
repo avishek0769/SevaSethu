@@ -7,29 +7,47 @@ import { useApp } from '../context/AppContext';
 import { AppCard } from '../components/CommonComponents';
 
 const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { user, isDarkMode, badges, leaderboardData, bloodBanks, fetchBadges, fetchLeaderboard, fetchBloodBanks } = useApp();
+  const { user, isDarkMode, badges, leaderboardData, bloodBanks, fetchBadges, fetchLeaderboard, fetchBloodBanks, fetchRewardsSummary } = useApp();
   const C = getColors(isDarkMode);
   const bg = C.background;
   const [leaderTab, setLeaderTab] = useState<'city' | 'state' | 'country'>('city');
   const [subTab, setSubTab] = useState<'individuals' | 'banks'>('individuals');
   const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
 
+  const [rewardsSummary, setRewardsSummary] = useState<any>(null);
+
   useEffect(() => {
     fetchBadges();
     fetchLeaderboard(leaderTab);
     fetchBloodBanks();
+    const loadSummary = async () => {
+      const summary = await fetchRewardsSummary();
+      if (summary) setRewardsSummary(summary);
+    };
+    loadSummary();
   }, []);
 
   const unlockedBadges = badges.filter(b => b.status === 'unlocked');
   const lockedBadges = badges.filter(b => b.status === 'locked');
 
-  const levelConfig: Record<string, { color: string; next: string; progress: number }> = {
-    Bronze: { color: '#D97706', next: 'Silver', progress: 40 },
-    Silver: { color: '#9CA3AF', next: 'Gold', progress: 60 },
-    Gold: { color: '#F59E0B', next: 'Platinum', progress: 80 },
-    Platinum: { color: '#6366F1', next: 'Diamond', progress: 95 },
+  // Coin-based level thresholds matching the backend
+  const LEVEL_THRESHOLDS: Record<string, { min: number; max: number; next: string }> = {
+    Bronze:   { min: 0,   max: 100,  next: 'Silver' },
+    Silver:   { min: 101, max: 300,  next: 'Gold' },
+    Gold:     { min: 301, max: 750,  next: 'Platinum' },
+    Platinum: { min: 751, max: 1500, next: 'Platinum' },
   };
-  const level = levelConfig[user.level] || levelConfig.Bronze;
+
+  const userCoins = rewardsSummary?.totalCoins ?? user.tokensEarned ?? 0;
+  const currentLevel = rewardsSummary?.level ?? user.level ?? 'Bronze';
+  const thresholds = LEVEL_THRESHOLDS[currentLevel] || LEVEL_THRESHOLDS.Bronze;
+  const range = thresholds.max - thresholds.min;
+  const levelProgress = range > 0
+    ? Math.min(Math.max(Math.round(((userCoins - thresholds.min) / range) * 100), 0), 100)
+    : 100;
+  const nextLevel = rewardsSummary?.nextLevel ?? thresholds.next;
+  const coinsToNext = rewardsSummary?.coinsToNext ?? Math.max(thresholds.max - userCoins + 1, 0);
+  const levelColor = currentLevel === 'Gold' ? '#F59E0B' : currentLevel === 'Silver' ? '#9CA3AF' : currentLevel === 'Platinum' ? '#6366F1' : '#D97706';
 
   const getLocation = (city: string) => {
     const stateMap: Record<string, string> = {
@@ -91,29 +109,31 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <LinearGradient colors={headerGradient} style={styles.header}>
         <Text style={[styles.headerTitle, { color: C.textPrimary }]}>Rewards</Text>
 
-        {/* Token Card */}
+        {/* Seva Coins Card */}
         <View style={[styles.tokenCard, { backgroundColor: 'rgba(88,108,226,0.1)', borderColor: C.primary }]}>
           <View style={styles.tokenLeft}>
             <Icon name="star-circle" size={40} color={C.warning} />
             <View>
-              <Text style={[styles.tokenValue, { color: C.textPrimary }]}>{user.tokensEarned}</Text>
-              <Text style={[styles.tokenLabel, { color: C.textSecondary }]}>Total Tokens</Text>
+              <Text style={[styles.tokenValue, { color: C.textPrimary }]}>{userCoins}</Text>
+              <Text style={[styles.tokenLabel, { color: C.textSecondary }]}>Seva Coins</Text>
             </View>
           </View>
           <View style={[styles.levelBadge, { backgroundColor: C.primaryLight }]}>
             <Icon name="shield-star" size={20} color={C.primary} />
-            <Text style={[styles.levelText, { color: C.primary }]}>{user.level}</Text>
+            <Text style={[styles.levelText, { color: C.primary }]}>{currentLevel}</Text>
           </View>
         </View>
 
         {/* Level Progress */}
         <View style={styles.levelProgress}>
           <View style={styles.levelRow}>
-            <Text style={[styles.levelLabel, { color: C.textSecondary }]}>{user.level} Donor</Text>
-            <Text style={[styles.levelLabel, { color: C.textSecondary }]}>Next: {level.next}</Text>
+            <Text style={[styles.levelLabel, { color: C.textSecondary }]}>{currentLevel} Donor</Text>
+            <Text style={[styles.levelLabel, { color: C.textSecondary }]}>
+              {currentLevel === 'Platinum' ? 'Max level' : `${coinsToNext} coins to ${nextLevel}`}
+            </Text>
           </View>
           <View style={[styles.progressBg, { backgroundColor: C.surfaceVariant }]}>
-            <View style={[styles.progressFill, { width: `${level.progress}%`, backgroundColor: C.warning }]} />
+            <View style={[styles.progressFill, { width: `${levelProgress}%`, backgroundColor: C.warning }]} />
           </View>
         </View>
       </LinearGradient>
@@ -192,7 +212,7 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               </View>
               <View style={styles.tokenCol}>
                 <Text style={[styles.leaderTokens, { color: C.warning }]}>{subTab === 'individuals' ? (entry.tokens || 0) : (entry.rating || 0).toFixed(1)}</Text>
-                <Text style={[styles.leaderTokenLabel, { color: C.textTertiary }]}>{subTab === 'individuals' ? 'tokens' : 'rating'}</Text>
+                <Text style={[styles.leaderTokenLabel, { color: C.textTertiary }]}>{subTab === 'individuals' ? 'coins' : 'rating'}</Text>
               </View>
             </View>
           </AppCard>

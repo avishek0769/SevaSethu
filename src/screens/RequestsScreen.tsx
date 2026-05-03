@@ -70,19 +70,6 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   });
 
   const handleAcceptRequest = (requestType: 'urgent' | 'scheduled', request: typeof urgentRequests[0] | typeof scheduledRequests[0]) => {
-    if (user.role !== 'donor') {
-      setDialog({
-        title: 'Requester mode',
-        message: 'Use My Requests to review the requests you created and track accepted donors there.',
-        icon: 'clipboard-text-outline',
-        accentColor: Colors.info,
-        confirmText: 'Got it',
-        confirmColors: ['#2563EB', '#1D4ED8'],
-        showCancel: false,
-        onConfirm: () => setDialog(null),
-      });
-      return;
-    }
 
     const requestContext = requestType === 'urgent'
       ? `${request.requesterName} at ${request.hospital}`
@@ -132,7 +119,7 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.cardHeaderLeft}>
           <BloodGroupBadge bloodGroup={item.bloodGroup} size="md" />
           <View style={styles.cardHeaderInfo}>
-            <Text style={[styles.patientName, { color: C.textPrimary }]}>{item.patientName}</Text>
+            <Text style={[styles.patientName, { color: C.textPrimary }]} numberOfLines={1}>{item.hospital}</Text>
             <Text style={[styles.reqSub, { color: C.textSecondary }]}>{item.units} unit{item.units > 1 ? 's' : ''} needed</Text>
           </View>
         </View>
@@ -321,7 +308,7 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingTop: 50, paddingBottom: 20, paddingHorizontal: 20 },
+  header: { paddingTop: 45, paddingBottom: 20, paddingHorizontal: 20 },
   headerTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.extrabold },
   headerSub: { fontSize: FontSize.sm, marginTop: 4 },
   tabContainer: { flexDirection: 'row', marginHorizontal: 20, marginTop: 12, borderRadius: BorderRadius.md, padding: 4, borderWidth: 1 },
@@ -331,8 +318,8 @@ const styles = StyleSheet.create({
   tabTextActive: { color: Colors.primary, fontWeight: FontWeight.bold },
   tabBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: BorderRadius.full },
   tabBadgeText: { fontSize: FontSize.xs, fontWeight: FontWeight.bold },
-  filterScroll: { marginTop: 12, minHeight: 52 },
-  filterContent: { paddingHorizontal: 20, paddingVertical: 4, alignItems: 'center' },
+  filterScroll: { height: 0 },
+  filterContent: { paddingHorizontal: 20, alignItems: 'center' },
   listContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 100 },
   reqCard: { marginBottom: 12 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },

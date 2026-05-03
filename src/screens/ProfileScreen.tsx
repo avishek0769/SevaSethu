@@ -64,7 +64,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={[styles.statsBar, { backgroundColor: C.surface, borderColor: C.border }, !isDarkMode && Shadow.sm]}>
           {[
             { label: 'Donations', value: user.totalDonations, icon: 'water' },
-            { label: 'Tokens', value: user.tokensEarned, icon: 'star-circle' },
+            { label: 'Seva Coins', value: user.tokensEarned, icon: 'star-circle' },
             { label: 'Rank', value: `#${user.rank}`, icon: 'trophy' },
             { label: 'Rating', value: user.rating.toFixed(1), icon: 'star' },
           ].map((stat, i) => (

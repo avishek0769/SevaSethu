@@ -190,15 +190,22 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
             <Text style={styles.sectionAction}>Open full view</Text>
           </TouchableOpacity>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
-          {matchingDonors.map(donor => (
-            <AppCard key={donor.id} style={styles.miniCard}>
-              <Text style={[styles.miniName, { color: C.textPrimary }]} numberOfLines={1}>{donor.name}</Text>
-              <Text style={styles.miniSub}>{donor.distance} away</Text>
-              <Text style={styles.miniSub}>{donor.totalDonations} donations</Text>
-            </AppCard>
-          ))}
-        </ScrollView>
+        {matchingDonors.length === 0 ? (
+          <View style={{ paddingHorizontal: 20, paddingVertical: 16, alignItems: 'center' }}>
+            <Icon name="account-search-outline" size={32} color={C.textTertiary} />
+            <Text style={{ color: C.textSecondary, marginTop: 8, fontSize: 13, textAlign: 'center' }}>Looking for compatible donors nearby...</Text>
+          </View>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
+            {matchingDonors.map(donor => (
+              <AppCard key={donor.id} style={styles.miniCard}>
+                <Text style={[styles.miniName, { color: C.textPrimary }]} numberOfLines={1}>{donor.name}</Text>
+                <Text style={styles.miniSub}>{donor.distance} away</Text>
+                <Text style={styles.miniSub}>{donor.totalDonations} donations</Text>
+              </AppCard>
+            ))}
+          </ScrollView>
+        )}
 
         <View style={styles.sectionHead}>
           <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>Nearby blood banks</Text>

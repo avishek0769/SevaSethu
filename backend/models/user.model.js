@@ -133,12 +133,17 @@ userSchema.methods.generateRefreshToken = function () {
 };
 
 /**
- * Recalculates user level based on totalDonations.
+ * Recalculates user level based on tokensEarned (Seva coins).
+ *   0  – 100   → Bronze
+ *   101 – 300  → Silver
+ *   301 – 750  → Gold
+ *   751+       → Platinum
  */
 userSchema.methods.recalculateLevel = function () {
-    if (this.totalDonations >= 25) this.level = "Platinum";
-    else if (this.totalDonations >= 10) this.level = "Gold";
-    else if (this.totalDonations >= 5) this.level = "Silver";
+    const coins = this.tokensEarned || 0;
+    if (coins >= 751) this.level = "Platinum";
+    else if (coins >= 301) this.level = "Gold";
+    else if (coins >= 101) this.level = "Silver";
     else this.level = "Bronze";
 };
 
