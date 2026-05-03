@@ -1,3 +1,20 @@
+allprojects {
+    buildscript {
+        repositories {
+            // This shims the jcenter() method so Gradle 9 doesn't crash
+            if (!this.metaClass.respondsTo(this, 'jcenter')) {
+                ext.jcenter = { mavenCentral() }
+            }
+        }
+    }
+    
+    repositories {
+        if (!this.metaClass.respondsTo(this, 'jcenter')) {
+            ext.jcenter = { mavenCentral() }
+        }
+    }
+}
+
 buildscript {
     ext {
         buildToolsVersion = "36.0.0"

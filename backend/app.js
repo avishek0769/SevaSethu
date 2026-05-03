@@ -25,6 +25,7 @@ import donationRouter from "./routers/donation.route.js";
 import rewardsRouter from "./routers/rewards.route.js";
 import notificationRouter from "./routers/notification.route.js";
 import certificateRouter from "./routers/certificate.route.js";
+import chatbotRouter from "./routers/chatbot.route.js";
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/requests", requestRouter);
@@ -33,6 +34,7 @@ app.use("/api/v1/donations", donationRouter);
 app.use("/api/v1/rewards", rewardsRouter);
 app.use("/api/v1/notifications", notificationRouter);
 app.use("/api/v1/certificates", certificateRouter);
+app.use("/api/v1/chatbot", chatbotRouter);
 
 // ── Health Check ────────────────────────────────────────
 app.get("/api/v1/health", (req, res) => {

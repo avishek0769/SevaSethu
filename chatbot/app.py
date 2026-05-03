@@ -153,18 +153,10 @@ def load_chat():
     return history
 
 
-chat_history = load_chat()
-
-
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-
 @app.route("/chat", methods=["POST"])
 def chat():
-    global chat_history
     user_input = request.json.get("message", "").strip()
+    raw_history = request.json.get("history", [])
 
     detected_lang = detect_language(user_input)
     english_input = translate_to_english(user_input, detected_lang)
@@ -181,6 +173,13 @@ def chat():
     if english_input_lower == "exit":
         reply = "Goodbye, take care."
         return jsonify({"reply": translate_from_english(reply, detected_lang), "lang": detected_lang})
+
+    chat_history = [SystemMessage(content=SYSTEM_PROMPT)]
+    for msg in raw_history:
+        if msg.get("role") == "user":
+            chat_history.append(HumanMessage(content=msg.get("content", "")))
+        elif msg.get("role") == "ai":
+            chat_history.append(AIMessage(content=msg.get("content", "")))
 
     chat_history.append(HumanMessage(content=english_input))
     chat_history = chat_history[-20:]
@@ -199,39 +198,11 @@ def chat():
 
     except Exception as e:
         print(f"LLM error: {e}")
-        chat_history.pop()
         reply = "Sorry, I am having trouble right now. Please try again."
         return jsonify({"reply": translate_from_english(reply, detected_lang), "lang": detected_lang})
 
-    # Store the AI message with detected language
-    ai_message = AIMessage(content=ai_content)
-    ai_message.lang = detected_lang
-    chat_history.append(ai_message)
-    save_chat(chat_history)
-
     final_reply = translate_from_english(ai_content, detected_lang)
     return jsonify({"reply": final_reply, "lang": detected_lang})
-
-
-@app.route("/history")
-def history():
-    formatted = []
-    for msg in chat_history:
-        if isinstance(msg, SystemMessage):
-            role = "system"
-            item = {"role": role, "content": msg.content}
-        elif isinstance(msg, HumanMessage):
-            role = "human"
-            item = {"role": role, "content": msg.content}
-        elif isinstance(msg, AIMessage):
-            role = "ai"
-            item = {"role": role, "content": msg.content}
-            if hasattr(msg, 'lang') and msg.lang:
-                item["lang"] = msg.lang
-        else:
-            continue
-        formatted.append(item)
-    return jsonify(formatted)
 
 
 if __name__ == "__main__":
