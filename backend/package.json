@@ -9,7 +9,11 @@
     "start": "node index.js",
     "seed": "node seed.js"
   },
-  "keywords": ["blood-donation", "healthcare", "api"],
+  "keywords": [
+    "blood-donation",
+    "healthcare",
+    "api"
+  ],
   "author": "Avishek Adhikary",
   "license": "ISC",
   "dependencies": {
@@ -17,8 +21,11 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "ethers": "^6.16.0",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.6.1"
+    "mongoose": "^9.6.1",
+    "pdfkit": "^0.18.0",
+    "puppeteer": "^24.42.0"
   }
 }

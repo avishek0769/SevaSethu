@@ -2,7 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ── Config ──────────────────────────────────────────────
-const BASE_URL = 'https://r51klsgs-3000.inc1.devtunnels.ms/api/v1'; // Android emulator -> localhost
+export const BASE_URL = 'https://r51klsgs-3000.inc1.devtunnels.ms/api/v1'; // Android emulator -> localhost
 
 const api = axios.create({
   baseURL: BASE_URL,

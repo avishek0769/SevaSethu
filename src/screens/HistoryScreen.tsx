@@ -6,6 +6,7 @@ import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '.
 import { useApp } from '../context/AppContext';
 import { AppCard, BloodGroupBadge, EmptyState, FilterChip } from '../components/CommonComponents';
 import { HistoryEntry } from '../utils/types';
+import { BASE_URL, getStoredTokens } from '../services/api';
 
 type HistoryFilter = 'All' | 'Pending' | 'Confirmed' | 'Rejected';
 type RequestOutcome = 'pending' | 'confirmed' | 'rejected';
@@ -203,9 +204,18 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const totalRejected = acceptedEntries.filter(entry => entry.outcome === 'rejected').length;
   const totalCoins = acceptedEntries.reduce((acc, entry) => acc + (entry.tokensEarned || 0), 0);
 
-  const handleDownloadCertificate = (item: AcceptedHistoryCard) => {
-    const certificateId = item.requestId || item.id;
-    void Linking.openURL(`https://sevasethu.example/certificate/${certificateId}`).catch(() => {});
+  const handleDownloadCertificate = async (item: AcceptedHistoryCard) => {
+    try {
+      const certificateId = item.id;
+      const { accessToken } = await getStoredTokens();
+      
+      if (accessToken) {
+        const downloadUrl = `${BASE_URL}/certificates/download/${certificateId}?token=${accessToken}`;
+        await Linking.openURL(downloadUrl);
+      }
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
   };
 
   const handleCallRequester = (item: AcceptedHistoryCard) => {

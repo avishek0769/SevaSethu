@@ -90,6 +90,18 @@ const donationSchema = new Schema(
             type: String,
             default: "",
         },
+        certificateMinted: {
+            type: Boolean,
+            default: false,
+        },
+        certificateTokenId: {
+            type: String,
+            default: "",
+        },
+        certificateTxHash: {
+            type: String,
+            default: "",
+        },
     },
     { timestamps: true },
 );

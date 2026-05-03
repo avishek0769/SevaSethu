@@ -9,7 +9,8 @@ const verifyStrictJWT = async (req, res, next) => {
     try {
         const token =
             req.cookies?.accessToken ||
-            req.header("Authorization")?.replace("Bearer ", "");
+            req.header("Authorization")?.replace("Bearer ", "") ||
+            req.query?.token;
 
         if (!token) {
             throw new ApiError(401, "Unauthorised request");
