@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -7,11 +7,15 @@ import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '.
 import { AppCard, BloodGroupBadge, EmptyState, FilterChip, UrgencyChip } from '../components/CommonComponents';
 
 const MyRequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { user, urgentRequests, scheduledRequests, isDarkMode } = useApp();
+  const { user, urgentRequests, scheduledRequests, isDarkMode, fetchRequests } = useApp();
   const [activeTab, setActiveTab] = useState<'urgent' | 'scheduled'>('urgent');
   const C = getColors(isDarkMode);
   const bg = C.background;
   const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
+
+  useEffect(() => {
+    fetchRequests();
+  }, []);
 
   const myUrgentRequests = urgentRequests.filter(request => request.requesterId === user.id);
   const myScheduledRequests = scheduledRequests.filter(request => request.requesterId === user.id);

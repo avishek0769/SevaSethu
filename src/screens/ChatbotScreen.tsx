@@ -4,8 +4,17 @@ import { useIsFocused } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
-import { chatMessages as initialMessages } from '../data/mockData';
 import { ChatMessage } from '../utils/types';
+
+const initialMessages: ChatMessage[] = [
+  { id: 'c1', text: 'Hello! I\'m BloodBot 🩸 How can I help you today?', isBot: true, timestamp: '10:00 AM' },
+  { id: 'c2', text: 'Can I donate blood if I have a cold?', isBot: false, timestamp: '10:01 AM' },
+  { id: 'c3', text: 'Great question! If you have a mild cold without fever, you may still be able to donate. However, if you have a fever, sore throat, or are on antibiotics, it\'s best to wait until you\'re fully recovered. Usually, 7 days after symptoms resolve is recommended.', isBot: true, timestamp: '10:01 AM' },
+  { id: 'c4', text: 'How often can I donate blood?', isBot: false, timestamp: '10:02 AM' },
+  { id: 'c5', text: 'You can donate whole blood every 56 days (about 8 weeks). Platelet donors can give every 7 days, up to 24 times a year. Your body replenishes blood volume within 48 hours! 💪', isBot: true, timestamp: '10:02 AM' },
+  { id: 'c6', text: 'What should I eat before donating?', isBot: false, timestamp: '10:03 AM' },
+  { id: 'c7', text: 'Before donating, eat iron-rich foods like spinach, red meat, or beans. Drink plenty of water (at least 16 oz). Avoid fatty foods as they can affect blood tests. A light, healthy meal 2-3 hours before is ideal! 🥗', isBot: true, timestamp: '10:03 AM' },
+];
 import { useApp } from '../context/AppContext';
 
 interface ChatThread {

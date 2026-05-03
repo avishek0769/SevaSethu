@@ -109,7 +109,7 @@ const DonorRegistrationScreen: React.FC<{ navigation: any }> = ({ navigation }) 
             <Text style={styles.label}>Gender</Text>
             <View style={styles.genderRow}>
               {GENDERS.map(g => (
-                <TouchableOpacity key={g} style={[styles.genderChip, gender === g && styles.genderChipActive]} onPress={() => setGender(g)}>
+                <TouchableOpacity key={g} style={[styles.genderChip, gender === g && styles.genderChipActive]} onPress={() => setGender(g as Gender)}>
                   <Icon name={g === 'Male' ? 'gender-male' : g === 'Female' ? 'gender-female' : 'gender-non-binary'} size={20} color={gender === g ? Colors.primary : Colors.textTertiary} />
                   <Text style={[styles.genderText, gender === g && { color: Colors.primary }]}>{g}</Text>
                 </TouchableOpacity>

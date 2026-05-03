@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, FlatList, Linking, Modal, Pressable } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -149,12 +149,16 @@ const buildTimeline = (entry: AcceptedHistoryCard): TimelineStep[] => {
 };
 
 const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { isDarkMode, historyEntries, user } = useApp();
+  const { isDarkMode, historyEntries, user, fetchHistory } = useApp();
   const C = getColors(isDarkMode);
   const bg = C.background;
   const headerGradient = [C.primary, C.primaryDark];
   const [selectedFilter, setSelectedFilter] = useState<HistoryFilter>('All');
   const [selectedEntry, setSelectedEntry] = useState<AcceptedHistoryCard | null>(null);
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
   const acceptedEntries = useMemo<AcceptedHistoryCard[]>(() => {
     const cards = historyEntries

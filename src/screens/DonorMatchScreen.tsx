@@ -1,14 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linking, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linking, Alert, ActivityIndicator } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Colors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
+import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 import { AppCard, BloodGroupBadge, EmptyState } from '../components/CommonComponents';
-import { bloodBanks, donorMatches } from '../data/mockData';
 
 const DonorMatchScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
-  const { isDarkMode } = useApp();
+  const { isDarkMode, bloodBanks, fetchMatchedDonors, fetchBloodBanks } = useApp();
   const C = getColors(isDarkMode);
   const headerGradient = [C.primary, C.primaryDark];
   const requestType = route?.params?.requestType || 'urgent';
@@ -17,13 +16,36 @@ const DonorMatchScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
   const requesterName = route?.params?.requesterName || 'the requester';
   const requestHospital = route?.params?.hospital || 'the hospital';
   const requestAddress = route?.params?.address || '';
+  const [matchingDonors, setMatchingDonors] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const matchingDonors = donorMatches.filter(donor => donor.bloodGroup === bloodGroup);
   const matchingBanks = bloodBanks.filter(bank => bank.availableGroups.includes(bloodGroup));
+
+  useEffect(() => {
+    const load = async () => {
+      setIsLoading(true);
+      await fetchBloodBanks();
+      if (requestId) {
+        const donors = await fetchMatchedDonors(requestId);
+        setMatchingDonors(donors);
+      }
+      setIsLoading(false);
+    };
+    load();
+  }, [requestId]);
 
   const notifyDonor = (name: string) => {
     Alert.alert('Request sent', `${name} has been notified for this ${requestType} request.`);
   };
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={{ marginTop: 12, color: Colors.textSecondary }}>Finding matches...</Text>
+      </View>
+    );
+  }
 
   if (matchingDonors.length === 0 && matchingBanks.length === 0) {
     return (

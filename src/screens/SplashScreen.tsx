@@ -1,31 +1,33 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, StatusBar, Image } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, getColors, FontSize, FontWeight } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 
 const SplashScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { isLoggedIn, hasCompletedOnboarding, isDarkMode } = useApp();
+  const { isLoggedIn, hasCompletedOnboarding, isDarkMode, restoreSession } = useApp();
   const C = getColors(isDarkMode);
   const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (isLoggedIn) {
-        navigation.replace('MainApp');
-        return;
-      }
-
-      if (hasCompletedOnboarding) {
-        navigation.replace('Login');
-        return;
-      }
-
-      navigation.replace('Onboarding');
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, [hasCompletedOnboarding, isLoggedIn, navigation]);
+    const init = async () => {
+      // Try to restore session from stored token
+      const restored = await restoreSession();
+      
+      setTimeout(() => {
+        if (restored) {
+          navigation.replace('MainApp');
+          return;
+        }
+        if (hasCompletedOnboarding) {
+          navigation.replace('Login');
+          return;
+        }
+        navigation.replace('Onboarding');
+      }, 2000);
+    };
+    init();
+  }, [hasCompletedOnboarding, navigation, restoreSession]);
 
   return (
     <LinearGradient colors={headerGradient} style={styles.container}>

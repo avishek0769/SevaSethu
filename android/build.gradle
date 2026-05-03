@@ -18,4 +18,14 @@ buildscript {
     }
 }
 
+allprojects {
+    repositories {
+        maven {
+            url "${project(":react-native-async-storage_async-storage").projectDir}/local_repo"
+        }
+        maven { url 'https://www.jitpack.io' }
+    }
+}
+
+
 apply plugin: "com.facebook.react.rootproject"

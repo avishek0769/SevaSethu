@@ -10,7 +10,7 @@ import { AppButton, BloodGroupBadge, UrgencyChip, AppCard, FilterChip, SearchBar
 const BLOOD_FILTERS = ['All', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
 const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { urgentRequests, scheduledRequests, isDarkMode, user, acceptRequest } = useApp();
+  const { urgentRequests, scheduledRequests, isDarkMode, user, acceptRequest, fetchRequests } = useApp();
   const [activeTab, setActiveTab] = useState<'urgent' | 'scheduled'>('urgent');
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,8 +30,11 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 350);
-    return () => clearTimeout(timer);
+    const load = async () => {
+      await fetchRequests();
+      setIsLoading(false);
+    };
+    load();
   }, []);
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -94,7 +97,7 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       confirmColors: C.gradientPrimary as [string, string],
       showCancel: true,
       onConfirm: () => {
-        acceptRequest(requestType, request.id, buildDonorAcceptance());
+        acceptRequest(request.id);
         setDialog({
           title: 'Accepted',
           message: 'Your response has been recorded for the requester.',

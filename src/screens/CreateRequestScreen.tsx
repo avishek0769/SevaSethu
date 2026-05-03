@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
 import { BloodGroup } from '../utils/types';
 import { useApp } from '../context/AppContext';
 import { AppButton, AppTextField } from '../components/CommonComponents';
+import { getErrorMessage } from '../services/api';
 
 const BLOOD_GROUPS: BloodGroup[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
 const CreateRequestScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { user, addUrgentRequest, addScheduledRequest, isDarkMode } = useApp();
+  const { user, createRequest, isDarkMode } = useApp();
   const C = getColors(isDarkMode);
   const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
   const [type, setType] = useState<'urgent' | 'scheduled'>('urgent');
@@ -33,8 +34,9 @@ const CreateRequestScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     date: string;
     time: string;
   } | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const requestBloodGroup = (bloodGroup || user.bloodGroup) as BloodGroup;
     const unitCount = Number.parseInt(units, 10) || 1;
     const requestDate = date.trim() || new Date().toISOString().split('T')[0];
@@ -42,54 +44,40 @@ const CreateRequestScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const safeHospital = hospital.trim() || 'Hospital Name';
     const safeAddress = address.trim() || user.city;
     const safeContact = contact.trim() || user.phone;
-    const safeNotes = notes.trim() || 'Created from SevaSethu prototype';
-    const requestId = `${type === 'urgent' ? 'ur' : 'sr'}-new-${Date.now()}`;
+    const safeNotes = notes.trim() || '';
 
-    if (type === 'urgent') {
-      addUrgentRequest({
-        id: requestId,
-        patientName: `${user.city} Emergency`,
+    setLoading(true);
+    try {
+      const created = await createRequest({
+        type,
+        patientName: type === 'urgent' ? `${user.city} Emergency` : undefined,
         bloodGroup: requestBloodGroup,
         units: unitCount,
         hospital: safeHospital,
         address: safeAddress,
-        distance: 'Nearby',
-        urgency: unitCount >= 3 ? 'critical' : 'high',
         contact: safeContact,
+        urgency: type === 'urgent' ? (unitCount >= 3 ? 'critical' : 'high') : undefined,
         notes: safeNotes,
-        createdAt: new Date().toISOString(),
-        requesterName: user.name,
-        requesterId: user.id,
-        acceptedDonors: [],
+        date: type === 'scheduled' ? requestDate : undefined,
+        time: type === 'scheduled' ? requestTime : undefined,
       });
-    } else {
-      addScheduledRequest({
-        id: requestId,
+
+      setCreatedRequest({
+        id: created._id || created.id || `new-${Date.now()}`,
+        type,
         bloodGroup: requestBloodGroup,
         units: unitCount,
         hospital: safeHospital,
         address: safeAddress,
         date: requestDate,
         time: requestTime,
-        contact: safeContact,
-        notes: safeNotes,
-        requesterName: user.name,
-        requesterId: user.id,
-        acceptedDonors: [],
       });
+      setSubmitted(true);
+    } catch (error) {
+      Alert.alert('Error', getErrorMessage(error));
+    } finally {
+      setLoading(false);
     }
-
-    setCreatedRequest({
-      id: requestId,
-      type,
-      bloodGroup: requestBloodGroup,
-      units: unitCount,
-      hospital: safeHospital,
-      address: safeAddress,
-      date: requestDate,
-      time: requestTime,
-    });
-    setSubmitted(true);
   };
 
   if (submitted) {

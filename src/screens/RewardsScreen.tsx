@@ -1,19 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, getColors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 import { AppCard } from '../components/CommonComponents';
-import { badges, leaderboardData, bloodBanks } from '../data/mockData';
 
 const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { user, isDarkMode } = useApp();
+  const { user, isDarkMode, badges, leaderboardData, bloodBanks, fetchBadges, fetchLeaderboard, fetchBloodBanks } = useApp();
   const C = getColors(isDarkMode);
   const bg = C.background;
   const [leaderTab, setLeaderTab] = useState<'city' | 'state' | 'country'>('city');
   const [subTab, setSubTab] = useState<'individuals' | 'banks'>('individuals');
   const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
+
+  useEffect(() => {
+    fetchBadges();
+    fetchLeaderboard(leaderTab);
+    fetchBloodBanks();
+  }, []);
 
   const unlockedBadges = badges.filter(b => b.status === 'unlocked');
   const lockedBadges = badges.filter(b => b.status === 'locked');
@@ -167,7 +172,7 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
 
         {/* Leaderboard List */}
-        {filteredLeaderboard.map((entry, i) => (
+        {filteredLeaderboard.map((entry: any, i: number) => (
           <AppCard key={entry.id} style={styles.leaderItem}>
             <View style={styles.leaderRow}>
               <View style={[styles.rankCircle, { backgroundColor: i === 0 ? C.warningLight : i === 1 ? C.primaryLight : i === 2 ? C.primaryLight : C.surfaceVariant }]}>
@@ -181,12 +186,12 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 <Text style={[styles.leaderName, { color: C.textPrimary }]}>{entry.name}</Text>
                 <Text style={[styles.leaderSub, { color: C.textSecondary }]}>
                   {subTab === 'individuals'
-                    ? `${entry.city} · ${entry.donations} donations`
-                    : `${entry.city} · ${entry.groups} groups · ${entry.isOpen ? 'Open now' : 'Closed'}`}
+                    ? `${entry.city} · ${entry.donations || 0} donations`
+                    : `${entry.city} · ${entry.groups || 0} groups · ${entry.isOpen ? 'Open now' : 'Closed'}`}
                 </Text>
               </View>
               <View style={styles.tokenCol}>
-                <Text style={[styles.leaderTokens, { color: C.warning }]}>{subTab === 'individuals' ? entry.tokens : entry.rating.toFixed(1)}</Text>
+                <Text style={[styles.leaderTokens, { color: C.warning }]}>{subTab === 'individuals' ? (entry.tokens || 0) : (entry.rating || 0).toFixed(1)}</Text>
                 <Text style={[styles.leaderTokenLabel, { color: C.textTertiary }]}>{subTab === 'individuals' ? 'tokens' : 'rating'}</Text>
               </View>
             </View>

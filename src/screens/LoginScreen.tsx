@@ -1,22 +1,35 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getColors, FontSize, FontWeight, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 import { AppButton, AppTextField } from '../components/CommonComponents';
+import { getErrorMessage } from '../services/api';
 
 const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { login, isDarkMode } = useApp();
+  const { loginWithApi, isDarkMode, isLoading } = useApp();
   const C = getColors(isDarkMode);
   const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    login();
-    navigation.replace('MainApp');
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Please enter email and password');
+      return;
+    }
+    setLoading(true);
+    try {
+      await loginWithApi(email.trim(), password);
+      navigation.replace('MainApp');
+    } catch (error) {
+      Alert.alert('Login Failed', getErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

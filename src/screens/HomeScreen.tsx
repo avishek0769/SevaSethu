@@ -1,18 +1,23 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, StatusBar, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, StatusBar, Linking, ActivityIndicator } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, getColors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 import { BloodGroupBadge, UrgencyChip, AppCard, SectionHeader, StatCard, ConfirmationDialog } from '../components/CommonComponents';
-import { bloodBanks, leaderboardData } from '../data/mockData';
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { user, isDarkMode, toggleAvailability, urgentRequests, acceptRequest } = useApp();
+  const { user, isDarkMode, toggleAvailability, urgentRequests, acceptRequest, bloodBanks, leaderboardData, fetchRequests, fetchBloodBanks, fetchLeaderboard } = useApp();
   const C = getColors(isDarkMode);
   const bg = C.background;
   const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
   const nearbyUrgent = urgentRequests.filter(r => r.urgency === 'critical').length;
+
+  useEffect(() => {
+    fetchRequests();
+    fetchBloodBanks();
+    fetchLeaderboard();
+  }, []);
   const [dialog, setDialog] = useState<{
     title: string;
     message: string;
@@ -59,7 +64,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       confirmColors: ['#DC2626', '#991B1B'],
       showCancel: true,
       onConfirm: () => {
-        acceptRequest('urgent', request.id, buildDonorAcceptance(request));
+        acceptRequest(request.id);
         setDialog({
           title: 'Accepted',
           message: 'Your response has been recorded for the requester.',

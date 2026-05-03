@@ -5,10 +5,9 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 import { AppCard, SearchBar, EmptyState, SkeletonLoader } from '../components/CommonComponents';
-import { bloodBanks } from '../data/mockData';
 
 const NearbyBloodBanksScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { isDarkMode } = useApp();
+  const { isDarkMode, bloodBanks, fetchBloodBanks } = useApp();
   const C = getColors(isDarkMode);
   const bg = C.background;
   const headerGradient = [C.primary, C.primaryDark];
@@ -16,8 +15,11 @@ const NearbyBloodBanksScreen: React.FC<{ navigation: any }> = ({ navigation }) =
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 350);
-    return () => clearTimeout(timer);
+    const load = async () => {
+      await fetchBloodBanks();
+      setIsLoading(false);
+    };
+    load();
   }, []);
 
   const normalizedSearch = searchTerm.trim().toLowerCase();

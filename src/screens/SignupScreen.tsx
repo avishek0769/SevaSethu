@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, StatusBar, Switch } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, StatusBar, Switch, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
 import { BloodGroup, Gender } from '../utils/types';
 import { useApp } from '../context/AppContext';
-import { currentUser } from '../data/users';
 import { AppButton, AppTextField } from '../components/CommonComponents';
+import { getErrorMessage } from '../services/api';
 
 const BLOOD_GROUPS: BloodGroup[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const GENDERS: Gender[] = ['Male', 'Female', 'Other'];
 
 const SignupScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { login, setUser, isDarkMode } = useApp();
+  const { registerWithApi, donorRegistration, isDarkMode } = useApp();
   const C = getColors(isDarkMode);
   const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
   const [step, setStep] = useState<1 | 2>(1);
@@ -20,43 +20,56 @@ const SignupScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [phone, setPhone] = useState(currentUser.phone);
-  const [bloodGroup, setBloodGroup] = useState<BloodGroup>(currentUser.bloodGroup);
-  const [age, setAge] = useState(String(currentUser.age));
-  const [gender, setGender] = useState<Gender>(currentUser.gender);
-  const [city, setCity] = useState(currentUser.city);
-  const [state, setState] = useState(currentUser.state);
+  const [phone, setPhone] = useState('');
+  const [bloodGroup, setBloodGroup] = useState<BloodGroup>('O+');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState<Gender>('Male');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
   const [healthIssues, setHealthIssues] = useState('');
   const [available, setAvailable] = useState(true);
 
-  const finishSignup = (asRequester = false) => {
-    const parsedHealthIssues = healthIssues.split(',').map(issue => issue.trim()).filter(Boolean);
+  const handleStepOne = async () => {
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+    setLoading(true);
+    try {
+      await registerWithApi(name.trim(), email.trim(), password, phone.trim());
+      setStep(2);
+    } catch (error) {
+      Alert.alert('Registration Failed', getErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    setUser({
-      ...currentUser,
-      name: name.trim() || currentUser.name,
-      email: email.trim() || currentUser.email,
-      password: password || currentUser.password,
-      phone: asRequester ? currentUser.phone : (phone.trim() || currentUser.phone),
-      role: asRequester ? 'requester' : 'donor',
-      bloodGroup: asRequester ? currentUser.bloodGroup : bloodGroup,
-      age: asRequester ? currentUser.age : (Number(age) || currentUser.age),
-      gender: asRequester ? currentUser.gender : gender,
-      city: asRequester ? currentUser.city : (city.trim() || currentUser.city),
-      state: asRequester ? currentUser.state : (state.trim() || currentUser.state),
-      isAvailable: asRequester ? false : available,
-      totalDonations: asRequester ? 0 : currentUser.totalDonations,
-      tokensEarned: asRequester ? 0 : currentUser.tokensEarned,
-      rank: asRequester ? 0 : currentUser.rank,
-      rating: asRequester ? 0 : currentUser.rating,
-      healthIssues: asRequester ? [] : parsedHealthIssues,
-      joinedDate: new Date().toISOString().split('T')[0],
-      lastDonation: asRequester ? undefined : currentUser.lastDonation,
-      level: asRequester ? 'Bronze' : currentUser.level,
-    });
-    login();
-    navigation.replace('MainApp');
+  const finishSignup = async (asRequester = false) => {
+    setLoading(true);
+    try {
+      if (asRequester) {
+        navigation.replace('MainApp');
+        return;
+      }
+      const parsedHealthIssues = healthIssues.split(',').map(issue => issue.trim()).filter(Boolean);
+      await donorRegistration({
+        bloodGroup,
+        age: Number(age) || 0,
+        gender,
+        healthIssues: parsedHealthIssues,
+        city: city.trim(),
+        state: state.trim(),
+        isAvailable: available,
+      });
+      navigation.replace('MainApp');
+    } catch (error) {
+      Alert.alert('Error', getErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderStepOne = () => (
@@ -96,7 +109,7 @@ const SignupScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         containerStyle={{ marginBottom: 18 }}
       />
 
-      <AppButton title="Continue" onPress={() => setStep(2)} iconRight="arrow-right" variant="primary" />
+      <AppButton title={loading ? 'Creating Account...' : 'Continue'} onPress={handleStepOne} iconRight="arrow-right" variant="primary" disabled={loading} />
     </View>
   );
 
@@ -218,7 +231,7 @@ const SignupScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       </View>
 
       <View style={{ marginTop: 16 }}>
-        <AppButton title="Complete Signup" onPress={() => finishSignup(false)} iconRight="check" variant="primary" />
+        <AppButton title={loading ? 'Saving...' : 'Complete Signup'} onPress={() => finishSignup(false)} iconRight="check" variant="primary" disabled={loading} />
       </View>
 
       <TouchableOpacity onPress={() => finishSignup(true)} activeOpacity={0.7} style={styles.skipBtn}>

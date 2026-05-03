@@ -28,7 +28,7 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
       return;
     }
 
-    confirmDonation(requestType, request.id, donor.id);
+    confirmDonation(request.id, donor.id);
     setConfirmed(true);
   };
 

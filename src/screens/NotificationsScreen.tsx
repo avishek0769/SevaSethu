@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -7,11 +7,15 @@ import { useApp } from '../context/AppContext';
 import { AppCard } from '../components/CommonComponents';
 
 const NotificationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { notifications, markNotificationRead, isDarkMode } = useApp();
+  const { notifications, markNotificationRead, isDarkMode, fetchNotifications } = useApp();
   const C = getColors(isDarkMode);
   const bg = C.background;
   const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
   const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
   const typeConfig: Record<string, { color: string; bg: string }> = {
     urgent: { color: C.error, bg: C.errorLight },

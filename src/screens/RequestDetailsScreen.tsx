@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linking } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useApp } from '../context/AppContext';
 import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
 import { AppCard, BloodGroupBadge, EmptyState, UrgencyChip, ConfirmationDialog } from '../components/CommonComponents';
-import { bloodBanks, donorMatches } from '../data/mockData';
 
 const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
-  const { urgentRequests, scheduledRequests, isDarkMode, rejectAcceptance } = useApp();
+  const { urgentRequests, scheduledRequests, isDarkMode, rejectAcceptance, bloodBanks, fetchMatchedDonors, fetchBloodBanks } = useApp();
   const C = getColors(isDarkMode);
   const bg = C.background;
   const headerGradient = [C.primary, C.primaryDark];
@@ -32,8 +31,19 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
   }
 
   const acceptedDonors = request.acceptedDonors || [];
-  const matchingDonors = donorMatches.filter(donor => donor.bloodGroup === request.bloodGroup);
+  const [matchingDonors, setMatchingDonors] = useState<any[]>([]);
   const matchingBanks = bloodBanks.filter(bank => bank.availableGroups.includes(request.bloodGroup));
+
+  useEffect(() => {
+    const load = async () => {
+      await fetchBloodBanks();
+      if (requestId) {
+        const donors = await fetchMatchedDonors(requestId);
+        setMatchingDonors(donors);
+      }
+    };
+    load();
+  }, [requestId]);
 
   const openConfirmation = (donor: typeof acceptedDonors[number]) => {
     navigation.navigate('DonationConfirmation', {
@@ -50,7 +60,7 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
   };
 
   const handleRejectAcceptance = (donorId: string, donorName: string) => {
-    rejectAcceptance(requestType, request.id, donorId);
+    rejectAcceptance(request.id, donorId);
     setRejectDialog(null);
   };
 
