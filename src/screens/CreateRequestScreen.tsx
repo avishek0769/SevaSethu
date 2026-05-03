@@ -56,7 +56,6 @@ const CreateRequestScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         hospital: safeHospital,
         address: safeAddress,
         contact: safeContact,
-        urgency: type === 'urgent' ? (unitCount >= 3 ? 'critical' : 'high') : undefined,
         notes: safeNotes,
         date: type === 'scheduled' ? requestDate : undefined,
         time: type === 'scheduled' ? requestTime : undefined,

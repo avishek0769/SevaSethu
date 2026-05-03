@@ -40,7 +40,7 @@ const getRequestById = asyncHandler(async (req, res) => {
 
 // ── POST /api/v1/requests ───────────────────────────────
 const createRequest = asyncHandler(async (req, res) => {
-    const { type, patientName, bloodGroup, units, hospital, address, contact, notes, urgency, date, time } = req.body;
+    const { type, patientName, bloodGroup, units, hospital, address, contact, notes, date, time } = req.body;
     validateRequired({ type, bloodGroup, units, hospital, address, contact }, ApiError);
     validateBloodGroup(bloodGroup, ApiError);
 
@@ -53,7 +53,6 @@ const createRequest = asyncHandler(async (req, res) => {
         address,
         contact,
         notes: notes || "",
-        urgency: type === "urgent" ? (urgency || "high") : "low",
         date: date || "",
         time: time || "",
         requester: req.user._id,
@@ -64,9 +63,9 @@ const createRequest = asyncHandler(async (req, res) => {
 });
 
 // ── GET /api/v1/requests/my ─────────────────────────────
-// Requests created by current user
+// Requests created by current user (exclude closed)
 const getMyRequests = asyncHandler(async (req, res) => {
-    const requests = await BloodRequest.find({ requester: req.user._id })
+    const requests = await BloodRequest.find({ requester: req.user._id, status: { $ne: "closed" } })
         .sort({ createdAt: -1 })
         .lean();
 
@@ -266,6 +265,24 @@ const getMatchedDonors = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200, enriched, "Matched donors fetched"));
 });
 
+// ── POST /api/v1/requests/:id/close ─────────────────────
+// Requester closes a request (soft-close, keeps data for history)
+const closeRequest = asyncHandler(async (req, res) => {
+    const request = await BloodRequest.findById(req.params.id);
+    if (!request) throw new ApiError(404, "Request not found");
+    if (request.requester.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "Only the requester can close this request");
+    }
+    if (request.status === "closed") {
+        throw new ApiError(400, "Request is already closed");
+    }
+
+    request.status = "closed";
+    await request.save();
+
+    res.status(200).json(new ApiResponse(200, request, "Request closed"));
+});
+
 export {
     getRequests,
     getRequestById,
@@ -275,4 +292,5 @@ export {
     confirmDonation,
     rejectAcceptance,
     getMatchedDonors,
+    closeRequest,
 };

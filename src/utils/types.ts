@@ -3,7 +3,7 @@
 export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 export type Gender = 'Male' | 'Female' | 'Other';
 export type UserRole = 'donor' | 'requester';
-export type RequestUrgency = 'critical' | 'high' | 'medium' | 'low';
+
 export type DonationStatus = 'completed' | 'pending' | 'cancelled' | 'missed';
 export type BadgeStatus = 'unlocked' | 'locked';
 
@@ -39,7 +39,6 @@ export interface UrgentRequest {
   hospital: string;
   address: string;
   distance: string;
-  urgency: RequestUrgency;
   contact: string;
   notes: string;
   createdAt: string;
@@ -63,7 +62,6 @@ export interface ScheduledRequest {
   requesterName: string;
   requesterId: string;
   acceptedDonors?: RequestAcceptance[];
-  urgency: string;
 }
 
 export interface RequestAcceptance extends DonorMatch {

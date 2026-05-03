@@ -4,14 +4,14 @@ import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, getColors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
-import { BloodGroupBadge, UrgencyChip, AppCard, SectionHeader, StatCard, ConfirmationDialog } from '../components/CommonComponents';
+import { BloodGroupBadge, AppCard, SectionHeader, StatCard, ConfirmationDialog } from '../components/CommonComponents';
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { user, isDarkMode, toggleAvailability, urgentRequests, acceptRequest, bloodBanks, leaderboardData, fetchRequests, fetchBloodBanks, fetchLeaderboard } = useApp();
   const C = getColors(isDarkMode);
   const bg = C.background;
   const headerGradient = isDarkMode ? [C.background, C.surfaceVariant] : [C.background, C.primarySurface];
-  const nearbyUrgent = urgentRequests.filter(r => r.urgency === 'critical').length;
+  const nearbyUrgent = urgentRequests.length;
 
   useEffect(() => {
     fetchRequests();
@@ -132,7 +132,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <View style={[styles.urgentCard, { backgroundColor: C.surface, borderColor: C.border, borderWidth: isDarkMode ? 1 : 0 }, !isDarkMode && Shadow.md]}>
               <View style={styles.urgentTop}>
                 <BloodGroupBadge bloodGroup={req.bloodGroup} size="sm" />
-                <UrgencyChip urgency={req.urgency} />
               </View>
               <Text style={[styles.urgentName, { color: C.textPrimary }]} numberOfLines={1}>{req.hospital}</Text>
               <View style={styles.urgentInfo}>

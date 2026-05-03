@@ -58,6 +58,7 @@ interface AppContextType {
   acceptRequest: (requestId: string) => Promise<void>;
   confirmDonation: (requestId: string, donorId: string) => Promise<void>;
   rejectAcceptance: (requestId: string, donorId: string) => Promise<void>;
+  closeRequest: (requestId: string) => Promise<void>;
   toggleAvailability: () => Promise<void>;
   updateProfile: (data: Record<string, any>) => Promise<void>;
   updateMedicalInfo: (data: Record<string, any>) => Promise<void>;
@@ -280,6 +281,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     await fetchRequests();
   }, [fetchRequests]);
 
+  const closeRequest = useCallback(async (requestId: string) => {
+    await requestService.closeRequest(requestId);
+    await fetchRequests();
+    await fetchMyRequests();
+  }, [fetchRequests, fetchMyRequests]);
+
   const toggleAvailability = useCallback(async () => {
     try {
       const result = await authService.toggleAvailability();
@@ -333,7 +340,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     fetchRequests, fetchMyRequests, fetchBloodBanks, fetchHistory,
     fetchNotifications, fetchBadges, fetchLeaderboard, fetchRewardsSummary,
     fetchDonationStats, fetchMatchedDonors,
-    createRequest, acceptRequest, confirmDonation, rejectAcceptance,
+    createRequest, acceptRequest, confirmDonation, rejectAcceptance, closeRequest,
     toggleAvailability, updateProfile, updateMedicalInfo, donorRegistration,
     markNotificationRead, markAllNotificationsRead,
     toggleDarkMode, toggleNotifications, completeOnboarding,

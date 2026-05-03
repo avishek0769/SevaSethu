@@ -4,10 +4,10 @@ import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useApp } from '../context/AppContext';
 import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
-import { AppCard, BloodGroupBadge, EmptyState, FilterChip, UrgencyChip } from '../components/CommonComponents';
+import { AppCard, BloodGroupBadge, EmptyState, FilterChip } from '../components/CommonComponents';
 
 const MyRequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { user, urgentRequests, scheduledRequests, isDarkMode, fetchRequests } = useApp();
+  const { user, urgentRequests, scheduledRequests, isDarkMode, fetchRequests, closeRequest } = useApp();
   const [activeTab, setActiveTab] = useState<'urgent' | 'scheduled'>('urgent');
   const C = getColors(isDarkMode);
   const bg = C.background;
@@ -55,16 +55,21 @@ const MyRequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               </Text>
             </View>
           </View>
-          {requestType === 'urgent' ? (
-            <UrgencyChip urgency={request.urgency} />
-          ) : (
+          {requestType === 'scheduled' ? (
             <View style={[styles.dateChip, { backgroundColor: C.infoLight }]}>
               <Icon name="calendar" size={14} color={C.info} />
               <Text style={[styles.dateChipText, { color: C.info }]}>
                 {new Date(request.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
               </Text>
             </View>
-          )}
+          ) : null}
+          <TouchableOpacity 
+            style={[styles.dateChip, { backgroundColor: C.errorLight, marginLeft: 8 }]} 
+            onPress={(e) => { e.stopPropagation(); closeRequest(request.id); }}
+          >
+            <Icon name="close" size={14} color={C.error} />
+            <Text style={[styles.dateChipText, { color: C.error }]}>Close</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.metaRow}>

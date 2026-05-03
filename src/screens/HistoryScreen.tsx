@@ -90,62 +90,69 @@ const buildTimeline = (entry: AcceptedHistoryCard): TimelineStep[] => {
   const confirmedTime = entry.confirmedAt || (entry.status === 'completed' ? entry.date : undefined);
   const rejectedTime = rejection?.rejectedAt || rejection?.date;
 
-  if (entry.outcome === 'rejected') {
-    return [
-      {
-        title: 'Request accepted',
-        description: `You accepted the ${entry.requestType || 'request'} request${entry.requesterName ? ` from ${entry.requesterName}` : ''}.`,
-        time: acceptedTime,
-        icon: 'check-circle-outline',
-        tone: 'success',
-      },
-      {
-        title: 'Requester chose another donor',
-        description: rejection?.description || 'The requester thanked you for your quick response and moved ahead with a different donor.',
-        time: rejectedTime,
-        icon: 'account-remove-outline',
-        tone: 'muted',
-      },
-      {
-        title: 'Acceptance closed',
-        description: 'The request is no longer active. Your intent to help is still recorded in history.',
-        time: rejectedTime,
-        icon: 'heart-outline',
-        tone: 'info',
-      },
-    ];
-  }
+  const steps: TimelineStep[] = [];
 
-  return [
-    {
+  if (entry.outcome === 'rejected') {
+    steps.push({
       title: 'Request accepted',
       description: `You accepted the ${entry.requestType || 'request'} request${entry.requesterName ? ` from ${entry.requesterName}` : ''}.`,
       time: acceptedTime,
       icon: 'check-circle-outline',
       tone: 'success',
-    },
-    {
+    });
+    if (rejectedTime) {
+      steps.push({
+        title: 'Requester chose another donor',
+        description: rejection?.description || 'The requester thanked you for your quick response and moved ahead with a different donor.',
+        time: rejectedTime,
+        icon: 'account-remove-outline',
+        tone: 'muted',
+      });
+      steps.push({
+        title: 'Acceptance closed',
+        description: 'The request is no longer active. Your intent to help is still recorded in history.',
+        time: rejectedTime,
+        icon: 'heart-outline',
+        tone: 'info',
+      });
+    }
+    return steps;
+  }
+
+  // Accepted flow
+  steps.push({
+    title: 'Request accepted',
+    description: `You accepted the ${entry.requestType || 'request'} request${entry.requesterName ? ` from ${entry.requesterName}` : ''}.`,
+    time: acceptedTime,
+    icon: 'check-circle-outline',
+    tone: 'success',
+  });
+
+  if (confirmedTime) {
+    steps.push({
       title: 'Donation verified by requester',
       description: 'The donor has donated the blood and the requester confirmed it.',
       time: confirmedTime,
       icon: 'handshake-outline',
       tone: 'success',
-    },
-    {
+    });
+    steps.push({
       title: 'Certificate ready to download',
       description: 'Download the certificate from this card once the donation is marked complete.',
       time: confirmedTime,
       icon: 'certificate-outline',
       tone: 'info',
-    },
-    {
+    });
+    steps.push({
       title: 'Seva coins received',
       description: `${entry.tokensEarned || 0} Seva coins have been credited to your wallet.`,
       time: confirmedTime,
       icon: 'star-circle-outline',
       tone: 'info',
-    },
-  ];
+    });
+  }
+
+  return steps;
 };
 
 const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {

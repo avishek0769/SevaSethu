@@ -31,11 +31,7 @@ const bloodRequestSchema = new Schema(
             required: true,
             trim: true,
         },
-        urgency: {
-            type: String,
-            enum: ["critical", "high", "medium", "low"],
-            default: "medium",
-        },
+
         contact: {
             type: String,
             required: true,
@@ -78,7 +74,7 @@ const bloodRequestSchema = new Schema(
         ],
         status: {
             type: String,
-            enum: ["open", "fulfilled", "cancelled"],
+            enum: ["open", "fulfilled", "cancelled", "closed"],
             default: "open",
         },
     },

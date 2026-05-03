@@ -4,7 +4,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useApp } from '../context/AppContext';
 import { Colors, getColors, FontSize, FontWeight, BorderRadius, Shadow } from '../utils/theme';
-import { AppCard, BloodGroupBadge, EmptyState, UrgencyChip, ConfirmationDialog } from '../components/CommonComponents';
+import { AppCard, BloodGroupBadge, EmptyState, ConfirmationDialog } from '../components/CommonComponents';
 
 const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
   const { urgentRequests, scheduledRequests, isDarkMode, rejectAcceptance, bloodBanks, fetchMatchedDonors, fetchBloodBanks } = useApp();
@@ -78,13 +78,20 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
       <View style={styles.body}>
         <AppCard style={styles.summaryCard}>
           <View style={styles.summaryTop}>
-            <BloodGroupBadge bloodGroup={request.bloodGroup} size="lg" />
+            <View style={styles.reqTopLeft}>
+              <BloodGroupBadge bloodGroup={request.bloodGroup} size="md" />
+            </View>
             <View style={styles.summaryInfo}>
               <Text style={[styles.summaryTitle, { color: C.textPrimary }]}>{request.hospital}</Text>
               <Text style={styles.summarySub}>{request.requesterName}</Text>
               <Text style={styles.summarySub}>{requestType === 'urgent' ? `${request.units} unit${request.units > 1 ? 's' : ''} needed urgently` : `${request.units} unit${request.units > 1 ? 's' : ''} scheduled for ${new Date(request.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`}</Text>
             </View>
-            {requestType === 'urgent' ? <UrgencyChip urgency={request.urgency} /> : <View style={styles.dateChip}><Icon name="calendar" size={14} color={Colors.info} /><Text style={styles.dateChipText}>{new Date(request.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</Text></View>}
+            <View style={styles.dateChip}>
+              <Icon name={requestType === 'urgent' ? "alert-circle" : "calendar"} size={14} color={Colors.info} />
+              <Text style={styles.dateChipText}>
+                {requestType === 'urgent' ? 'Urgent' : new Date(request.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+              </Text>
+            </View>
           </View>
 
           <View style={styles.metaBlock}>
@@ -167,18 +174,26 @@ const RequestDetailsScreen: React.FC<{ navigation: any; route: any }> = ({ navig
                   <Icon name="phone" size={18} color={C.success} />
                   <Text style={[styles.callText, { color: C.success }]} numberOfLines={1}>Call</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8} onPress={() => openConfirmation(donor)}>
-                  <LinearGradient colors={headerGradient} style={styles.confirmBtn}>
-                    <Icon name="check-decagram" size={18} color={C.textOnPrimary} />
-                    <Text style={styles.confirmText} numberOfLines={1}>Confirm Donation</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-                <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8} onPress={() => setRejectDialog({ visible: true, donorId: donor.id, donorName: donor.name })}>
-                  <LinearGradient colors={['#6B7280', '#374151']} style={styles.rejectBtn}>
-                    <Icon name="close-circle" size={18} color={C.textOnPrimary} />
-                    <Text style={styles.confirmText} numberOfLines={1}>Reject</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
+                {donor.confirmed ? (
+                  <View style={[styles.confirmBtn, { backgroundColor: C.successLight, paddingVertical: 10, flex: 2, alignItems: 'center', borderRadius: BorderRadius.full }]}>
+                    <Text style={{ color: C.success, fontWeight: FontWeight.bold, fontSize: FontSize.sm }}>Donation Completed</Text>
+                  </View>
+                ) : (
+                  <>
+                    <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8} onPress={() => openConfirmation(donor)}>
+                      <LinearGradient colors={headerGradient} style={styles.confirmBtn}>
+                        <Icon name="check-decagram" size={18} color={C.textOnPrimary} />
+                        <Text style={styles.confirmText} numberOfLines={1}>Confirm</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8} onPress={() => setRejectDialog({ visible: true, donorId: donor.id, donorName: donor.name })}>
+                      <LinearGradient colors={['#6B7280', '#374151']} style={styles.rejectBtn}>
+                        <Icon name="close-circle" size={18} color={C.textOnPrimary} />
+                        <Text style={styles.confirmText} numberOfLines={1}>Reject</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </>
+                )}
               </View>
             </AppCard>
           ))
@@ -246,6 +261,7 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: 20, paddingTop: 16 },
   summaryCard: { marginBottom: 16 },
   summaryTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 14 },
+  reqTopLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   summaryInfo: { flex: 1 },
   summaryTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.textPrimary },
   summarySub: { fontSize: FontSize.sm, color: Colors.textSecondary, marginTop: 3 },

@@ -9,6 +9,7 @@ import {
     confirmDonation,
     rejectAcceptance,
     getMatchedDonors,
+    closeRequest,
 } from "../controllers/request.controller.js";
 
 const requestRouter = Router();
@@ -24,5 +25,6 @@ requestRouter.get("/:id/match", getMatchedDonors);
 requestRouter.post("/:id/accept", acceptRequest);
 requestRouter.post("/:id/confirm/:donorId", confirmDonation);
 requestRouter.post("/:id/reject/:donorId", rejectAcceptance);
+requestRouter.post("/:id/close", closeRequest);
 
 export default requestRouter;

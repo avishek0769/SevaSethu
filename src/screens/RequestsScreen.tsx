@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Colors, getColors, FontSize, FontWeight, Spacing, BorderRadius, Shadow } from '../utils/theme';
 import { useApp } from '../context/AppContext';
 import { ScheduledRequest } from '../utils/types';
-import { AppButton, BloodGroupBadge, UrgencyChip, AppCard, FilterChip, SearchBar, EmptyState, SkeletonLoader, ConfirmationDialog } from '../components/CommonComponents';
+import { AppButton, BloodGroupBadge, AppCard, FilterChip, SearchBar, EmptyState, SkeletonLoader, ConfirmationDialog } from '../components/CommonComponents';
 
 const BLOOD_FILTERS = ['All', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -123,7 +123,6 @@ const RequestsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Text style={[styles.reqSub, { color: C.textSecondary }]}>{item.units} unit{item.units > 1 ? 's' : ''} needed</Text>
           </View>
         </View>
-        <UrgencyChip urgency={item.urgency} />
       </View>
 
       <View style={styles.detailsGrid}>

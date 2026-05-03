@@ -54,4 +54,9 @@ export const requestService = {
     const res = await api.get(`/requests/${requestId}/match`);
     return res.data.data;
   },
+
+  closeRequest: async (requestId: string) => {
+    const res = await api.post(`/requests/${requestId}/close`);
+    return res.data.data;
+  },
 };
