@@ -1,610 +1,569 @@
 <!doctype html>
 <html lang="en" class="dark">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Blood Bot</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <style>
-            /* (same as before, no changes needed) */
-            body {
-                font-family: "Segoe UI", system-ui, sans-serif;
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blood Bot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* (same as before, no changes needed) */
+        body {
+            font-family: "Segoe UI", system-ui, sans-serif;
+        }
+
+        #chat::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chat::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #chat::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+
+        body.light {
+            background: #f8fafc;
+        }
+
+        body.light #sidebar {
+            background: #e2e8f0;
+            border-right-color: #cbd5e1;
+        }
+
+        body.light #sidebar h2 {
+            color: #b91c1c;
+        }
+
+        body.light .history-item {
+            background: #f1f5f9;
+        }
+
+        body.light .history-item:hover {
+            background: #cbd5e1;
+        }
+
+        body.light #header {
+            background: #f1f5f9;
+            border-bottom-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        body.light #input-area {
+            background: #f1f5f9;
+            border-top-color: #cbd5e1;
+        }
+
+        body.light #input {
+            background: white;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+        }
+
+        body.light .ai {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        body.light .user {
+            background: #2563eb;
+            color: white;
+        }
+
+        body.light button.theme-toggle {
+            background: #0f172a;
+            color: white;
+        }
+
+        .typing-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #94a3b8;
+            margin: 0 3px;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
             }
 
-            #chat::-webkit-scrollbar {
-                width: 6px;
+            50% {
+                transform: translateY(-10px);
             }
+        }
+    </style>
+</head>
 
-            #chat::-webkit-scrollbar-track {
-                background: transparent;
-            }
+<body class="h-screen flex overflow-hidden transition-colors duration-300">
+    <!-- Sidebar -->
+    <div id="sidebar" class="w-72 bg-slate-950 p-5 border-r border-slate-800 flex flex-col transition-colors">
+        <h2 class="mb-6 text-xl font-bold text-red-400 flex items-center gap-2">
+            🩸 SevaSethu
+        </h2>
+        <div id="history-list" class="space-y-3 overflow-y-auto flex-1"></div>
+    </div>
 
-            #chat::-webkit-scrollbar-thumb {
-                background: #475569;
-                border-radius: 3px;
-            }
-
-            body.light {
-                background: #f8fafc;
-            }
-
-            body.light #sidebar {
-                background: #e2e8f0;
-                border-right-color: #cbd5e1;
-            }
-
-            body.light #sidebar h2 {
-                color: #b91c1c;
-            }
-
-            body.light .history-item {
-                background: #f1f5f9;
-            }
-
-            body.light .history-item:hover {
-                background: #cbd5e1;
-            }
-
-            body.light #header {
-                background: #f1f5f9;
-                border-bottom-color: #cbd5e1;
-                color: #0f172a;
-            }
-
-            body.light #input-area {
-                background: #f1f5f9;
-                border-top-color: #cbd5e1;
-            }
-
-            body.light #input {
-                background: white;
-                color: #0f172a;
-                border: 1px solid #cbd5e1;
-            }
-
-            body.light .ai {
-                background: #e2e8f0;
-                color: #0f172a;
-            }
-
-            body.light .user {
-                background: #2563eb;
-                color: white;
-            }
-
-            body.light button.theme-toggle {
-                background: #0f172a;
-                color: white;
-            }
-
-            .typing-dot {
-                display: inline-block;
-                width: 8px;
-                height: 8px;
-                border-radius: 50%;
-                background: #94a3b8;
-                margin: 0 3px;
-                animation: bounce 1.4s infinite ease-in-out;
-            }
-
-            .typing-dot:nth-child(2) {
-                animation-delay: 0.2s;
-            }
-
-            .typing-dot:nth-child(3) {
-                animation-delay: 0.4s;
-            }
-
-            @keyframes bounce {
-                0%,
-                100% {
-                    transform: translateY(0);
-                }
-
-                50% {
-                    transform: translateY(-10px);
-                }
-            }
-        </style>
-    </head>
-
-    <body class="h-screen flex overflow-hidden transition-colors duration-300">
-        <!-- Sidebar -->
-        <div
-            id="sidebar"
-            class="w-72 bg-slate-950 p-5 border-r border-slate-800 flex flex-col transition-colors"
-        >
-            <h2
-                class="mb-6 text-xl font-bold text-red-400 flex items-center gap-2"
-            >
-                🩸 SevaSethu
-            </h2>
-            <div
-                id="history-list"
-                class="space-y-3 overflow-y-auto flex-1"
-            ></div>
-        </div>
-
-        <!-- Main Chat -->
-        <div class="flex-1 flex flex-col">
-            <div
-                id="header"
-                class="flex items-center justify-between px-6 py-4 bg-slate-950 border-b border-slate-800 text-xl font-semibold transition-colors"
-            >
-                <span>Blood Bot Assistant</span>
-                <div class="flex items-center gap-3">
-                    <button
-                        id="voiceToggle"
-                        onclick="toggleVoice()"
-                        class="px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 rounded-lg flex items-center gap-2 transition"
-                        title="Toggle auto-speak answer"
-                    >
-                        <span id="voiceIcon">🔊</span>
-                        <span id="voiceText">Voice On</span>
-                    </button>
-                    <button
-                        onclick="toggleTheme()"
-                        class="theme-toggle p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition"
-                        title="Switch theme"
-                    >
-                        <span id="themeIcon">☀️</span>
-                    </button>
-                </div>
-            </div>
-
-            <div
-                id="chat"
-                class="flex-1 px-6 py-5 overflow-y-auto space-y-4"
-            ></div>
-
-            <div
-                id="input-area"
-                class="flex items-center gap-3 px-5 py-4 bg-slate-950 border-t border-slate-800 transition-colors"
-            >
-                <input
-                    type="text"
-                    id="input"
-                    placeholder="Ask about donation..."
-                    onkeypress="handleKey(event)"
-                    class="flex-1 px-4 py-3 rounded-xl bg-slate-800 text-white placeholder-slate-400 outline-none focus:ring-2 focus:ring-red-500 transition"
-                />
-                <button
-                    onclick="startVoiceInput()"
-                    id="micBtn"
-                    class="p-3 rounded-full bg-slate-700 hover:bg-slate-600 transition flex items-center justify-center"
-                    title="Voice input"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"
-                        />
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M19 10v2a7 7 0 01-14 0v-2"
-                        />
-                        <line x1="12" y1="19" x2="12" y2="23" />
-                        <line x1="8" y1="23" x2="16" y2="23" />
-                    </svg>
+    <!-- Main Chat -->
+    <div class="flex-1 flex flex-col">
+        <div id="header"
+            class="flex items-center justify-between px-6 py-4 bg-slate-950 border-b border-slate-800 text-xl font-semibold transition-colors">
+            <span>Blood Bot Assistant</span>
+            <div class="flex items-center gap-3">
+                <button id="voiceToggle" onclick="toggleVoice()"
+                    class="px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 rounded-lg flex items-center gap-2 transition"
+                    title="Toggle auto-speak answer">
+                    <span id="voiceIcon">🔊</span>
+                    <span id="voiceText">Voice On</span>
                 </button>
-                <button
-                    onclick="send()"
-                    class="px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold transition"
-                >
-                    Send
+                <button onclick="toggleTheme()"
+                    class="theme-toggle p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition" title="Switch theme">
+                    <span id="themeIcon">☀️</span>
                 </button>
             </div>
         </div>
 
-        <script>
-            let conversations = {};
-            let currentChat = null;
-            let voiceEnabled = true;
+        <div id="chat" class="flex-1 px-6 py-5 overflow-y-auto space-y-4"></div>
 
-            // Language mapping: ISO 639-1 → BCP-47 (with multiple fallbacks)
-            const langMap = {
-                en: ["en-US", "en-GB", "en"],
-                hi: ["hi-IN", "hi"],
-                bn: ["bn-IN", "bn-BD", "bn"], // Bengali (India, Bangladesh, generic)
-                ar: ["ar-SA", "ar-EG", "ar"],
-                de: ["de-DE", "de"],
-                es: ["es-ES", "es-MX", "es"],
-                ja: ["ja-JP", "ja"],
-                zh: ["zh-CN", "zh-TW", "zh"],
-                fr: ["fr-FR", "fr-CA", "fr"],
-                pt: ["pt-BR", "pt-PT", "pt"],
-                ru: ["ru-RU", "ru"],
-                it: ["it-IT", "it"],
-            };
+        <div id="input-area"
+            class="flex items-center gap-3 px-5 py-4 bg-slate-950 border-t border-slate-800 transition-colors">
+            <input type="text" id="input" placeholder="Ask about donation..." onkeypress="handleKey(event)"
+                class="flex-1 px-4 py-3 rounded-xl bg-slate-800 text-white placeholder-slate-400 outline-none focus:ring-2 focus:ring-red-500 transition" />
+            <button onclick="startVoiceInput()" id="micBtn"
+                class="p-3 rounded-full bg-slate-700 hover:bg-slate-600 transition flex items-center justify-center"
+                title="Voice input">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 10v2a7 7 0 01-14 0v-2" />
+                    <line x1="12" y1="19" x2="12" y2="23" />
+                    <line x1="8" y1="23" x2="16" y2="23" />
+                </svg>
+            </button>
+            <button onclick="send()"
+                class="px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold transition">
+                Send
+            </button>
+        </div>
+    </div>
 
-            // Wait for voices to be loaded
-            function waitForVoices() {
-                return new Promise((resolve) => {
-                    let voices = window.speechSynthesis.getVoices();
-                    if (voices.length !== 0) {
+    <script>
+        let conversations = {};
+        let currentChat = null;
+        let voiceEnabled = true;
+
+        // Language mapping: ISO 639-1 → BCP-47 (with multiple fallbacks)
+        const langMap = {
+            en: ["en-US", "en-GB", "en"],
+            hi: ["hi-IN", "hi"],
+            bn: ["bn-IN", "bn-BD", "bn"], // Bengali (India, Bangladesh, generic)
+            ar: ["ar-SA", "ar-EG", "ar"],
+            de: ["de-DE", "de"],
+            es: ["es-ES", "es-MX", "es"],
+            ja: ["ja-JP", "ja"],
+            zh: ["zh-CN", "zh-TW", "zh"],
+            fr: ["fr-FR", "fr-CA", "fr"],
+            pt: ["pt-BR", "pt-PT", "pt"],
+            ru: ["ru-RU", "ru"],
+            it: ["it-IT", "it"],
+        };
+
+        // Wait for voices to be loaded
+        function waitForVoices() {
+            return new Promise((resolve) => {
+                let voices = window.speechSynthesis.getVoices();
+                if (voices.length !== 0) {
+                    resolve(voices);
+                } else {
+                    window.speechSynthesis.onvoiceschanged = () => {
+                        voices = window.speechSynthesis.getVoices();
                         resolve(voices);
-                    } else {
-                        window.speechSynthesis.onvoiceschanged = () => {
-                            voices = window.speechSynthesis.getVoices();
-                            resolve(voices);
-                        };
-                    }
-                });
-            }
-
-            // Find the best voice for a given language code
-            function findBestVoice(voices, langCode) {
-                const targets = langMap[langCode] || [langCode];
-                // 1. Exact match on lang attribute
-                for (let target of targets) {
-                    let voice = voices.find((v) => v.lang === target);
-                    if (voice) return voice;
-                }
-                // 2. Partial match (language starts with code)
-                for (let target of targets) {
-                    let base = target.split("-")[0];
-                    let voice = voices.find((v) => v.lang.startsWith(base));
-                    if (voice) return voice;
-                }
-                // 3. Fallback to any voice (default)
-                return null;
-            }
-
-            // Speak text with automatic voice selection for any language
-            async function speakText(text, langCode) {
-                if (!text || text.trim() === "") return;
-                if (!voiceEnabled) return;
-
-                window.speechSynthesis.cancel();
-
-                const voices = await waitForVoices();
-                console.log(
-                    "Available voices:",
-                    voices.map((v) => `${v.name} (${v.lang})`),
-                );
-
-                let selectedVoice = findBestVoice(voices, langCode);
-                const utterance = new SpeechSynthesisUtterance(text);
-
-                if (selectedVoice) {
-                    utterance.voice = selectedVoice;
-                    utterance.lang = selectedVoice.lang;
-                    console.log(
-                        `✅ Speaking ${langCode} with voice: ${selectedVoice.name} (${selectedVoice.lang})`,
-                    );
-                } else {
-                    // No voice found – use a generic fallback language tag and alert user
-                    const fallbackLang = langMap[langCode]
-                        ? langMap[langCode][0]
-                        : "en-US";
-                    utterance.lang = fallbackLang;
-                    console.warn(
-                        `⚠️ No voice for ${langCode}. Using fallback language ${fallbackLang}.`,
-                    );
-                    // Show a one-time alert (optional)
-                    if (!window._voiceAlertShown) {
-                        alert(
-                            `Your browser does not have a voice for "${langCode}". The bot will speak in English instead. To enable ${langCode.toUpperCase()} voice, install the language pack on your system.`,
-                        );
-                        window._voiceAlertShown = true;
-                    }
-                }
-
-                utterance.rate = 0.95;
-                utterance.pitch = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-
-            // ---------------- Theme -----------------
-            function setThemeFromStorage() {
-                const saved = localStorage.getItem("blood-bot-theme");
-                if (saved === "light") {
-                    document.body.classList.add("light");
-                    document.getElementById("themeIcon").textContent = "🌙";
-                } else {
-                    document.body.classList.remove("light");
-                    document.getElementById("themeIcon").textContent = "☀️";
-                }
-            }
-
-            function toggleTheme() {
-                document.body.classList.toggle("light");
-                const isLight = document.body.classList.contains("light");
-                localStorage.setItem(
-                    "blood-bot-theme",
-                    isLight ? "light" : "dark",
-                );
-                document.getElementById("themeIcon").textContent = isLight
-                    ? "🌙"
-                    : "☀️";
-            }
-
-            // ---------------- Voice Toggle ----------------
-            function toggleVoice() {
-                voiceEnabled = !voiceEnabled;
-                const icon = document.getElementById("voiceIcon");
-                const text = document.getElementById("voiceText");
-                if (voiceEnabled) {
-                    icon.textContent = "🔊";
-                    text.textContent = "Voice On";
-                } else {
-                    icon.textContent = "🔇";
-                    text.textContent = "Voice Off";
-                }
-            }
-
-            // ---------------- Speech Recognition ----------------
-            async function startVoiceInput() {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        audio: true,
-                    });
-                    stream.getTracks().forEach((track) => track.stop());
-                } catch (err) {
-                    alert(
-                        "Microphone access denied. Please allow mic access and try again.",
-                    );
-                    return;
-                }
-
-                const SpeechRecognition =
-                    window.SpeechRecognition || window.webkitSpeechRecognition;
-                if (!SpeechRecognition) {
-                    alert(
-                        "Sorry, your browser doesn't support speech recognition. Try Chrome or Edge.",
-                    );
-                    return;
-                }
-
-                const recognition = new SpeechRecognition();
-                recognition.lang = "bn-IN"; // Better for Bengali input
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
-
-                const micBtn = document.getElementById("micBtn");
-                micBtn.disabled = true;
-                micBtn.classList.add("opacity-50");
-                recognition.start();
-
-                recognition.onresult = function (event) {
-                    const transcript = event.results[0][0].transcript.trim();
-                    if (transcript) {
-                        document.getElementById("input").value = transcript;
-                        setTimeout(() => send(), 300);
-                    }
-                };
-
-                recognition.onerror = function (event) {
-                    console.error("Speech recognition error:", event.error);
-                    alert("Speech recognition error: " + event.error);
-                    micBtn.disabled = false;
-                    micBtn.classList.remove("opacity-50");
-                };
-
-                recognition.onend = function () {
-                    micBtn.disabled = false;
-                    micBtn.classList.remove("opacity-50");
-                };
-            }
-
-            // ---------------- Chat History ----------------
-            async function loadHistory() {
-                const res = await fetch("/history");
-                const data = await res.json();
-                const historyList = document.getElementById("history-list");
-                historyList.innerHTML = "";
-
-                conversations = {};
-                let chatId = 0;
-
-                data.forEach((msg) => {
-                    if (msg.role === "human") {
-                        chatId++;
-                        conversations[chatId] = [msg];
-                    } else if (msg.role === "ai") {
-                        if (conversations[chatId])
-                            conversations[chatId].push(msg);
-                    }
-                });
-
-                Object.keys(conversations).forEach((id) => {
-                    const item = document.createElement("div");
-                    item.className =
-                        "history-item p-3 rounded-lg bg-slate-900 cursor-pointer hover:bg-slate-800 transition truncate";
-                    item.innerText = conversations[id][0].content.slice(0, 30);
-                    item.onclick = () => loadChat(id);
-                    historyList.appendChild(item);
-                });
-
-                if (currentChat && !conversations[currentChat])
-                    currentChat = null;
-            }
-
-            function loadChat(id) {
-                if (!conversations[id]) return;
-                currentChat = id;
-                const chat = document.getElementById("chat");
-                chat.innerHTML = "";
-
-                conversations[id].forEach((msg) => {
-                    const div = document.createElement("div");
-                    div.className =
-                        "msg " + (msg.role === "human" ? "user" : "ai");
-                    div.classList.add(
-                        "max-w-[75%]",
-                        "p-4",
-                        "rounded-xl",
-                        "whitespace-pre-wrap",
-                        "leading-relaxed",
-                    );
-                    if (msg.role === "human") {
-                        div.classList.add(
-                            "user",
-                            "bg-blue-600",
-                            "self-end",
-                            "ml-auto",
-                            "text-white",
-                        );
-                    } else {
-                        div.classList.add("ai", "bg-slate-800", "text-white");
-                    }
-                    div.innerText = msg.content;
-                    if (msg.role !== "human") {
-                        const speakBtn = createSpeakButton(
-                            msg.content,
-                            msg.lang,
-                        );
-                        div.appendChild(speakBtn);
-                    }
-                    chat.appendChild(div);
-                });
-                chat.scrollTop = chat.scrollHeight;
-            }
-
-            function createSpeakButton(text, langCode) {
-                const btn = document.createElement("button");
-                btn.className =
-                    "ml-2 inline-flex items-center justify-center p-1 rounded-full bg-slate-600 hover:bg-slate-500 transition";
-                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v.01M17.364 18.364l-2.828-2.828M21 12h.01M3 12h.01M6.636 18.364l2.828-2.828M12 18v.01"/></svg>`;
-                btn.title = "Read this answer aloud";
-                btn.onclick = (e) => {
-                    e.stopPropagation();
-                    speakText(text, langCode);
-                };
-                return btn;
-            }
-
-            // ---------------- Send ----------------
-            function handleKey(e) {
-                if (e.key === "Enter") send();
-            }
-
-            async function send() {
-                const input = document.getElementById("input");
-                const message = input.value.trim();
-                if (!message) return;
-                const chat = document.getElementById("chat");
-
-                if (!currentChat || !conversations[currentChat]) {
-                    currentChat = Date.now();
-                    conversations[currentChat] = [];
-                }
-
-                const userMsg = { role: "human", content: message };
-                conversations[currentChat].push(userMsg);
-
-                const userDiv = document.createElement("div");
-                userDiv.className =
-                    "msg user max-w-[75%] p-4 rounded-xl bg-blue-600 self-end ml-auto text-white whitespace-pre-wrap leading-relaxed";
-                userDiv.innerText = message;
-                chat.appendChild(userDiv);
-                input.value = "";
-
-                const typingDiv = document.createElement("div");
-                typingDiv.className =
-                    "msg ai max-w-[75%] p-4 rounded-xl bg-slate-800 text-white flex items-center gap-1";
-                typingDiv.innerHTML = `<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>`;
-                chat.appendChild(typingDiv);
-                chat.scrollTop = chat.scrollHeight;
-
-                try {
-                    const res = await fetch("/chat", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ message }),
-                    });
-                    if (!res.ok)
-                        throw new Error(`Server error (${res.status})`);
-
-                    const data = await res.json();
-                    const aiLang = data.lang; // 'bn' for Bengali
-
-                    chat.removeChild(typingDiv);
-
-                    const aiDiv = document.createElement("div");
-                    aiDiv.className =
-                        "msg ai max-w-[75%] p-4 rounded-xl bg-slate-800 text-white whitespace-pre-wrap leading-relaxed";
-                    chat.appendChild(aiDiv);
-
-                    typeText(aiDiv, data.reply, 40, () => {
-                        const speakBtn = createSpeakButton(data.reply, aiLang);
-                        aiDiv.appendChild(speakBtn);
-                    });
-
-                    const aiMsg = {
-                        role: "ai",
-                        content: data.reply,
-                        lang: aiLang,
                     };
-                    conversations[currentChat].push(aiMsg);
-
-                    if (voiceEnabled) {
-                        speakText(data.reply, aiLang);
-                    }
-                } catch (error) {
-                    console.error("Send error:", error);
-                    chat.removeChild(typingDiv);
-                    const errorDiv = document.createElement("div");
-                    errorDiv.className =
-                        "msg ai max-w-[75%] p-4 rounded-xl bg-red-800 text-white";
-                    errorDiv.innerText =
-                        "⚠️ " +
-                        (error.message ||
-                            "Something went wrong. Please try again.");
-                    chat.appendChild(errorDiv);
-                    conversations[currentChat].push({
-                        role: "ai",
-                        content: errorDiv.innerText,
-                    });
-                }
-                chat.scrollTop = chat.scrollHeight;
-                loadHistory();
-            }
-
-            function typeText(element, text, speed = 40, onComplete) {
-                element.innerText = "";
-                let i = 0;
-                function typing() {
-                    if (i < text.length) {
-                        element.innerText += text.charAt(i);
-                        i++;
-                        setTimeout(typing, speed);
-                    } else if (onComplete) {
-                        onComplete();
-                    }
-                }
-                typing();
-            }
-
-            // ---------------- Initialization ----------------
-            setThemeFromStorage();
-            loadHistory();
-
-            // Log available voices to console on load
-            waitForVoices().then((voices) => {
-                console.log(
-                    "Final voice list:",
-                    voices.map((v) => `${v.name} (${v.lang})`),
-                );
-                const hasBengali = voices.some((v) => v.lang.startsWith("bn"));
-                if (!hasBengali) {
-                    console.warn(
-                        "⚠️ No Bengali voice found. Install Bengali language pack on your OS to enable Bengali TTS.",
-                    );
-                } else {
-                    console.log("✅ Bengali voice available!");
                 }
             });
-        </script>
-    </body>
+        }
+
+        // Find the best voice for a given language code
+        function findBestVoice(voices, langCode) {
+            const targets = langMap[langCode] || [langCode];
+            // 1. Exact match on lang attribute
+            for (let target of targets) {
+                let voice = voices.find((v) => v.lang === target);
+                if (voice) return voice;
+            }
+            // 2. Partial match (language starts with code)
+            for (let target of targets) {
+                let base = target.split("-")[0];
+                let voice = voices.find((v) => v.lang.startsWith(base));
+                if (voice) return voice;
+            }
+            // 3. Fallback to any voice (default)
+            return null;
+        }
+
+        // Speak text with automatic voice selection for any language
+        async function speakText(text, langCode) {
+            if (!text || text.trim() === "") return;
+            if (!voiceEnabled) return;
+
+            window.speechSynthesis.cancel();
+
+            const voices = await waitForVoices();
+            console.log(
+                "Available voices:",
+                voices.map((v) => `${v.name} (${v.lang})`),
+            );
+
+            let selectedVoice = findBestVoice(voices, langCode);
+            const utterance = new SpeechSynthesisUtterance(text);
+
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+                utterance.lang = selectedVoice.lang;
+                console.log(
+                    `✅ Speaking ${langCode} with voice: ${selectedVoice.name} (${selectedVoice.lang})`,
+                );
+            } else {
+                // No voice found – use a generic fallback language tag and alert user
+                const fallbackLang = langMap[langCode]
+                    ? langMap[langCode][0]
+                    : "en-US";
+                utterance.lang = fallbackLang;
+                console.warn(
+                    `⚠️ No voice for ${langCode}. Using fallback language ${fallbackLang}.`,
+                );
+                // Show a one-time alert (optional)
+                if (!window._voiceAlertShown) {
+                    alert(
+                        `Your browser does not have a voice for "${langCode}". The bot will speak in English instead. To enable ${langCode.toUpperCase()} voice, install the language pack on your system.`,
+                    );
+                    window._voiceAlertShown = true;
+                }
+            }
+
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // ---------------- Theme -----------------
+        function setThemeFromStorage() {
+            const saved = localStorage.getItem("blood-bot-theme");
+            if (saved === "light") {
+                document.body.classList.add("light");
+                document.getElementById("themeIcon").textContent = "🌙";
+            } else {
+                document.body.classList.remove("light");
+                document.getElementById("themeIcon").textContent = "☀️";
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("light");
+            const isLight = document.body.classList.contains("light");
+            localStorage.setItem(
+                "blood-bot-theme",
+                isLight ? "light" : "dark",
+            );
+            document.getElementById("themeIcon").textContent = isLight
+                ? "🌙"
+                : "☀️";
+        }
+
+        // ---------------- Voice Toggle ----------------
+        function toggleVoice() {
+            voiceEnabled = !voiceEnabled;
+            const icon = document.getElementById("voiceIcon");
+            const text = document.getElementById("voiceText");
+            if (voiceEnabled) {
+                icon.textContent = "🔊";
+                text.textContent = "Voice On";
+            } else {
+                icon.textContent = "🔇";
+                text.textContent = "Voice Off";
+            }
+        }
+
+        // ---------------- Speech Recognition ----------------
+        async function startVoiceInput() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                });
+                stream.getTracks().forEach((track) => track.stop());
+            } catch (err) {
+                alert(
+                    "Microphone access denied. Please allow mic access and try again.",
+                );
+                return;
+            }
+
+            const SpeechRecognition =
+                window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert(
+                    "Sorry, your browser doesn't support speech recognition. Try Chrome or Edge.",
+                );
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = "bn-IN"; // Better for Bengali input
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            const micBtn = document.getElementById("micBtn");
+            micBtn.disabled = true;
+            micBtn.classList.add("opacity-50");
+            recognition.start();
+
+            recognition.onresult = function (event) {
+                const transcript = event.results[0][0].transcript.trim();
+                if (transcript) {
+                    document.getElementById("input").value = transcript;
+                    setTimeout(() => send(), 300);
+                }
+            };
+
+            recognition.onerror = function (event) {
+                console.error("Speech recognition error:", event.error);
+                alert("Speech recognition error: " + event.error);
+                micBtn.disabled = false;
+                micBtn.classList.remove("opacity-50");
+            };
+
+            recognition.onend = function () {
+                micBtn.disabled = false;
+                micBtn.classList.remove("opacity-50");
+            };
+        }
+
+        // ---------------- Chat History ----------------
+        async function loadHistory() {
+            const res = await fetch("/history");
+            const data = await res.json();
+            const historyList = document.getElementById("history-list");
+            historyList.innerHTML = "";
+
+            conversations = {};
+            let chatId = 0;
+
+            data.forEach((msg) => {
+                if (msg.role === "human") {
+                    chatId++;
+                    conversations[chatId] = [msg];
+                } else if (msg.role === "ai") {
+                    if (conversations[chatId])
+                        conversations[chatId].push(msg);
+                }
+            });
+
+            Object.keys(conversations).forEach((id) => {
+                const item = document.createElement("div");
+                item.className =
+                    "history-item p-3 rounded-lg bg-slate-900 cursor-pointer hover:bg-slate-800 transition truncate";
+                item.innerText = conversations[id][0].content.slice(0, 30);
+                item.onclick = () => loadChat(id);
+                historyList.appendChild(item);
+            });
+
+            if (currentChat && !conversations[currentChat])
+                currentChat = null;
+        }
+
+        function loadChat(id) {
+            if (!conversations[id]) return;
+            currentChat = id;
+            const chat = document.getElementById("chat");
+            chat.innerHTML = "";
+
+            conversations[id].forEach((msg) => {
+                const div = document.createElement("div");
+                div.className =
+                    "msg " + (msg.role === "human" ? "user" : "ai");
+                div.classList.add(
+                    "max-w-[75%]",
+                    "p-4",
+                    "rounded-xl",
+                    "whitespace-pre-wrap",
+                    "leading-relaxed",
+                );
+                if (msg.role === "human") {
+                    div.classList.add(
+                        "user",
+                        "bg-blue-600",
+                        "self-end",
+                        "ml-auto",
+                        "text-white",
+                    );
+                } else {
+                    div.classList.add("ai", "bg-slate-800", "text-white");
+                }
+                div.innerText = msg.content;
+                if (msg.role !== "human") {
+                    const speakBtn = createSpeakButton(
+                        msg.content,
+                        msg.lang,
+                    );
+                    div.appendChild(speakBtn);
+                }
+                chat.appendChild(div);
+            });
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function createSpeakButton(text, langCode) {
+            const btn = document.createElement("button");
+            btn.className =
+                "ml-2 inline-flex items-center justify-center p-1 rounded-full bg-slate-600 hover:bg-slate-500 transition";
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v.01M17.364 18.364l-2.828-2.828M21 12h.01M3 12h.01M6.636 18.364l2.828-2.828M12 18v.01"/></svg>`;
+            btn.title = "Read this answer aloud";
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                speakText(text, langCode);
+            };
+            return btn;
+        }
+
+        // ---------------- Send ----------------
+        function handleKey(e) {
+            if (e.key === "Enter") send();
+        }
+
+        async function send() {
+            const input = document.getElementById("input");
+            const message = input.value.trim();
+            if (!message) return;
+            const chat = document.getElementById("chat");
+
+            if (!currentChat || !conversations[currentChat]) {
+                currentChat = Date.now();
+                conversations[currentChat] = [];
+            }
+
+            const userMsg = { role: "human", content: message };
+            conversations[currentChat].push(userMsg);
+
+            const userDiv = document.createElement("div");
+            userDiv.className =
+                "msg user max-w-[75%] p-4 rounded-xl bg-blue-600 self-end ml-auto text-white whitespace-pre-wrap leading-relaxed";
+            userDiv.innerText = message;
+            chat.appendChild(userDiv);
+            input.value = "";
+
+            const typingDiv = document.createElement("div");
+            typingDiv.className =
+                "msg ai max-w-[75%] p-4 rounded-xl bg-slate-800 text-white flex items-center gap-1";
+            typingDiv.innerHTML = `<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>`;
+            chat.appendChild(typingDiv);
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const res = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message }),
+                });
+                if (!res.ok)
+                    throw new Error(`Server error (${res.status})`);
+
+                const data = await res.json();
+                const aiLang = data.lang; // 'bn' for Bengali
+
+                chat.removeChild(typingDiv);
+
+                const aiDiv = document.createElement("div");
+                aiDiv.className =
+                    "msg ai max-w-[75%] p-4 rounded-xl bg-slate-800 text-white whitespace-pre-wrap leading-relaxed";
+                chat.appendChild(aiDiv);
+
+                typeText(aiDiv, data.reply, 40, () => {
+                    const speakBtn = createSpeakButton(data.reply, aiLang);
+                    aiDiv.appendChild(speakBtn);
+                });
+
+                const aiMsg = {
+                    role: "ai",
+                    content: data.reply,
+                    lang: aiLang,
+                };
+                conversations[currentChat].push(aiMsg);
+
+                if (voiceEnabled) {
+                    speakText(data.reply, aiLang);
+                }
+            } catch (error) {
+                console.error("Send error:", error);
+                chat.removeChild(typingDiv);
+                const errorDiv = document.createElement("div");
+                errorDiv.className =
+                    "msg ai max-w-[75%] p-4 rounded-xl bg-red-800 text-white";
+                errorDiv.innerText =
+                    "⚠️ " +
+                    (error.message ||
+                        "Something went wrong. Please try again.");
+                chat.appendChild(errorDiv);
+                conversations[currentChat].push({
+                    role: "ai",
+                    content: errorDiv.innerText,
+                });
+            }
+            chat.scrollTop = chat.scrollHeight;
+            loadHistory();
+        }
+
+        function typeText(element, text, speed = 40, onComplete) {
+            element.innerText = "";
+            let i = 0;
+            function typing() {
+                if (i < text.length) {
+                    element.innerText += text.charAt(i);
+                    i++;
+                    setTimeout(typing, speed);
+                } else if (onComplete) {
+                    onComplete();
+                }
+            }
+            typing();
+        }
+
+        // ---------------- Initialization ----------------
+        setThemeFromStorage();
+        loadHistory();
+
+        // Log available voices to console on load
+        waitForVoices().then((voices) => {
+            console.log(
+                "Final voice list:",
+                voices.map((v) => `${v.name} (${v.lang})`),
+            );
+            const hasBengali = voices.some((v) => v.lang.startsWith("bn"));
+            if (!hasBengali) {
+                console.warn(
+                    "⚠️ No Bengali voice found. Install Bengali language pack on your OS to enable Bengali TTS.",
+                );
+            } else {
+                console.log("✅ Bengali voice available!");
+            }
+        });
+    </script>
+</body>
+
 </html>

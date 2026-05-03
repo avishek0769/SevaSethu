@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, jsonify
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
 from langdetect import detect, DetectorFactory
 from dotenv import load_dotenv
 from deep_translator import GoogleTranslator
+from flask_cors import CORS
 import json
 import os
 import re
@@ -11,7 +12,7 @@ import re
 load_dotenv()
 
 app = Flask(__name__)
-
+CORS(app, methods=["POST", "GET", "PUT", "OPTIONS"])
 DetectorFactory.seed = 0
 
 FILE_NAME = "chat_history.json"
@@ -37,9 +38,10 @@ SYSTEM_PROMPT = (
     "Sorry, I can only answer blood donation related questions."
 )
 
-llm = ChatGroq(
-    model="openai/gpt-oss-120b",
-    temperature=0,
+llm = ChatOpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    model="openai/gpt-oss-120b:free",
+    api_key=os.getenv("OPENROUTER_API_KEY"),
 )
 
 
@@ -163,7 +165,6 @@ def index():
 def chat():
     global chat_history
     user_input = request.json.get("message", "").strip()
-    user_input_lower = user_input.lower()
 
     detected_lang = detect_language(user_input)
     english_input = translate_to_english(user_input, detected_lang)
