@@ -4,7 +4,14 @@ const donationSchema = new Schema(
     {
         type: {
             type: String,
-            enum: ["donated", "received", "accepted", "rejected", "missed", "reward"],
+            enum: [
+                "donated",
+                "received",
+                "accepted",
+                "rejected",
+                "missed",
+                "reward",
+            ],
             required: true,
         },
         bloodGroup: {

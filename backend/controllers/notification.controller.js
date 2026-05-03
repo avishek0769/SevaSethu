@@ -31,10 +31,18 @@ const markAsRead = asyncHandler(async (req, res) => {
     );
 
     if (!notification) {
-        return res.status(404).json(new ApiResponse(404, null, "Notification not found"));
+        return res
+            .status(404)
+            .json(new ApiResponse(404, null, "Notification not found"));
     }
 
-    res.status(200).json(new ApiResponse(200, { id: notification._id, isRead: true }, "Marked as read"));
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            { id: notification._id, isRead: true },
+            "Marked as read",
+        ),
+    );
 });
 
 // ── PATCH /api/v1/notifications/read-all ────────────────

@@ -9,9 +9,7 @@ const getHistory = asyncHandler(async (req, res) => {
     if (type) filter.type = type;
     if (status) filter.status = status;
 
-    const entries = await Donation.find(filter)
-        .sort({ createdAt: -1 })
-        .lean();
+    const entries = await Donation.find(filter).sort({ createdAt: -1 }).lean();
 
     // Map to frontend-expected shape
     const mapped = entries.map((e) => ({
@@ -46,8 +44,16 @@ const getDonationStats = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
     const [donated, received, totalTokens] = await Promise.all([
-        Donation.countDocuments({ user: userId, type: { $in: ["donated", "accepted"] }, status: "completed" }),
-        Donation.countDocuments({ user: userId, type: "received", status: "completed" }),
+        Donation.countDocuments({
+            user: userId,
+            type: { $in: ["donated", "accepted"] },
+            status: "completed",
+        }),
+        Donation.countDocuments({
+            user: userId,
+            type: "received",
+            status: "completed",
+        }),
         Donation.aggregate([
             { $match: { user: userId, tokensEarned: { $gt: 0 } } },
             { $group: { _id: null, total: { $sum: "$tokensEarned" } } },
@@ -55,11 +61,15 @@ const getDonationStats = asyncHandler(async (req, res) => {
     ]);
 
     res.status(200).json(
-        new ApiResponse(200, {
-            totalDonated: donated,
-            totalReceived: received,
-            totalTokens: totalTokens[0]?.total || 0,
-        }, "Stats fetched"),
+        new ApiResponse(
+            200,
+            {
+                totalDonated: donated,
+                totalReceived: received,
+                totalTokens: totalTokens[0]?.total || 0,
+            },
+            "Stats fetched",
+        ),
     );
 });
 

@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { verifyStrictJWT } from "../middlewares/auth.middleware.js";
-import { getBadges, getLeaderboard, getRewardsSummary } from "../controllers/rewards.controller.js";
+import {
+    getBadges,
+    getLeaderboard,
+    getRewardsSummary,
+} from "../controllers/rewards.controller.js";
 
 const rewardsRouter = Router();
 

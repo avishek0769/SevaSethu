@@ -1,111 +1,123 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ── Config ──────────────────────────────────────────────
-export const BASE_URL = 'https://r51klsgs-3000.inc1.devtunnels.ms/api/v1'; // Android emulator -> localhost
+export const BASE_URL = "https://r51klsgs-3000.inc1.devtunnels.ms/api/v1"; // Android emulator -> localhost
 
 const api = axios.create({
-  baseURL: BASE_URL,
-  timeout: 15000,
-  headers: { 'Content-Type': 'application/json' },
+    baseURL: BASE_URL,
+    timeout: 15000,
+    headers: { "Content-Type": "application/json" },
 });
 
 // ── Token Storage ───────────────────────────────────────
-const TOKEN_KEY = 'sevasethu_access_token';
-const REFRESH_KEY = 'sevasethu_refresh_token';
+const TOKEN_KEY = "sevasethu_access_token";
+const REFRESH_KEY = "sevasethu_refresh_token";
 
 export const storeTokens = async (access: string, refresh: string) => {
-  await AsyncStorage.setItem(TOKEN_KEY, access);
-  await AsyncStorage.setItem(REFRESH_KEY, refresh);
+    await AsyncStorage.setItem(TOKEN_KEY, access);
+    await AsyncStorage.setItem(REFRESH_KEY, refresh);
 };
 
 export const getStoredTokens = async () => {
-  const accessToken = await AsyncStorage.getItem(TOKEN_KEY);
-  const refreshToken = await AsyncStorage.getItem(REFRESH_KEY);
-  return { accessToken, refreshToken };
+    const accessToken = await AsyncStorage.getItem(TOKEN_KEY);
+    const refreshToken = await AsyncStorage.getItem(REFRESH_KEY);
+    return { accessToken, refreshToken };
 };
 
 export const clearTokens = async () => {
-  await AsyncStorage.removeItem(TOKEN_KEY);
-  await AsyncStorage.removeItem(REFRESH_KEY);
+    await AsyncStorage.removeItem(TOKEN_KEY);
+    await AsyncStorage.removeItem(REFRESH_KEY);
 };
 
 // ── Request Interceptor (attach token) ──────────────────
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-  const { accessToken } = await getStoredTokens();
-  if (accessToken && config.headers) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
-  }
-  return config;
+    const { accessToken } = await getStoredTokens();
+    if (accessToken && config.headers) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
 });
 
 // ── Response Interceptor (auto-refresh on 401) ──────────
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (v: any) => void; reject: (e: any) => void }> = [];
+let failedQueue: Array<{
+    resolve: (v: any) => void;
+    reject: (e: any) => void;
+}> = [];
 
 const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach(p => {
-    if (error) p.reject(error);
-    else p.resolve(token);
-  });
-  failedQueue = [];
+    failedQueue.forEach((p) => {
+        if (error) p.reject(error);
+        else p.resolve(token);
+    });
+    failedQueue = [];
 };
 
 api.interceptors.response.use(
-  response => response,
-  async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    (response) => response,
+    async (error: AxiosError) => {
+        const originalRequest = error.config as InternalAxiosRequestConfig & {
+            _retry?: boolean;
+        };
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then(token => {
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-          }
-          return api(originalRequest);
-        });
-      }
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                }).then((token) => {
+                    if (originalRequest.headers) {
+                        originalRequest.headers.Authorization = `Bearer ${token}`;
+                    }
+                    return api(originalRequest);
+                });
+            }
 
-      originalRequest._retry = true;
-      isRefreshing = true;
+            originalRequest._retry = true;
+            isRefreshing = true;
 
-      try {
-        const { refreshToken } = await getStoredTokens();
-        if (!refreshToken) throw new Error('No refresh token');
+            try {
+                const { refreshToken } = await getStoredTokens();
+                if (!refreshToken) throw new Error("No refresh token");
 
-        const res = await axios.patch(`${BASE_URL}/user/refresh-tokens`, {}, {
-          headers: { Authorization: `Bearer ${refreshToken}` },
-        });
+                const res = await axios.patch(
+                    `${BASE_URL}/user/refresh-tokens`,
+                    {},
+                    {
+                        headers: { Authorization: `Bearer ${refreshToken}` },
+                    },
+                );
 
-        const { accessToken: newAccess, refreshToken: newRefresh } = res.data.data;
-        await storeTokens(newAccess, newRefresh);
-        processQueue(null, newAccess);
+                const { accessToken: newAccess, refreshToken: newRefresh } =
+                    res.data.data;
+                await storeTokens(newAccess, newRefresh);
+                processQueue(null, newAccess);
 
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+                if (originalRequest.headers) {
+                    originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+                }
+                return api(originalRequest);
+            } catch (refreshError) {
+                processQueue(refreshError, null);
+                await clearTokens();
+                return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
+            }
         }
-        return api(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        await clearTokens();
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
-    }
 
-    return Promise.reject(error);
-  },
+        return Promise.reject(error);
+    },
 );
 
 // ── Extract error message helper ────────────────────────
 export const getErrorMessage = (error: any): string => {
-  if (axios.isAxiosError(error)) {
-    return error.response?.data?.message || error.message || 'Network error';
-  }
-  return error?.message || 'Something went wrong';
+    if (axios.isAxiosError(error)) {
+        return (
+            error.response?.data?.message || error.message || "Network error"
+        );
+    }
+    return error?.message || "Something went wrong";
 };
 
 export default api;

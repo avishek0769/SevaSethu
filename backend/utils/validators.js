@@ -5,18 +5,35 @@
  */
 export const validateRequired = (fields, ApiError) => {
     const missing = Object.entries(fields)
-        .filter(([, value]) => value === undefined || value === null || String(value).trim() === "")
+        .filter(
+            ([, value]) =>
+                value === undefined ||
+                value === null ||
+                String(value).trim() === "",
+        )
         .map(([key]) => key);
 
     if (missing.length > 0) {
-        throw new ApiError(400, `Missing required fields: ${missing.join(", ")}`);
+        throw new ApiError(
+            400,
+            `Missing required fields: ${missing.join(", ")}`,
+        );
     }
 };
 
 /**
  * Valid blood group values
  */
-export const VALID_BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+export const VALID_BLOOD_GROUPS = [
+    "A+",
+    "A-",
+    "B+",
+    "B-",
+    "AB+",
+    "AB-",
+    "O+",
+    "O-",
+];
 
 /**
  * Validate blood group
@@ -43,9 +60,9 @@ export const calculateMockDistance = () => {
  *   751+       → Platinum
  */
 export const LEVEL_THRESHOLDS = {
-    Bronze:   { min: 0,   max: 100,  next: "Silver" },
-    Silver:   { min: 101, max: 300,  next: "Gold" },
-    Gold:     { min: 301, max: 750,  next: "Platinum" },
+    Bronze: { min: 0, max: 100, next: "Silver" },
+    Silver: { min: 101, max: 300, next: "Gold" },
+    Gold: { min: 301, max: 750, next: "Platinum" },
     Platinum: { min: 751, max: Infinity, next: "Platinum" },
 };
 
@@ -64,7 +81,12 @@ export const LEVEL_THRESHOLDS = {
  * @param {Date|string} [acceptedAt] - when the donor accepted
  * @returns {number} total Seva coins
  */
-export const calculateTokens = (units, distance, requestCreatedAt, acceptedAt) => {
+export const calculateTokens = (
+    units,
+    distance,
+    requestCreatedAt,
+    acceptedAt,
+) => {
     let coins = (units || 1) * 30;
 
     // Distance bonus

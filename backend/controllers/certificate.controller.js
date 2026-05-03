@@ -7,7 +7,7 @@ import ABI from "../utils/LifelineCert.js";
 
 const downloadCertificate = asyncHandler(async (req, res) => {
     const donationId = req.params.donationId;
-    
+
     // 1. Fetch donation and ensure it's confirmed
     const donation = await Donation.findById(donationId).populate("user");
     if (!donation) throw new ApiError(404, "Donation not found");
@@ -34,7 +34,9 @@ const downloadCertificate = asyncHandler(async (req, res) => {
             const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, wallet);
 
             const tokenURI = `https://r51klsgs-3000.inc1.devtunnels.ms/certificate/${donationId}`;
-            const donationDateUnix = Math.floor(new Date(donation.confirmedAt || Date.now()).getTime() / 1000);
+            const donationDateUnix = Math.floor(
+                new Date(donation.confirmedAt || Date.now()).getTime() / 1000,
+            );
 
             // Call the selfMintCertificate function
             const tx = await contract.selfMintCertificate(
@@ -45,11 +47,11 @@ const downloadCertificate = asyncHandler(async (req, res) => {
                 donation.requesterName || "Verified Doctor",
                 donationDateUnix,
                 donation.units || 1,
-                tokenURI
+                tokenURI,
             );
 
             const receipt = await tx.wait();
-            
+
             // Extract the tokenId from the CertificateMinted event
             let tokenId = "N/A";
             for (const log of receipt.logs) {
@@ -70,15 +72,31 @@ const downloadCertificate = asyncHandler(async (req, res) => {
             await donation.save();
         } catch (error) {
             console.error("Minting failed:", error);
-            throw new ApiError(500, "Failed to mint certificate on the blockchain");
+            throw new ApiError(
+                500,
+                "Failed to mint certificate on the blockchain",
+            );
         }
     }
 
     // 3. Generate PDF using Puppeteer with exact frontend layout
-    const fmt = (date) => new Date(date).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
-    const shortTx = donation.certificateTxHash ? donation.certificateTxHash.slice(0, 14) + '...' + donation.certificateTxHash.slice(-8) : '—';
-    const shortWal = process.env.CONTRACT_ADDRESS ? process.env.CONTRACT_ADDRESS.slice(0, 10) + '...' + process.env.CONTRACT_ADDRESS.slice(-8) : '—';
-    
+    const fmt = (date) =>
+        new Date(date).toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+        });
+    const shortTx = donation.certificateTxHash
+        ? donation.certificateTxHash.slice(0, 14) +
+          "..." +
+          donation.certificateTxHash.slice(-8)
+        : "—";
+    const shortWal = process.env.CONTRACT_ADDRESS
+        ? process.env.CONTRACT_ADDRESS.slice(0, 10) +
+          "..." +
+          process.env.CONTRACT_ADDRESS.slice(-8)
+        : "—";
+
     const htmlContent = `
       <!DOCTYPE html>
         <html>
@@ -325,20 +343,31 @@ const downloadCertificate = asyncHandler(async (req, res) => {
     `;
 
     try {
-        const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+        const browser = await puppeteer.launch({
+            headless: "new",
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
         const page = await browser.newPage();
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        await page.setContent(htmlContent, { waitUntil: "networkidle0" });
 
         const pdfBuffer = await page.pdf({
-            format: 'A4',
+            format: "A4",
             printBackground: true,
-            margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' }
+            margin: {
+                top: "20px",
+                right: "20px",
+                bottom: "20px",
+                left: "20px",
+            },
         });
 
         await browser.close();
 
         res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", `attachment; filename=SevaSethu_Certificate_${donationId}.pdf`);
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=SevaSethu_Certificate_${donationId}.pdf`,
+        );
         res.end(pdfBuffer);
     } catch (pdfError) {
         console.error("PDF generation failed:", pdfError);

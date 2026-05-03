@@ -62,7 +62,9 @@ const getLeaderboard = asyncHandler(async (req, res) => {
         avatar: u.avatar || "",
     }));
 
-    res.status(200).json(new ApiResponse(200, leaderboard, "Leaderboard fetched"));
+    res.status(200).json(
+        new ApiResponse(200, leaderboard, "Leaderboard fetched"),
+    );
 });
 
 // ── GET /api/v1/rewards/summary ─────────────────────────
@@ -72,28 +74,33 @@ const getRewardsSummary = asyncHandler(async (req, res) => {
 
     // Seva coin thresholds: Bronze 0-100, Silver 101-300, Gold 301-750, Platinum 751+
     const levels = {
-        Bronze:   { next: "Silver",   min: 0,   max: 100 },
-        Silver:   { next: "Gold",     min: 101, max: 300 },
-        Gold:     { next: "Platinum", min: 301, max: 750 },
+        Bronze: { next: "Silver", min: 0, max: 100 },
+        Silver: { next: "Gold", min: 101, max: 300 },
+        Gold: { next: "Platinum", min: 301, max: 750 },
         Platinum: { next: "Platinum", min: 751, max: 1500 },
     };
 
     const config = levels[user.level] || levels.Bronze;
     const range = config.max - config.min;
-    const progress = range > 0
-        ? Math.min(Math.round(((coins - config.min) / range) * 100), 100)
-        : 100;
+    const progress =
+        range > 0
+            ? Math.min(Math.round(((coins - config.min) / range) * 100), 100)
+            : 100;
 
     res.status(200).json(
-        new ApiResponse(200, {
-            totalCoins: coins,
-            level: user.level,
-            nextLevel: config.next,
-            levelProgress: Math.max(progress, 0),
-            coinsToNext: Math.max(config.max - coins + 1, 0),
-            totalDonations: user.totalDonations,
-            rank: user.rank,
-        }, "Rewards summary fetched"),
+        new ApiResponse(
+            200,
+            {
+                totalCoins: coins,
+                level: user.level,
+                nextLevel: config.next,
+                levelProgress: Math.max(progress, 0),
+                coinsToNext: Math.max(config.max - coins + 1, 0),
+                totalDonations: user.totalDonations,
+                rank: user.rank,
+            },
+            "Rewards summary fetched",
+        ),
     );
 });
 

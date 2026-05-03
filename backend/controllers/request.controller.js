@@ -4,7 +4,12 @@ import Donation from "../models/donation.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import { validateRequired, validateBloodGroup, calculateMockDistance, calculateTokens } from "../utils/validators.js";
+import {
+    validateRequired,
+    validateBloodGroup,
+    calculateMockDistance,
+    calculateTokens,
+} from "../utils/validators.js";
 
 // ── GET /api/v1/requests?type=urgent&bloodGroup=O+&status=open ──
 const getRequests = asyncHandler(async (req, res) => {
@@ -40,8 +45,22 @@ const getRequestById = asyncHandler(async (req, res) => {
 
 // ── POST /api/v1/requests ───────────────────────────────
 const createRequest = asyncHandler(async (req, res) => {
-    const { type, patientName, bloodGroup, units, hospital, address, contact, notes, date, time } = req.body;
-    validateRequired({ type, bloodGroup, units, hospital, address, contact }, ApiError);
+    const {
+        type,
+        patientName,
+        bloodGroup,
+        units,
+        hospital,
+        address,
+        contact,
+        notes,
+        date,
+        time,
+    } = req.body;
+    validateRequired(
+        { type, bloodGroup, units, hospital, address, contact },
+        ApiError,
+    );
     validateBloodGroup(bloodGroup, ApiError);
 
     const request = await BloodRequest.create({
@@ -59,13 +78,18 @@ const createRequest = asyncHandler(async (req, res) => {
         requesterName: req.user.name,
     });
 
-    res.status(201).json(new ApiResponse(201, request, "Blood request created"));
+    res.status(201).json(
+        new ApiResponse(201, request, "Blood request created"),
+    );
 });
 
 // ── GET /api/v1/requests/my ─────────────────────────────
 // Requests created by current user (exclude closed)
 const getMyRequests = asyncHandler(async (req, res) => {
-    const requests = await BloodRequest.find({ requester: req.user._id, status: { $ne: "closed" } })
+    const requests = await BloodRequest.find({
+        requester: req.user._id,
+        status: { $ne: "closed" },
+    })
         .sort({ createdAt: -1 })
         .lean();
 
@@ -77,7 +101,8 @@ const getMyRequests = asyncHandler(async (req, res) => {
 const acceptRequest = asyncHandler(async (req, res) => {
     const request = await BloodRequest.findById(req.params.id);
     if (!request) throw new ApiError(404, "Request not found");
-    if (request.status !== "open") throw new ApiError(400, "Request is no longer open");
+    if (request.status !== "open")
+        throw new ApiError(400, "Request is no longer open");
 
     const donor = req.user;
 
@@ -85,7 +110,8 @@ const acceptRequest = asyncHandler(async (req, res) => {
     const alreadyAccepted = request.acceptedDonors.some(
         (d) => d.donor?.toString() === donor._id.toString(),
     );
-    if (alreadyAccepted) throw new ApiError(400, "You have already accepted this request");
+    if (alreadyAccepted)
+        throw new ApiError(400, "You have already accepted this request");
 
     request.acceptedDonors.push({
         donor: donor._id,
@@ -118,7 +144,8 @@ const acceptRequest = asyncHandler(async (req, res) => {
         requesterName: request.requesterName,
         requesterPhone: request.contact,
         acceptedAt: new Date(),
-        approvalNote: "Once the requester approves, the donor receives the certificate and tokens.",
+        approvalNote:
+            "Once the requester approves, the donor receives the certificate and tokens.",
     });
 
     res.status(200).json(new ApiResponse(200, request, "Request accepted"));
@@ -138,7 +165,8 @@ const confirmDonation = asyncHandler(async (req, res) => {
     const donorEntry = request.acceptedDonors.find(
         (d) => d.donor?.toString() === donorId,
     );
-    if (!donorEntry) throw new ApiError(404, "Donor not found in accepted list");
+    if (!donorEntry)
+        throw new ApiError(404, "Donor not found in accepted list");
 
     donorEntry.confirmed = true;
     await request.save();
@@ -146,9 +174,9 @@ const confirmDonation = asyncHandler(async (req, res) => {
     // Calculate Seva coins with multi-factor scoring
     const sevaCoins = calculateTokens(
         request.units,
-        donorEntry.distance,        // how far the donor traveled
-        request.createdAt,           // when request was posted
-        donorEntry.acceptedAt,       // when donor accepted
+        donorEntry.distance, // how far the donor traveled
+        request.createdAt, // when request was posted
+        donorEntry.acceptedAt, // when donor accepted
     );
 
     // Update history
@@ -242,7 +270,9 @@ const getMatchedDonors = asyncHandler(async (req, res) => {
         "AB+": ["AB+", "AB-", "A+", "A-", "B+", "B-", "O+", "O-"],
     };
 
-    const compatible = compatibleGroups[request.bloodGroup] || [request.bloodGroup];
+    const compatible = compatibleGroups[request.bloodGroup] || [
+        request.bloodGroup,
+    ];
 
     const donors = await User.find({
         role: "donor",
@@ -262,7 +292,9 @@ const getMatchedDonors = asyncHandler(async (req, res) => {
         lastDonation: d.lastDonation?.toISOString() || "",
     }));
 
-    res.status(200).json(new ApiResponse(200, enriched, "Matched donors fetched"));
+    res.status(200).json(
+        new ApiResponse(200, enriched, "Matched donors fetched"),
+    );
 });
 
 // ── POST /api/v1/requests/:id/close ─────────────────────

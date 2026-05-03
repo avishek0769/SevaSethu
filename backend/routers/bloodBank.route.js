@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { getBloodBanks, getBloodBankById } from "../controllers/bloodBank.controller.js";
+import {
+    getBloodBanks,
+    getBloodBankById,
+} from "../controllers/bloodBank.controller.js";
 
 const bloodBankRouter = Router();
 
