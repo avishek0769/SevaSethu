@@ -1,0 +1,26 @@
+{
+  "name": "lifeline-nft-certificate",
+  "version": "1.0.0",
+  "description": "LifeLine Blood Donation NFT Certificate — Real Blockchain on Polygon",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "compile": "npx hardhat compile",
+    "deploy:testnet": "npx hardhat run scripts/deploy.js --network amoy",
+    "deploy:mainnet": "npx hardhat run scripts/deploy.js --network polygon"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.6",
+    "ethers": "^6.9.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "dotenv": "^16.3.1",
+    "hardhat": "^2.28.6",
+    "vite": "^4.4.0"
+  }
+}
