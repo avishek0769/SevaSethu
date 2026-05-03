@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import PDFDocument from "pdfkit";
+import puppeteer from "puppeteer";
 import Donation from "../models/donation.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -74,46 +74,103 @@ const downloadCertificate = asyncHandler(async (req, res) => {
         }
     }
 
-    // 3. Generate PDF
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename=SevaSethu_Certificate_${donationId}.pdf`);
-
-    const doc = new PDFDocument({
-        layout: "landscape",
-        size: "A4",
-    });
-
-    doc.pipe(res);
-
-    // PDF Styling
-    doc.rect(0, 0, doc.page.width, doc.page.height).fill("#f8f9fa");
-    doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).stroke("#e11d48");
-    doc.rect(25, 25, doc.page.width - 50, doc.page.height - 50).stroke("#be123c");
-
-    // Header
-    doc.fillColor("#be123c").fontSize(40).text("CERTIFICATE", 0, 90, { align: "center" });
-    doc.fillColor("#000000").fontSize(20).text("OF APPRECIATION", 0, 135, { align: "center" });
-
-    // Body
-    doc.fontSize(14).text("THIS IS PROUDLY PRESENTED TO", 0, 200, { align: "center" });
+    // 3. Generate PDF using Puppeteer with exact frontend layout
+    const fmt = (date) => new Date(date).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+    const shortTx = donation.certificateTxHash ? donation.certificateTxHash.slice(0, 14) + '...' + donation.certificateTxHash.slice(-8) : '—';
+    const shortWal = process.env.CONTRACT_ADDRESS ? process.env.CONTRACT_ADDRESS.slice(0, 10) + '...' + process.env.CONTRACT_ADDRESS.slice(-8) : '—';
     
-    doc.fillColor("#e11d48").fontSize(32).text(donation.donorName || donation.user.name, 0, 230, { align: "center" });
-    
-    doc.fillColor("#4b5563").fontSize(14).text(
-        `For their selfless and noble act of donating ${donation.units} unit(s) of ${donation.bloodGroup} blood at ${donation.hospital}. Your contribution is a lifeline to those in need.`, 
-        100, 280, { align: "center", width: doc.page.width - 200 }
-    );
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+        <style>
+          body { background: transparent; margin: 0; padding: 20px; color: #f0e0e4; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+          .cert-container { width: 100%; max-width: 680px; }
+          .status-badges { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+          .badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; padding: 4px 12px; font-size: 11px; font-family: 'Share Tech Mono', monospace; }
+          .badge-verified { background: #071a0e; border: 1px solid #1a6b35; color: #2ecc71; }
+          .badge-erc { background: #150a1a; border: 1px solid #4a2a6a; color: #a855f7; }
+          .badge-token { background: #1a1205; border: 1px solid #d4af37; color: #d4af37; }
+          .gold-wrapper { padding: 3px; border-radius: 14px; background: linear-gradient(135deg,#d4af37,#8b0000,#d4af37,#8b0000,#d4af37); }
+          .cert-body { background: linear-gradient(160deg,#130810 0%,#0d0508 50%,#130810 100%); border-radius: 12px; padding: 28px 28px 22px; position: relative; overflow: hidden; }
+          .watermark { position: absolute; font-size: 160px; opacity: 0.04; top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; user-select: none; line-height: 1; }
+          .header { text-align: center; margin-bottom: 22px; border-bottom: 1px solid #3a1510; padding-bottom: 16px; }
+          .header-sub { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.3em; color: #d4af37; margin-bottom: 6px; }
+          .header-title { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700; color: #f5d76e; letter-spacing: 0.1em; }
+          .header-meta { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #a07080; letter-spacing: 0.15em; margin-top: 4px; }
+          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; margin-bottom: 20px; }
+          .field-label { font-size: 10px; color: #a07080; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+          .chain-box { background: #0a0306; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; border: 1px solid #2a0f16; }
+          .chain-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+          .chain-label { font-size: 10px; font-family: 'Share Tech Mono', monospace; color: #a07080; letter-spacing: 0.08em; }
+          .chain-val { font-size: 11px; font-family: 'Share Tech Mono', monospace; color: #d4af37; }
+          .footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+          .footer-text { font-size: 10px; font-family: 'Share Tech Mono', monospace; color: #5a3040; text-align: right; }
+        </style>
+      </head>
+      <body>
+        <div class="cert-container">
+          <div class="status-badges">
+            <span class="badge badge-verified">✔ Verified on Polygon</span>
+            <span class="badge badge-erc">◆ ERC-721 NFT</span>
+            <span class="badge badge-token">Token #${donation.certificateTokenId}</span>
+          </div>
+          <div class="gold-wrapper">
+            <div class="cert-body">
+              <div class="watermark">🩸</div>
+              <div class="header">
+                <div class="header-sub">✦ LIFELINE BLOOD NETWORK ✦</div>
+                <div class="header-title">Official Donor Certificate</div>
+                <div class="header-meta">Blockchain Verified · Immutable Record</div>
+              </div>
+              <div class="grid">
+                <div><div class="field-label">Donor Name</div><div style="font-size:22px; font-weight:700; font-family:'Cinzel',serif; color:#e74c3c; word-break:break-all;">${donation.donorName || donation.user.name}</div></div>
+                <div><div class="field-label">Blood Type</div><div style="font-size:22px; font-weight:700; font-family:'Cinzel',serif; color:#e74c3c; word-break:break-all;">${donation.bloodGroup}</div></div>
+                <div><div class="field-label">Hospital</div><div style="font-size:14px; font-weight:500; font-family:inherit; color:#f0e0e4; word-break:break-all;">${donation.hospital || "SevaSethu Hospital"}</div></div>
+                <div><div class="field-label">City</div><div style="font-size:14px; font-weight:500; font-family:inherit; color:#f0e0e4; word-break:break-all;">${donation.user.city || "Unknown"}</div></div>
+                <div><div class="field-label">Verified By</div><div style="font-size:14px; font-weight:500; font-family:inherit; color:#f0e0e4; word-break:break-all;">${donation.requesterName || "Verified Doctor"}</div></div>
+                <div><div class="field-label">Donation Date</div><div style="font-size:14px; font-weight:500; font-family:inherit; color:#f0e0e4; word-break:break-all;">${fmt(donation.confirmedAt || Date.now())}</div></div>
+                <div><div class="field-label">Units</div><div style="font-size:14px; font-weight:500; font-family:inherit; color:#f0e0e4; word-break:break-all;">1 bag · ${donation.units * 450 || 450} ml</div></div>
+                <div><div class="field-label">Wallet</div><div style="font-size:11px; font-weight:500; font-family:'Share Tech Mono',monospace; color:#d4af37; word-break:break-all;">${shortWal}</div></div>
+              </div>
+              <div class="chain-box">
+                <div class="chain-row"><span class="chain-label">TX HASH</span><span class="chain-val">${shortTx}</span></div>
+                <div class="chain-row"><span class="chain-label">NETWORK</span><span class="chain-val">Hardhat Localhost</span></div>
+                <div class="chain-row"><span class="chain-label">CONTRACT</span><span class="chain-val">0x5FbDB2315678afecb367f032d93F642f64180aa3</span></div>
+                <div class="chain-row"><span class="chain-label">STANDARD</span><span class="chain-val">ERC-721 · IPFS Metadata</span></div>
+              </div>
+              <div class="footer">
+                <div style="flex:1"></div>
+                <div class="footer-text">LIFELINE·NFT<br/>v1.0.0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
 
-    // Meta Data
-    doc.fillColor("#000000").fontSize(12).text(`Date: ${new Date(donation.confirmedAt || Date.now()).toLocaleDateString()}`, 100, 360);
-    doc.text(`Authorized by: ${donation.requesterName || "SevaSethu Network"}`, doc.page.width - 300, 360, { align: "right" });
+    try {
+        const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
-    // Blockchain Info Footer
-    doc.fontSize(10).fillColor("#6b7280").text(`Blockchain Verified (Polygon Amoy)`, 100, 450);
-    doc.text(`Token ID: ${donation.certificateTokenId}`, 100, 465);
-    doc.text(`Tx Hash: ${donation.certificateTxHash}`, 100, 480);
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' }
+        });
 
-    doc.end();
+        await browser.close();
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename=SevaSethu_Certificate_${donationId}.pdf`);
+        res.end(pdfBuffer);
+    } catch (pdfError) {
+        console.error("PDF generation failed:", pdfError);
+        throw new ApiError(500, "Failed to generate PDF certificate");
+    }
 });
 
 export { downloadCertificate };
