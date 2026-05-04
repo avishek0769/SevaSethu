@@ -1,0 +1,212 @@
+import { BLOOD_GROUPS } from "./constants";
+import type { Alert, BloodBank, Donation, LeaderboardEntry, Request, User } from "./types";
+function isoDaysAgo(days: number) {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d.toISOString();
+}
+
+export const mockUsers: User[] = [
+  {
+    id: "u_1",
+    name: "Aarav Iyer",
+    role: "donor",
+    bloodGroup: "O+",
+    city: "Bengaluru",
+    state: "Karnataka",
+    locationLabel: "Indiranagar",
+    isAvailable: true,
+    isVerified: true,
+    isFlagged: false,
+    lastActiveAt: isoDaysAgo(0),
+  },
+  {
+    id: "u_2",
+    name: "Meera Nair",
+    role: "donor",
+    bloodGroup: "AB-",
+    city: "Hyderabad",
+    state: "Telangana",
+    locationLabel: "Gachibowli",
+    isAvailable: false,
+    isVerified: false,
+    isFlagged: false,
+    lastActiveAt: isoDaysAgo(2),
+  },
+  {
+    id: "u_3",
+    name: "Rohit Sharma",
+    role: "requester",
+    bloodGroup: "A+",
+    city: "Mumbai",
+    state: "Maharashtra",
+    locationLabel: "Andheri",
+    isAvailable: false,
+    isVerified: true,
+    isFlagged: false,
+    lastActiveAt: isoDaysAgo(1),
+  },
+  {
+    id: "u_4",
+    name: "Sana Khan",
+    role: "donor",
+    bloodGroup: "O-",
+    city: "Delhi",
+    state: "Delhi",
+    locationLabel: "Saket",
+    isAvailable: true,
+    isVerified: true,
+    isFlagged: false,
+    lastActiveAt: isoDaysAgo(0),
+  },
+  {
+    id: "u_5",
+    name: "Karthik R",
+    role: "donor",
+    bloodGroup: "B+",
+    city: "Chennai",
+    state: "Tamil Nadu",
+    locationLabel: "Anna Nagar",
+    isAvailable: true,
+    isVerified: false,
+    isFlagged: true,
+    lastActiveAt: isoDaysAgo(7),
+  },
+];
+
+export const mockRequests: Request[] = [
+  {
+    id: "r_1",
+    type: "urgent",
+    bloodGroup: "AB-",
+    units: 2,
+    hospital: "St. Mary Hospital",
+    city: "Hyderabad",
+    status: "open",
+    urgency: "critical",
+    createdAt: isoDaysAgo(0),
+    acceptedCount: 1,
+    notes: "ICU case, need within 6 hours.",
+  },
+  {
+    id: "r_2",
+    type: "urgent",
+    bloodGroup: "O-",
+    units: 1,
+    hospital: "City Care",
+    city: "Delhi",
+    status: "accepted",
+    urgency: "high",
+    createdAt: isoDaysAgo(1),
+    acceptedCount: 2,
+    notes: "Accident victim.",
+  },
+  {
+    id: "r_3",
+    type: "scheduled",
+    bloodGroup: "A+",
+    units: 3,
+    hospital: "Lotus Medical Center",
+    city: "Bengaluru",
+    status: "open",
+    urgency: "medium",
+    createdAt: isoDaysAgo(3),
+    scheduledAt: isoDaysAgo(-2),
+    acceptedCount: 0,
+    notes: "Surgery planned next week.",
+  },
+  {
+    id: "r_4",
+    type: "scheduled",
+    bloodGroup: "B+",
+    units: 2,
+    hospital: "Apollo Clinic",
+    city: "Chennai",
+    status: "fulfilled",
+    urgency: "low",
+    createdAt: isoDaysAgo(10),
+    scheduledAt: isoDaysAgo(6),
+    acceptedCount: 3,
+    notes: "Thalassemia transfusion.",
+  },
+];
+
+export const mockDonations: Donation[] = [
+  {
+    id: "d_1",
+    requestId: "r_2",
+    donorName: "Sana Khan",
+    bloodGroup: "O-",
+    units: 1,
+    tokens: 120,
+    status: "pending",
+    date: isoDaysAgo(0),
+  },
+  {
+    id: "d_2",
+    requestId: "r_4",
+    donorName: "Karthik R",
+    bloodGroup: "B+",
+    units: 1,
+    tokens: 80,
+    status: "verified",
+    date: isoDaysAgo(5),
+  },
+];
+
+export const mockAlerts: Alert[] = [
+  {
+    id: "a_1",
+    title: "Rare blood needed: AB-",
+    message: "No matched donors within 10km. Consider expanding radius.",
+    bloodGroups: ["AB-"],
+    severity: "critical",
+    createdAt: isoDaysAgo(0),
+    notified: false,
+  },
+  {
+    id: "a_2",
+    title: "Unfulfilled request cluster",
+    message: "3 open urgent requests in Hyderabad are pending donor match.",
+    bloodGroups: ["A-", "B-", "O-"].filter((g): g is (typeof BLOOD_GROUPS)[number] => BLOOD_GROUPS.includes(g as any)),
+    severity: "high",
+    createdAt: isoDaysAgo(1),
+    notified: false,
+  },
+];
+
+export const mockBloodBanks: BloodBank[] = [
+  {
+    id: "bb_1",
+    name: "RedCross Blood Bank",
+    address: "12 MG Road",
+    contact: "+91 90000 00001",
+    city: "Bengaluru",
+    state: "Karnataka",
+    groups: ["A+", "B+", "O+", "O-"],
+    status: "active",
+  },
+  {
+    id: "bb_2",
+    name: "City Blood Center",
+    address: "Near Central Station",
+    contact: "+91 90000 00002",
+    city: "Chennai",
+    state: "Tamil Nadu",
+    groups: ["A+", "AB+", "O+"],
+    status: "inactive",
+  },
+];
+
+export const mockLeaderboardIndividuals: LeaderboardEntry[] = [
+  { id: "li_1", rank: 1, name: "Aarav Iyer", scopeLabel: "Bengaluru", tokens: 1240, donations: 14 },
+  { id: "li_2", rank: 2, name: "Sana Khan", scopeLabel: "Delhi", tokens: 1160, donations: 12 },
+  { id: "li_3", rank: 3, name: "Meera Nair", scopeLabel: "Hyderabad", tokens: 980, donations: 10 },
+  { id: "li_4", rank: 4, name: "Karthik R", scopeLabel: "Chennai", tokens: 860, donations: 9 },
+];
+
+export const mockLeaderboardBanks: LeaderboardEntry[] = [
+  { id: "lb_1", rank: 1, name: "RedCross Blood Bank", scopeLabel: "Karnataka", tokens: 6420, donations: 71 },
+  { id: "lb_2", rank: 2, name: "City Blood Center", scopeLabel: "Tamil Nadu", tokens: 5180, donations: 58 },
+  { id: "lb_3", rank: 3, name: "Metro Blood Hub", scopeLabel: "Telangana", tokens: 4320, donations: 49 },
+];

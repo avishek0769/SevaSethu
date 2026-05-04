@@ -1,1 +1,55 @@
 @import "tailwindcss";
+
+/*
+  SevaSethu dashboard theme variables (kept aligned with the RN app theme).
+  Actual values are applied dynamically from `applyTheme()`, but we keep a safe
+  light-mode default here to avoid unstyled flashes.
+*/
+:root {
+  --primary: #DC2626;
+  --primary-dark: #991B1B;
+  --primary-light: #FCA5A5;
+  --primary-soft: #FEE2E2;
+  --primary-surface: #FFF1F2;
+
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+  --surface-2: #F1F5F9;
+  --border: #E2E8F0;
+
+  --fg: #0F172A;
+  --fg-2: #475569;
+  --fg-3: #94A3B8;
+  --on-primary: #FFFFFF;
+
+  --success: #059669;
+  --success-bg: #D1FAE5;
+  --warning: #D97706;
+  --warning-bg: #FEF3C7;
+  --info: #2563EB;
+  --info-bg: #DBEAFE;
+  --danger: #DC2626;
+  --danger-bg: #FEE2E2;
+
+  --gold: #F59E0B;
+  --silver: #9CA3AF;
+  --bronze: #D97706;
+  --platinum: #6366F1;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji";
+}
+
+::selection {
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
+}
