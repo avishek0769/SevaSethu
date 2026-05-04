@@ -18,7 +18,7 @@ import {
     Shadow,
 } from "../utils/theme";
 import { useApp } from "../context/AppContext";
-import { AppCard } from "../components/CommonComponents";
+import { AppCard, ConfirmationDialog } from "../components/CommonComponents";
 
 const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
     navigation,
@@ -35,6 +35,7 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
     const bg = C.background;
     const headerGradient = [C.primary, C.primaryDark];
     const [confirmed, setConfirmed] = useState(false);
+    const [confirmDialogVisible, setConfirmDialogVisible] = useState(false);
     const goToMyRequests = () =>
         navigation.navigate("MainApp", { screen: "MyRequests" });
     const requestType: "urgent" | "scheduled" =
@@ -49,13 +50,21 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
 
     const donor = request?.acceptedDonors?.find((item) => item.id === donorId);
 
-    const handleConfirm = () => {
+    const confirmDonationNow = () => {
         if (!request || !donor) {
             return;
         }
 
         confirmDonation(request.id, donor.id);
         setConfirmed(true);
+    };
+
+    const handleConfirmPress = () => {
+        if (!request || !donor) {
+            return;
+        }
+
+        setConfirmDialogVisible(true);
     };
 
     if (confirmed) {
@@ -205,7 +214,7 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
                     </View>
 
                     <TouchableOpacity
-                        onPress={handleConfirm}
+                        onPress={handleConfirmPress}
                         activeOpacity={0.8}
                         style={{ marginTop: 24 }}
                     >
@@ -227,6 +236,22 @@ const DonationConfirmationScreen: React.FC<{ navigation: any; route: any }> = ({
                     </TouchableOpacity>
                 </AppCard>
             </View>
+
+            <ConfirmationDialog
+                visible={confirmDialogVisible}
+                title="Confirm donation"
+                message={`Mark ${donor.name}'s donation as complete for ${request.requesterName}? This should be done only after the blood has been donated.`}
+                icon="check-decagram"
+                accentColor={C.success}
+                confirmColors={["#059669", "#047857"]}
+                confirmText="Yes, confirm"
+                cancelText="Not yet"
+                onCancel={() => setConfirmDialogVisible(false)}
+                onConfirm={() => {
+                    setConfirmDialogVisible(false);
+                    confirmDonationNow();
+                }}
+            />
         </ScrollView>
     );
 };

@@ -93,12 +93,12 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         Math.max(thresholds.max - userCoins + 1, 0);
     const levelColor =
         currentLevel === "Gold"
-            ? "#F59E0B"
+            ? C.gold
             : currentLevel === "Silver"
-              ? "#9CA3AF"
+              ? C.silver
               : currentLevel === "Platinum"
-                ? "#6366F1"
-                : "#D97706";
+                ? C.platinum
+                : C.bronze;
 
     const getLocation = (city: string) => {
         const stateMap: Record<string, string> = {
@@ -181,7 +181,7 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     ]}
                 >
                     <View style={styles.tokenLeft}>
-                        <Icon name="star-circle" size={40} color={C.warning} />
+                        <Icon name="star-circle" size={40} color={levelColor} />
                         <View>
                             <Text
                                 style={[
@@ -204,11 +204,11 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <View
                         style={[
                             styles.levelBadge,
-                            { backgroundColor: C.primaryLight },
+                            { backgroundColor: `${levelColor}22` },
                         ]}
                     >
-                        <Icon name="shield-star" size={20} color={C.primary} />
-                        <Text style={[styles.levelText, { color: C.primary }]}>
+                        <Icon name="shield-star" size={20} color={levelColor} />
+                        <Text style={[styles.levelText, { color: levelColor }]}>
                             {currentLevel}
                         </Text>
                     </View>
@@ -247,7 +247,7 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                                 styles.progressFill,
                                 {
                                     width: `${levelProgress}%`,
-                                    backgroundColor: C.warning,
+                                    backgroundColor: levelColor,
                                 },
                             ]}
                         />
@@ -445,11 +445,11 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                                     {
                                         backgroundColor:
                                             i === 0
-                                                ? C.warningLight
+                                                ? `${C.gold}22`
                                                 : i === 1
-                                                  ? C.primaryLight
+                                                  ? `${C.silver}22`
                                                   : i === 2
-                                                    ? C.primaryLight
+                                                    ? `${C.bronze}22`
                                                     : C.surfaceVariant,
                                     },
                                 ]}
@@ -464,10 +464,10 @@ const RewardsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                                         size={18}
                                         color={
                                             i === 0
-                                                ? C.warning
+                                                ? C.gold
                                                 : i === 1
-                                                  ? C.primary
-                                                  : C.primary
+                                                  ? C.silver
+                                                  : C.bronze
                                         }
                                     />
                                 ) : (

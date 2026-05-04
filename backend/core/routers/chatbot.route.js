@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { verifyStrictJWT } from "../middlewares/auth.middleware.js";
-import { getChatHistory, sendMessage, clearChatHistory } from "../controllers/chatbot.controller.js";
+import {
+    getChatHistory,
+    sendMessage,
+    clearChatHistory,
+} from "../controllers/chatbot.controller.js";
 
 const chatbotRouter = Router();
 

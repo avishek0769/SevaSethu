@@ -193,7 +193,7 @@ const HistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const { isDarkMode, historyEntries, user, fetchHistory } = useApp();
     const C = getColors(isDarkMode);
     const bg = C.background;
-    const headerGradient = [C.primary, C.primaryDark];
+    const headerGradient = [C.primaryLight, C.primary];
     const [selectedFilter, setSelectedFilter] = useState<HistoryFilter>("All");
     const [selectedEntry, setSelectedEntry] =
         useState<AcceptedHistoryCard | null>(null);

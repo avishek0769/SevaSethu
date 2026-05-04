@@ -53,10 +53,10 @@ export const Colors = {
     bloodGroupText: "#DC2626",
 
     // Badge Colors
-    gold: "#F59E0B",
-    silver: "#9CA3AF",
-    bronze: "#D97706",
-    platinum: "#6366F1",
+    gold: "#D4AF37",
+    silver: "#B8C2CC",
+    bronze: "#B87333",
+    platinum: "#A78BFA",
 
     // Overlay
     overlay: "rgba(0, 0, 0, 0.55)",
