@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList,
-    StatusBar, KeyboardAvoidingView, Platform, ActivityIndicator
+    StatusBar, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, PermissionsAndroid
 } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import LinearGradient from "react-native-linear-gradient";
@@ -41,18 +41,24 @@ const ChatbotScreen: React.FC = () => {
         Tts.addEventListener("tts-finish", () => setIsSpeaking(false));
         Tts.addEventListener("tts-cancel", () => setIsSpeaking(false));
 
-        Voice.onSpeechStart = () => setIsListening(true);
-        Voice.onSpeechEnd = () => setIsListening(false);
-        Voice.onSpeechResults = (e: any) => {
-            if (e.value && e.value.length > 0) {
-                setInput(e.value[0]);
-            }
-        };
+        try {
+            Voice.onSpeechStart = () => setIsListening(true);
+            Voice.onSpeechEnd = () => setIsListening(false);
+            Voice.onSpeechResults = (e: any) => {
+                if (e.value && e.value.length > 0) {
+                    setInput(e.value[0]);
+                }
+            };
+        } catch (e) {
+            console.warn("Voice module not fully initialized");
+        }
 
         fetchHistory();
 
         return () => {
-            Voice.destroy().then(Voice.removeAllListeners);
+            try {
+                Voice.destroy().then(Voice.removeAllListeners);
+            } catch (e) {}
             Tts.stop();
         };
     }, []);
@@ -127,13 +133,34 @@ const ChatbotScreen: React.FC = () => {
 
     const toggleListening = async () => {
         try {
+            if (Platform.OS === 'android') {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+                    {
+                        title: "Microphone Permission",
+                        message: "BloodBot needs access to your microphone so you can talk to it.",
+                        buttonNeutral: "Ask Me Later",
+                        buttonNegative: "Cancel",
+                        buttonPositive: "OK"
+                    }
+                );
+                if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+                    Alert.alert("Permission Denied", "Microphone permission is required to use voice input.");
+                    return;
+                }
+            }
+
             if (isListening) {
                 await Voice.stop();
             } else {
                 await Voice.start("en-US");
             }
-        } catch (e) {
-            console.error(e);
+        } catch (e: any) {
+            console.error("Voice Error:", e);
+            Alert.alert(
+                "Voice Input Unavailable",
+                "The Voice native module could not be loaded. This package might be incompatible with the current React Native version. Please use text input instead."
+            );
         }
     };
 
