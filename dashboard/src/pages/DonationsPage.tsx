@@ -26,7 +26,7 @@ export function DonationsPage() {
                     <div>
                         <CardTitle>Donations</CardTitle>
                         <CardMeta>
-                            Verify / reject and adjust reward tokens (UI only)
+                            Verify / reject and adjust reward tokens (mock)
                         </CardMeta>
                     </div>
                     <Badge tone="info">{rows.length} records</Badge>

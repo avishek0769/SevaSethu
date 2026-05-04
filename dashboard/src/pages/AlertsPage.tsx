@@ -63,7 +63,7 @@ export function AlertsPage() {
 
                         <div className="mt-4 flex items-center justify-between">
                             <div className="text-sm text-[var(--fg-2)]">
-                                Notify donors button is UI-only.
+                                Notify donors updates mock state.
                             </div>
                             <Button
                                 variant={a.notified ? "secondary" : "primary"}

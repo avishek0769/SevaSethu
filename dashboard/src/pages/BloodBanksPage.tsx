@@ -88,7 +88,7 @@ export function BloodBanksPage() {
                             Register + manage blood banks (mock)
                         </CardMeta>
                     </div>
-                    <Badge tone="info">UI only</Badge>
+                    <Badge tone="info">Mock</Badge>
                 </CardHeader>
             </Card>
 

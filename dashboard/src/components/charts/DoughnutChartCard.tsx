@@ -1,6 +1,11 @@
 import { Doughnut } from "react-chartjs-2";
 import { Card, CardHeader, CardMeta, CardTitle } from "../ui/Card";
 import "./chartjs";
+import {
+    resolveChartColor,
+    resolveChartColors,
+    withAlpha,
+} from "./chartTheme";
 
 type Props = {
     title: string;
@@ -10,6 +15,19 @@ type Props = {
 };
 
 export function DoughnutChartCard({ title, subtitle, labels, data }: Props) {
+    const surface = resolveChartColor("var(--surface)");
+    const fg2 = resolveChartColor("var(--fg-2)");
+    const border = resolveChartColor("var(--border)");
+
+    const palette = resolveChartColors([
+        "var(--primary)",
+        "var(--info)",
+        "var(--success)",
+        "var(--warning)",
+        "var(--primary-light)",
+    ]);
+    const segmentColors = labels.map((_, i) => palette[i % palette.length]);
+
     return (
         <Card>
             <CardHeader>
@@ -27,15 +45,10 @@ export function DoughnutChartCard({ title, subtitle, labels, data }: Props) {
                             {
                                 label: title,
                                 data,
-                                backgroundColor: [
-                                    "var(--primary)",
-                                    "var(--primary-light)",
-                                ],
-                                borderColor: [
-                                    "var(--surface)",
-                                    "var(--surface)",
-                                ],
+                                backgroundColor: segmentColors,
+                                borderColor: labels.map(() => surface),
                                 borderWidth: 3,
+                                hoverOffset: 6,
                             },
                         ],
                     }}
@@ -45,7 +58,15 @@ export function DoughnutChartCard({ title, subtitle, labels, data }: Props) {
                         plugins: {
                             legend: {
                                 position: "bottom",
-                                labels: { color: "var(--fg-2)" },
+                                labels: { color: fg2 },
+                            },
+                            tooltip: {
+                                enabled: true,
+                                backgroundColor: withAlpha(surface, 0.96),
+                                titleColor: fg2,
+                                bodyColor: fg2,
+                                borderColor: withAlpha(border, 0.9),
+                                borderWidth: 1,
                             },
                         },
                     }}

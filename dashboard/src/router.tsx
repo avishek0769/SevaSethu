@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AppLayout } from "./layouts/AppLayout";
 import { DashboardPage } from "./pages/DashboardPage.tsx";
 import { UsersPage } from "./pages/UsersPage.tsx";
+import { DonorActivityPage } from "./pages/DonorActivityPage.tsx";
 import { RequestsPage } from "./pages/RequestsPage.tsx";
 import { DonationsPage } from "./pages/DonationsPage.tsx";
 import { LeaderboardPage } from "./pages/LeaderboardPage.tsx";
@@ -25,6 +26,11 @@ export const router = createBrowserRouter([
                 path: "users",
                 element: <UsersPage />,
                 handle: { title: "Users" },
+            },
+            {
+                path: "donor-activity",
+                element: <DonorActivityPage />,
+                handle: { title: "Donor Activity" },
             },
             {
                 path: "requests",

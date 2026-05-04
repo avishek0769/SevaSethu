@@ -1,6 +1,7 @@
 import { Bar } from "react-chartjs-2";
 import { Card, CardHeader, CardMeta, CardTitle } from "../ui/Card";
 import "./chartjs";
+import { resolveChartColor, withAlpha } from "./chartTheme";
 
 type Props = {
     title: string;
@@ -17,6 +18,11 @@ export function BarChartCard({
     data,
     color = "var(--info)",
 }: Props) {
+    const fill = resolveChartColor(color);
+    const fg2 = resolveChartColor("var(--fg-2)");
+    const fg3 = resolveChartColor("var(--fg-3)");
+    const border = resolveChartColor("var(--border)");
+    const surface = resolveChartColor("var(--surface)");
     return (
         <Card>
             <CardHeader>
@@ -34,7 +40,7 @@ export function BarChartCard({
                             {
                                 label: title,
                                 data,
-                                backgroundColor: color,
+                                backgroundColor: fill,
                                 borderRadius: 10,
                             },
                         ],
@@ -42,15 +48,27 @@ export function BarChartCard({
                     options={{
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                enabled: true,
+                                backgroundColor: withAlpha(surface, 0.96),
+                                titleColor: fg2,
+                                bodyColor: fg2,
+                                borderColor: withAlpha(border, 0.9),
+                                borderWidth: 1,
+                                displayColors: false,
+                            },
+                        },
+                        interaction: { mode: "nearest", intersect: true },
                         scales: {
                             x: {
                                 grid: { display: false },
-                                ticks: { color: "var(--fg-3)" },
+                                ticks: { color: fg3 },
                             },
                             y: {
-                                grid: { color: "rgba(148,163,184,0.15)" },
-                                ticks: { color: "var(--fg-3)" },
+                                grid: { color: withAlpha(border, 0.35) },
+                                ticks: { color: fg3 },
                             },
                         },
                     }}

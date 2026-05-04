@@ -5,7 +5,7 @@ import { Table, Td, Th } from "../components/ui/Table";
 
 export function ReportsPage() {
     const exportUIOnly = (kind: string) => {
-        window.alert(`${kind} export is UI-only in this mock dashboard.`);
+        window.alert(`${kind} export is not enabled in this mock dashboard.`);
     };
 
     return (
@@ -14,7 +14,7 @@ export function ReportsPage() {
                 <CardHeader>
                     <div>
                         <CardTitle>Reports</CardTitle>
-                        <CardMeta>Tables + export buttons (UI only)</CardMeta>
+                        <CardMeta>Tables + export buttons (mock)</CardMeta>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
@@ -79,7 +79,7 @@ export function ReportsPage() {
                         <CardTitle>Audit Trail</CardTitle>
                         <CardMeta>Verification/flagging activity</CardMeta>
                     </div>
-                    <Badge tone="neutral">UI only</Badge>
+                    <Badge tone="neutral">Mock</Badge>
                 </CardHeader>
 
                 <Table>

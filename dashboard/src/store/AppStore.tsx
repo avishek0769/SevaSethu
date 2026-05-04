@@ -37,7 +37,6 @@ type State = {
 
 type Action =
     | { type: "theme/toggle" }
-    | { type: "users/verify"; id: string; value?: boolean }
     | { type: "users/flag"; id: string; value?: boolean }
     | { type: "requests/setStatus"; id: string; status: Request["status"] }
     | { type: "donations/setStatus"; id: string; status: Donation["status"] }
@@ -67,16 +66,6 @@ function reducer(state: State, action: Action): State {
             const theme: ThemeMode = state.theme === "dark" ? "light" : "dark";
             return { ...state, theme };
         }
-
-        case "users/verify":
-            return {
-                ...state,
-                users: state.users.map((u) =>
-                    u.id === action.id
-                        ? { ...u, isVerified: action.value ?? !u.isVerified }
-                        : u,
-                ),
-            };
 
         case "users/flag":
             return {
@@ -150,7 +139,6 @@ type Store = {
     dispatch: React.Dispatch<Action>;
     actions: {
         toggleTheme: () => void;
-        verifyUser: (id: string, value?: boolean) => void;
         flagUser: (id: string, value?: boolean) => void;
         setRequestStatus: (id: string, status: Request["status"]) => void;
         setDonationStatus: (id: string, status: Donation["status"]) => void;
@@ -175,8 +163,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const actions = useMemo<Store["actions"]>(
         () => ({
             toggleTheme: () => dispatch({ type: "theme/toggle" }),
-            verifyUser: (id, value) =>
-                dispatch({ type: "users/verify", id, value }),
             flagUser: (id, value) =>
                 dispatch({ type: "users/flag", id, value }),
             setRequestStatus: (id, status) =>

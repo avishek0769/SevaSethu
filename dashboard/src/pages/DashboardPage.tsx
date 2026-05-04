@@ -12,33 +12,58 @@ export function DashboardPage() {
         const users = state.users.length;
         const donors = state.users.filter((u) => u.role === "donor").length;
         const requests = state.requests.length;
+        const openRequests = state.requests.filter((r) => r.status === "open").length;
         const donations = state.donations.length;
-        const critical = state.requests.filter(
-            (r) =>
-                r.type === "urgent" &&
-                r.urgency === "critical" &&
-                r.status === "open",
-        ).length;
-        return { users, donors, requests, donations, critical };
+        return { users, donors, requests, openRequests, donations };
     }, [state]);
 
     const requestsByDay = useMemo(() => {
-        const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-        const data = [7, 11, 9, 13, 10, 8, 12];
+        const days = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date();
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() - (6 - i));
+            return d;
+        });
+
+        const labels = days.map((d) =>
+            d.toLocaleDateString(undefined, { weekday: "short" }),
+        );
+        const data = days.map((d) => {
+            const start = d.getTime();
+            const end = start + 24 * 60 * 60 * 1000;
+            return state.requests.filter((r) => {
+                const t = new Date(r.createdAt).getTime();
+                return t >= start && t < end;
+            }).length;
+        });
         return { labels, data };
-    }, []);
+    }, [state.requests]);
 
     const donationsByDay = useMemo(() => {
-        const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-        const data = [3, 5, 4, 6, 4, 3, 7];
+        const days = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date();
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() - (6 - i));
+            return d;
+        });
+        const labels = days.map((d) =>
+            d.toLocaleDateString(undefined, { weekday: "short" }),
+        );
+        const data = days.map((d) => {
+            const start = d.getTime();
+            const end = start + 24 * 60 * 60 * 1000;
+            return state.donations.filter((don) => {
+                const t = new Date(don.date).getTime();
+                return t >= start && t < end;
+            }).length;
+        });
         return { labels, data };
-    }, []);
+    }, [state.donations]);
 
     const requestSplit = useMemo(() => {
-        const urgent = state.requests.filter((r) => r.type === "urgent").length;
-        const scheduled = state.requests.filter(
-            (r) => r.type === "scheduled",
-        ).length;
+        const open = state.requests.filter((r) => r.status === "open");
+        const urgent = open.filter((r) => r.type === "urgent").length;
+        const scheduled = open.filter((r) => r.type === "scheduled").length;
         return {
             labels: ["Urgent", "Scheduled"],
             data: [urgent, scheduled],
@@ -104,22 +129,22 @@ export function DashboardPage() {
                         <Badge tone="success">Verified</Badge>
                     </CardHeader>
                     <div className="text-sm text-[var(--fg-2)]">
-                        Confirmation workflow (UI only).
+                        Confirmation workflow overview.
                     </div>
                 </Card>
 
                 <Card className="border-[var(--primary-light)]">
                     <CardHeader>
                         <div>
-                            <CardMeta>Critical</CardMeta>
+                            <CardMeta>Open Requests</CardMeta>
                             <CardTitle className="text-2xl">
-                                {stats.critical}
+                                {stats.openRequests}
                             </CardTitle>
                         </div>
-                        <Badge tone="danger">Urgent</Badge>
+                        <Badge tone="warning">Live</Badge>
                     </CardHeader>
                     <div className="text-sm text-[var(--fg-2)]">
-                        Open critical urgent requests.
+                        Requests currently waiting to be fulfilled.
                     </div>
                 </Card>
             </div>
@@ -140,7 +165,7 @@ export function DashboardPage() {
                 />
                 <DoughnutChartCard
                     title="Urgent vs Scheduled"
-                    subtitle="Mix of request types"
+                    subtitle="Open requests split"
                     labels={requestSplit.labels}
                     data={requestSplit.data}
                 />

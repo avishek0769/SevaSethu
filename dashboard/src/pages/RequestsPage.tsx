@@ -44,7 +44,7 @@ export function RequestsPage() {
                     <div>
                         <CardTitle>Request Queue</CardTitle>
                         <CardMeta>
-                            Urgent + scheduled requests (UI only)
+                            Urgent + scheduled requests (mock)
                         </CardMeta>
                     </div>
                     <Badge tone="info">{filtered.length} items</Badge>
@@ -71,7 +71,7 @@ export function RequestsPage() {
                         ))}
                     </Select>
                     <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-sm text-[var(--fg-2)]">
-                        Tip: use “Escalate” for critical unfulfilled.
+                        Tip: filter by status to focus the queue.
                     </div>
                 </div>
             </Card>

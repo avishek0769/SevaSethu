@@ -1,6 +1,7 @@
 import { Line } from "react-chartjs-2";
 import { Card, CardHeader, CardMeta, CardTitle } from "../ui/Card";
 import "./chartjs";
+import { resolveChartColor, withAlpha } from "./chartTheme";
 
 type Props = {
     title: string;
@@ -17,6 +18,11 @@ export function LineChartCard({
     data,
     color = "var(--primary)",
 }: Props) {
+    const stroke = resolveChartColor(color);
+    const fg2 = resolveChartColor("var(--fg-2)");
+    const fg3 = resolveChartColor("var(--fg-3)");
+    const border = resolveChartColor("var(--border)");
+    const surface = resolveChartColor("var(--surface)");
     return (
         <Card>
             <CardHeader>
@@ -34,10 +40,12 @@ export function LineChartCard({
                             {
                                 label: title,
                                 data,
-                                borderColor: color,
-                                backgroundColor: color,
+                                borderColor: stroke,
+                                backgroundColor: stroke,
                                 tension: 0.35,
                                 pointRadius: 0,
+                                pointHitRadius: 14,
+                                borderWidth: 2,
                             },
                         ],
                     }}
@@ -46,16 +54,25 @@ export function LineChartCard({
                         maintainAspectRatio: false,
                         plugins: {
                             legend: { display: false },
-                            tooltip: { enabled: true },
+                            tooltip: {
+                                enabled: true,
+                                backgroundColor: withAlpha(surface, 0.96),
+                                titleColor: fg2,
+                                bodyColor: fg2,
+                                borderColor: withAlpha(border, 0.9),
+                                borderWidth: 1,
+                                displayColors: false,
+                            },
                         },
+                        interaction: { mode: "nearest", intersect: false },
                         scales: {
                             x: {
-                                grid: { color: "rgba(148,163,184,0.15)" },
-                                ticks: { color: "var(--fg-3)" },
+                                grid: { color: withAlpha(border, 0.35) },
+                                ticks: { color: fg3 },
                             },
                             y: {
-                                grid: { color: "rgba(148,163,184,0.15)" },
-                                ticks: { color: "var(--fg-3)" },
+                                grid: { color: withAlpha(border, 0.35) },
+                                ticks: { color: fg3 },
                             },
                         },
                     }}

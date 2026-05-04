@@ -150,11 +150,6 @@ export function UsersPage() {
                                             Unavailable
                                         </Badge>
                                     )}
-                                    {u.isVerified ? (
-                                        <Badge tone="info">Verified</Badge>
-                                    ) : (
-                                        <Badge tone="warning">Unverified</Badge>
-                                    )}
                                     {u.isFlagged ? (
                                         <Badge tone="danger">Flagged</Badge>
                                     ) : null}
@@ -168,17 +163,6 @@ export function UsersPage() {
                                         onClick={() => setSelectedId(u.id)}
                                     >
                                         View
-                                    </Button>
-                                    <Button
-                                        variant={
-                                            u.isVerified
-                                                ? "secondary"
-                                                : "primary"
-                                        }
-                                        size="sm"
-                                        onClick={() => actions.verifyUser(u.id)}
-                                    >
-                                        {u.isVerified ? "Unverify" : "Verify"}
                                     </Button>
                                     <Button
                                         variant={

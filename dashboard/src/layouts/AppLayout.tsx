@@ -7,6 +7,7 @@ import logoUrl from "../assets/SevaSethu_Logo.png";
 const NAV = [
     { to: "/dashboard", label: "Dashboard" },
     { to: "/users", label: "Users" },
+    { to: "/donor-activity", label: "Donor Activity" },
     { to: "/requests", label: "Requests" },
     { to: "/donations", label: "Donations" },
     { to: "/leaderboard", label: "Leaderboard" },
@@ -95,7 +96,7 @@ export function AppLayout() {
                                 {activeTitle}
                             </div>
                             <div className="mt-1 text-sm text-[var(--fg-2)]">
-                                Mock admin console • UI only • No backend
+                                Mock admin console • No backend
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
