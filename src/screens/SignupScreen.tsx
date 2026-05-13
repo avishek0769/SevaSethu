@@ -7,6 +7,8 @@ import {
     TouchableOpacity,
     ScrollView,
     StatusBar,
+    KeyboardAvoidingView,
+    Platform,
     Switch,
     Alert,
 } from "react-native";
@@ -390,70 +392,89 @@ const SignupScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     );
 
     return (
-        <ScrollView
-            style={[styles.container, { backgroundColor: C.background }]}
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled"
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-            <StatusBar
-                barStyle={isDarkMode ? "light-content" : "dark-content"}
-                backgroundColor={C.background}
-            />
-            <LinearGradient colors={headerGradient} style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backBtn}
-                    onPress={() =>
-                        step === 1 ? navigation.goBack() : setStep(1)
-                    }
-                >
-                    <Icon name="arrow-left" size={24} color={C.textPrimary} />
-                </TouchableOpacity>
-                <Text style={[styles.headerTitle, { color: C.textPrimary }]}>
-                    Create Account
-                </Text>
-                <Text style={[styles.headerSub, { color: C.textSecondary }]}>
-                    Step {step} of 2
-                </Text>
-                <View
-                    style={[styles.progressBg, { backgroundColor: C.border }]}
-                >
+            <ScrollView
+                style={[styles.container, { backgroundColor: C.background }]}
+                contentContainerStyle={styles.content}
+                keyboardShouldPersistTaps="handled"
+            >
+                <StatusBar
+                    barStyle={isDarkMode ? "light-content" : "dark-content"}
+                    backgroundColor={C.background}
+                />
+                <LinearGradient colors={headerGradient} style={styles.header}>
+                    <TouchableOpacity
+                        style={styles.backBtn}
+                        onPress={() =>
+                            step === 1 ? navigation.goBack() : setStep(1)
+                        }
+                    >
+                        <Icon
+                            name="arrow-left"
+                            size={24}
+                            color={C.textPrimary}
+                        />
+                    </TouchableOpacity>
+                    <Text
+                        style={[styles.headerTitle, { color: C.textPrimary }]}
+                    >
+                        Create Account
+                    </Text>
+                    <Text style={[styles.headerSub, { color: C.textSecondary }]}>
+                        Step {step} of 2
+                    </Text>
                     <View
                         style={[
-                            styles.progressFill,
-                            {
-                                width: `${(step / 2) * 100}%`,
-                                backgroundColor: C.primary,
-                            },
+                            styles.progressBg,
+                            { backgroundColor: C.border },
                         ]}
-                    />
-                </View>
-            </LinearGradient>
-
-            <View
-                style={[
-                    styles.form,
-                    { backgroundColor: C.surface, borderColor: C.border },
-                    isDarkMode ? { borderWidth: 1 } : Shadow.lg,
-                ]}
-            >
-                {step === 1 ? renderStepOne() : renderStepTwo()}
-
-                <View style={styles.loginRow}>
-                    <Text
-                        style={[styles.loginText, { color: C.textSecondary }]}
                     >
-                        Already have an account?{" "}
-                    </Text>
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate("Login")}
-                    >
-                        <Text style={[styles.loginLink, { color: C.primary }]}>
-                            Sign In
+                        <View
+                            style={[
+                                styles.progressFill,
+                                {
+                                    width: `${(step / 2) * 100}%`,
+                                    backgroundColor: C.primary,
+                                },
+                            ]}
+                        />
+                    </View>
+                </LinearGradient>
+
+                <View
+                    style={[
+                        styles.form,
+                        { backgroundColor: C.surface, borderColor: C.border },
+                        isDarkMode ? { borderWidth: 1 } : Shadow.lg,
+                    ]}
+                >
+                    {step === 1 ? renderStepOne() : renderStepTwo()}
+
+                    <View style={styles.loginRow}>
+                        <Text
+                            style={[
+                                styles.loginText,
+                                { color: C.textSecondary },
+                            ]}
+                        >
+                            Already have an account?{" "}
                         </Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate("Login")}
+                        >
+                            <Text
+                                style={[styles.loginLink, { color: C.primary }]}
+                            >
+                                Sign In
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
-        </ScrollView>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 };
 

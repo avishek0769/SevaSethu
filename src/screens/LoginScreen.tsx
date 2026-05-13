@@ -48,7 +48,7 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     return (
         <KeyboardAvoidingView
             style={styles.flex}
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
             <ScrollView
                 style={[styles.container, { backgroundColor: C.background }]}

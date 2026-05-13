@@ -273,7 +273,7 @@ const ChatbotScreen: React.FC = () => {
     return (
         <KeyboardAvoidingView
             style={[styles.container, { backgroundColor: bg }]}
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
             <StatusBar
                 barStyle={isDarkMode ? "light-content" : "dark-content"}
