@@ -37,6 +37,8 @@ buildscript {
 
 allprojects {
     repositories {
+        google()
+        mavenCentral()
         maven {
             url "${project(":react-native-async-storage_async-storage").projectDir}/local_repo"
         }
