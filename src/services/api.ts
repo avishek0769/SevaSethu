@@ -61,7 +61,17 @@ api.interceptors.response.use(
             _retry?: boolean;
         };
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        const url = originalRequest?.url || "";
+        const isAuthEndpoint =
+            url.includes("/user/login") ||
+            url.includes("/user/register") ||
+            url.includes("/user/refresh-tokens");
+
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry &&
+            !isAuthEndpoint
+        ) {
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {
                     failedQueue.push({ resolve, reject });
@@ -78,7 +88,11 @@ api.interceptors.response.use(
 
             try {
                 const { refreshToken } = await getStoredTokens();
-                if (!refreshToken) throw new Error("No refresh token");
+                if (!refreshToken) {
+                    processQueue(error, null);
+                    await clearTokens();
+                    return Promise.reject(error);
+                }
 
                 const res = await axios.patch(
                     `${BASE_URL}/user/refresh-tokens`,
@@ -116,6 +130,9 @@ export const getErrorMessage = (error: any): string => {
         return (
             error.response?.data?.message || error.message || "Network error"
         );
+    }
+    if (error?.message === "No refresh token") {
+        return "Session expired. Please sign in again.";
     }
     return error?.message || "Something went wrong";
 };
